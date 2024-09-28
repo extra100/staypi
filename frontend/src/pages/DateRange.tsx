@@ -50,7 +50,10 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
     }
   }, [dateDifference])
 
-  const handleStartDateChange = (date: Dayjs | null, dateString: string) => {
+  const handleStartDateChange = (
+    date: Dayjs | null,
+    dateString: string | string[]
+  ) => {
     if (date) {
       setStartDate(date)
       const newDifference = endDate.diff(date, 'days')
@@ -58,7 +61,10 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
     }
   }
 
-  const handleEndDateChange = (date: Dayjs | null, dateString: string) => {
+  const handleEndDateChange = (
+    date: Dayjs | null,
+    dateString: string | string[]
+  ) => {
     if (date) {
       setEndDate(date)
       const newDifference = date.diff(startDate, 'days')
