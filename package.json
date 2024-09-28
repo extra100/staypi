@@ -1,5 +1,5 @@
 {
-  "name": "lombok-copy",
+  "name": "sehat",
   "version": "1.0.0",
   "description": "## Lessons",
   "main": "index.js",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/extra100/lombok-copy.git"
+    "url": "git+https://github.com/extra100/sehat.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/extra100/lombok-copy/issues"
+    "url": "https://github.com/extra100/sehat/issues"
   },
-  "homepage": "https://github.com/extra100/lombok-copy#readme",
+  "homepage": "https://github.com/extra100/sehat#readme",
   "engines": {
     "node": "20.10.0"
   },
