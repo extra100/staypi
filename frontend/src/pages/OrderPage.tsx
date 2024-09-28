@@ -46,20 +46,20 @@ export default function OrderPage() {
 
   useEffect(() => {
     if (paypalConfig && paypalConfig.clientId) {
-      // const loadPaypalScript = async () => {
-      //   paypalDispatch({
-      //     type: 'resetOptions',
-      //     value: {
-      //       'client-id': paypalConfig!.clientId,
-      //       currency: 'USD',
-      //     },
-      //   })
-      //   paypalDispatch({
-      //     type: 'setLoadingStatus',
-      //     value: SCRIPT_LOADING_STATE.PENDING,
-      //   })
-      // }
-      // loadPaypalScript()
+      const loadPaypalScript = async () => {
+        paypalDispatch({
+          type: 'resetOptions',
+          value: {
+            clientId: paypalConfig.clientId, // Use clientId instead of 'client-id'
+            currency: 'USD',
+          },
+        })
+        paypalDispatch({
+          type: 'setLoadingStatus',
+          value: SCRIPT_LOADING_STATE.PENDING,
+        })
+      }
+      loadPaypalScript()
     }
   }, [paypalConfig])
 
