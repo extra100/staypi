@@ -4,6 +4,8 @@ import express, { Request, Response } from 'express'
 import mongoose from 'mongoose'
 import path from 'path'
 import { barangRouter } from './src/routers/barangRouter'
+// import barangRouter from './routers/barangRouter'
+
 import { contactRouter } from './src/routers/contactRouter'
 
 import { keyRouter } from './src/routers/keyRouter'
