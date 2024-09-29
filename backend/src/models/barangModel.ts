@@ -9,5 +9,12 @@ export class Barang {
   public name!: string
   @prop({ required: true, unique: true })
   public price!: number
+  @prop({ required: true, unique: true })
+  public unit_id!: number
+  @prop({ required: true, unique: true })
+  public unit?: {
+    id: number
+    name: string
+  }
 }
 export const BarangModel = getModelForClass(Barang)
