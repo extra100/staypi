@@ -28,20 +28,42 @@ const ProductStocksPage: React.FC = () => {
 
   const { idProduct } = useIdProduct(productIdInput)
 
-  const generateShortInvoiceId = (): string => {
-    const uuid = uuidv4()
-    const last4OfUUID = uuid.substr(uuid.length - 4)
-    const shortNumber = parseInt(last4OfUUID, 16) % 10000
-    return `Mutate-${String(shortNumber).padStart(4, '0')}`
-  }
-  const [refNumber, setRefNumber] = useState(generateShortInvoiceId())
+  // const generateShortInvoiceId = (): string => {
+  //   const uuid = uuidv4()
+  //   const last4OfUUID = uuid.substr(uuid.length - 4)
+  //   const shortNumber = parseInt(last4OfUUID, 16) % 10000
+  //   return `IPO-${String(shortNumber).padStart(4, '0')}`
+  // }
 
   const navigate = useNavigate()
-
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
   const [warehouseDariId, setWarehouseDariId] = useState<string>('')
 
+  const generateShortInvoiceId = (idOutlet: string): string => {
+    const uuid = uuidv4()
+    const last4OfUUID = uuid.substr(uuid.length - 4)
+    const shortNumber = parseInt(last4OfUUID, 16) % 10000
+    return `IPO-${idOutlet}-${String(shortNumber).padStart(4, '0')}`
+  }
+
+  // const [refNumber, setRefNumber] = useState(generateShortInvoiceId())
+  const [refNumber, setRefNumber] = useState<string>('')
+
+  console.log({ refNumber })
+  // useEffect(() => {
+  //   if (user) {
+  //     setWarehouseDariId(user.id_outlet)
+  //   }
+  // }, [user])
+  useEffect(() => {
+    if (user) {
+      setWarehouseDariId(user.id_outlet)
+
+      const newRefNumber = generateShortInvoiceId(user.id_outlet)
+      setRefNumber(newRefNumber)
+    }
+  }, [user])
   const [warehouseTujuanId, setWarehouseTujuanId] = useState<string>('')
 
   const [dataSource, setDataSource] = useState<any[]>([])
@@ -67,12 +89,6 @@ const ProductStocksPage: React.FC = () => {
     combinedWarehouseIds
   )
   const { mutate: addWarehouseTransfer } = useAddWarehouseTransferMutation()
-
-  useEffect(() => {
-    if (user) {
-      setWarehouseDariId(user.id_outlet)
-    }
-  }, [user])
 
   // const handleProductChange = (id: string, key: number) => {
   //   setDataSource((prevDataSource) =>
