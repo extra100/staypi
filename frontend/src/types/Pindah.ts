@@ -14,4 +14,5 @@ export type TransferItem = {
   product_id: number
   product_name: number
   qty: number
+  unit_name: string
 }

@@ -13,6 +13,8 @@ export class TransferItem {
   public before_qty_dari!: number
   @prop({ required: true })
   public before_qty_tujuan!: number
+  @prop({ required: true })
+  public unit_name!: string
 }
 
 @modelOptions({ schemaOptions: { timestamps: true } })

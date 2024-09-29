@@ -27,19 +27,10 @@ const ProductStocksPage: React.FC = () => {
   const [productIdInput, setProductIdInput] = useState<string>('')
 
   const { idProduct } = useIdProduct(productIdInput)
-
-  // const generateShortInvoiceId = (): string => {
-  //   const uuid = uuidv4()
-  //   const last4OfUUID = uuid.substr(uuid.length - 4)
-  //   const shortNumber = parseInt(last4OfUUID, 16) % 10000
-  //   return `IPO-${String(shortNumber).padStart(4, '0')}`
-  // }
-
   const navigate = useNavigate()
+
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
-  const [warehouseDariId, setWarehouseDariId] = useState<string>('')
-
   const generateShortInvoiceId = (idOutlet: string): string => {
     const uuid = uuidv4()
     const last4OfUUID = uuid.substr(uuid.length - 4)
@@ -47,15 +38,8 @@ const ProductStocksPage: React.FC = () => {
     return `IPO-${idOutlet}-${String(shortNumber).padStart(4, '0')}`
   }
 
-  // const [refNumber, setRefNumber] = useState(generateShortInvoiceId())
   const [refNumber, setRefNumber] = useState<string>('')
 
-  console.log({ refNumber })
-  // useEffect(() => {
-  //   if (user) {
-  //     setWarehouseDariId(user.id_outlet)
-  //   }
-  // }, [user])
   useEffect(() => {
     if (user) {
       setWarehouseDariId(user.id_outlet)
@@ -64,6 +48,9 @@ const ProductStocksPage: React.FC = () => {
       setRefNumber(newRefNumber)
     }
   }, [user])
+
+  const [warehouseDariId, setWarehouseDariId] = useState<string>('')
+
   const [warehouseTujuanId, setWarehouseTujuanId] = useState<string>('')
 
   const [dataSource, setDataSource] = useState<any[]>([])
@@ -90,20 +77,36 @@ const ProductStocksPage: React.FC = () => {
   )
   const { mutate: addWarehouseTransfer } = useAddWarehouseTransferMutation()
 
-  // const handleProductChange = (id: string, key: number) => {
-  //   setDataSource((prevDataSource) =>
-  //     prevDataSource.map((row) => (row.key === key ? { ...row, id: id } : row))
-  //   )
-  // }
+  useEffect(() => {
+    if (user) {
+      setWarehouseDariId(user.id_outlet)
+    }
+  }, [user])
+  const [unitName, setUnitName] = useState<string>('') // Atau tipe lain yang sesuai
+
   const handleProductChange = (id: any, key: any) => {
     const selectedProduct = idaDataBarang?.find((product) => product.id === id)
-    const productName = selectedProduct ? selectedProduct.name : ''
-    setDataSource((prevDataSource) =>
-      prevDataSource.map((row) =>
-        row.key === key ? { ...row, id: id, name: productName } : row
+
+    if (selectedProduct) {
+      const productName = selectedProduct.name
+      const unitName = selectedProduct.unit?.name || 'N/A'
+      setUnitName(unitName)
+
+      setDataSource((prevDataSource) =>
+        prevDataSource.map((row) =>
+          row.key === key
+            ? {
+                ...row,
+                id: id,
+                name: productName,
+                unit: unitName,
+              }
+            : row
+        )
       )
-    )
+    }
   }
+
   const handleWarehouseDariChange = (value: string) => {
     setWarehouseDariId(value)
   }
@@ -198,7 +201,14 @@ const ProductStocksPage: React.FC = () => {
         </Select>
       ),
     },
-
+    {
+      title: 'Unit',
+      dataIndex: 'unit',
+      key: 'unit',
+      render: (_: any, record: any) => (
+        <span>{record.unit ? record.unit : 'N/A'}</span>
+      ),
+    },
     {
       title: 'Outlet',
       dataIndex: 'stok_terkini',
@@ -317,6 +327,7 @@ const ProductStocksPage: React.FC = () => {
         qty: row.transferQty,
         before_qty_dari: qtyDari,
         before_qty_tujuan: qtyTujuan,
+        unit_name: unitName,
       })),
     }
 

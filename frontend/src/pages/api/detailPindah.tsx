@@ -75,8 +75,8 @@ const WarehouseTransferDetail: React.FC = () => {
     },
     {
       title: 'Satuan',
-      key: 'unit',
-      render: () => '-',
+      dataIndex: 'unit_name',
+      key: 'unit_name',
     },
   ]
 
