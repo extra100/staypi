@@ -56,7 +56,7 @@ import ProductLookup from './pages/api/SingleProductPage'
 import ProductsComponent from './pages/api/Cepatin'
 import ProductList from './pages/api/Cepatin'
 import ProductTable from './pages/api/Cepatin'
-import BatchProcessProducts from './hooks/saveProduct'
+
 import BatchProcessWarehouses from './pages/saveWarehouse'
 import BatchProcessTags from './pages/api/SaveTags'
 import BatchProcessContacts from './pages/api/SaveContact'
@@ -64,6 +64,7 @@ import BarangList from './pages/api/barangPage'
 import TransactionTable from './pages/api/ListTransaksi'
 import Receipt from './pages/api/printNota'
 import ReceiptJalan from './pages/api/ReceiptJalan'
+import BatchProcessProducts from './pages/api/saveProduct'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
