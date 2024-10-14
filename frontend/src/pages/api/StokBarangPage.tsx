@@ -392,6 +392,7 @@ const StockSelectorTable = () => {
     setSelectag(value) // Value di sini berupa array karena mode multiple
   }
   const [selectedContact, setSelectedContact] = useState<number | null>(null)
+  console.log({ selectedContact })
 
   const handleContactChange = (value: number) => {
     setSelectedContact(value)
@@ -531,7 +532,7 @@ const StockSelectorTable = () => {
       return map
     }, {})
     const saveContactName = saveNameContact[selectedContact as any]
-
+    console.log({ saveContactName })
     const saveNamaGudang = idWarehouse.reduce((map: any, warehouse: any) => {
       map[warehouse.id] = warehouse.name
       return map
@@ -603,9 +604,9 @@ const StockSelectorTable = () => {
       column_name: '',
     }
 
-    saveInvoiceData(invoiceData)
+    // saveInvoiceData(invoiceData)
     addPosMutation.mutate(invoiceData as any)
-    navigate('/listkledo')
+    // navigate('/listkledo')
   }
 
   const columns = [
