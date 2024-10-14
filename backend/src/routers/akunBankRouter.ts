@@ -3,22 +3,22 @@ import axios from 'axios'
 import NodeCache from 'node-cache'
 import { HOST } from '../config'
 import expressAsyncHandler from 'express-async-handler'
-import { TagModel } from '../models/tagModel'
+import { AkunBankModel } from '../models/akunBankModel'
 import TOKEN from '../token'
 import asyncHandler from 'express-async-handler'
-type Tag = {
+type AkunBank = {
   id: number
   name: string
 }
 
-const tagRouter = express.Router()
+const akunBankRouter = express.Router()
 
-tagRouter.get(
+akunBankRouter.get(
   '/',
   asyncHandler(async (req, res) => {
     try {
-      const tags = await TagModel.find()
-      res.json(tags)
+      const akunBanks = await AkunBankModel.find()
+      res.json(akunBanks)
     } catch (error) {
       console.error('Server Error:', error)
       res.status(500).json({ message: 'Internal Server Error' })
@@ -28,10 +28,10 @@ tagRouter.get(
 
 const cache = new NodeCache({ stdTTL: 10000000000000000 })
 
-const fetchTags = async (page: number, perPage: number) => {
+const fetchAkunBanks = async (page: number, perPage: number) => {
   try {
     const response = await axios.get(
-      `${HOST}/finance/tags?page=${page}&per_page=${perPage}`,
+      `${HOST}/finance/accounts?page=${page}&per_page=${perPage}`,
       {
         headers: {
           Authorization: `Bearer ${TOKEN}`,
@@ -40,11 +40,11 @@ const fetchTags = async (page: number, perPage: number) => {
     )
 
     if (response.status !== 200) {
-      throw new Error('Failed to fetch tags')
+      throw new Error('Failed to fetch akunBanks')
     }
 
     const rawData = response.data.data.data
-    const filteredData: Tag[] = rawData.map((item: any) => ({
+    const filteredData: AkunBank[] = rawData.map((item: any) => ({
       id: item.id,
       name: item.name,
     }))
@@ -55,74 +55,74 @@ const fetchTags = async (page: number, perPage: number) => {
       total: response.data.data.total,
     }
   } catch (error) {
-    console.error('Error fetching tags by page:', error)
-    throw new Error('Failed to fetch tags by page')
+    console.error('Error fetching akunBanks by page:', error)
+    throw new Error('Failed to fetch akunBanks by page')
   }
 }
 
-const fetchAllTags = async (perPage: number): Promise<Tag[]> => {
-  const cachedData = cache.get<Tag[]>('allTages')
+const fetchAllAkunBanks = async (perPage: number): Promise<AkunBank[]> => {
+  const cachedData = cache.get<AkunBank[]>('allAkunBanks')
   if (cachedData) {
     console.log('Fetching data from cache...')
     return cachedData
   }
 
-  let allTages: Tag[] = []
+  let allAkunBanks: AkunBank[] = []
   let page = 1
 
-  const firstPageData = await fetchTags(page, perPage)
-  const totalTags = firstPageData.total
-  allTages = firstPageData.data
-  const totalPages = Math.ceil(totalTags / perPage)
+  const firstPageData = await fetchAkunBanks(page, perPage)
+  const totalAkunBanks = firstPageData.total
+  allAkunBanks = firstPageData.data
+  const totalPages = Math.ceil(totalAkunBanks / perPage)
 
   const batchSize = 5
   for (let i = 2; i <= totalPages; i += batchSize) {
     const requests = []
     for (let j = i; j < i + batchSize && j <= totalPages; j++) {
-      requests.push(fetchTags(j, perPage))
+      requests.push(fetchAkunBanks(j, perPage))
     }
 
     const results = await Promise.all(requests)
     results.forEach((result) => {
-      allTages = allTages.concat(result.data)
+      allAkunBanks = allAkunBanks.concat(result.data)
     })
   }
 
-  cache.set('allTages', allTages)
+  cache.set('allAkunBanks', allAkunBanks)
   console.log('Data cached successfully.')
 
-  return allTages
+  return allAkunBanks
 }
-tagRouter.post(
+akunBankRouter.post(
   '/',
   expressAsyncHandler(async (req, res) => {
     const posData = req.body
 
-    const justPos = await TagModel.create(posData)
+    const justPos = await AkunBankModel.create(posData)
     res.status(201).json(justPos)
   })
 )
 
-tagRouter.get(
-  '/tags',
+akunBankRouter.get(
+  '/akunBanks',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const perPage = parseInt(req.query.per_page as string) || 15
 
-      const allTages = await fetchAllTags(perPage)
+      const allAkunBanks = await fetchAllAkunBanks(perPage)
 
       res.json({
         success: true,
-        data: allTages,
+        data: allAkunBanks,
         meta: {
-          total: allTages.length,
+          total: allAkunBanks.length,
         },
       })
     } catch (error) {
-      console.error('Error fetching all tags:', error)
+      console.error('Error fetching all akunBanks:', error)
       res.status(500).json({ error: 'Internal Server Error' })
     }
   }
 )
 
-export default tagRouter
+export default akunBankRouter

@@ -67,6 +67,7 @@ import ListStok from './pages/api/semuaStok'
 import ReceiptJalan from './pages/api/ReceiptJalan'
 import BatchProcessProducts from './pages/api/saveProduct'
 import BatchProcessBarangTerjuals from './pages/api/saveBarangTerjual'
+import BatchProcessAkunBanks from './pages/api/saveAkunBank'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -93,6 +94,7 @@ const router = createBrowserRouter(
       <Route path="/savebarang" element={<BatchProcessProducts />} />
       <Route path="/savewarehouses" element={<BatchProcessWarehouses />} />
       <Route path="/savetag" element={<BatchProcessTags />} />
+      <Route path="/saveakunbank" element={<BatchProcessAkunBanks />} />
       <Route path="/savecontact" element={<BatchProcessContacts />} />
       <Route path="/po" element={<ProductStocksTable />} />
       <Route path="/langsungstok" element={<ListStok />} />

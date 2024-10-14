@@ -35,6 +35,10 @@ import NumberFormat, {
   NumberFormatBase,
   NumericFormat,
 } from 'react-number-format'
+import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
+import { useGetTagsQueryDb } from '../../hooks/tagHooks'
+import { AnyRecord } from 'dns'
+import { useGetAkunBanksQueryDb } from '../../hooks/akunBankHooks'
 
 const { Option } = Select
 const { Title, Text } = Typography
@@ -56,22 +60,20 @@ const StockSelectorTable = () => {
     selectedWarehouseId
   )
 
-  // useEffect(() => {
-  //   console.log('warehouseStock from useWarehouseStock:', warehouseStock)
-  // }, [warehouseStock])
-
-  //user
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
 
   const { idaDataBarang } = useIdNamaBarang()
   const { data: barangs } = useGetBarangsQuery()
+  const { data: gudangdb } = useGetWarehousesQuery()
+  const { data: akunBanks } = useGetAkunBanksQueryDb()
+
+  const { data: tagDb } = useGetTagsQueryDb()
 
   const { idWarehouse } = useIdWarehouse()
 
   const { idContact } = useIdContact()
   const { data: contacts } = useGetContactsQuery()
-  console.log({ contacts })
 
   const { saveInvoiceData } = SaveApi()
   //
@@ -91,7 +93,6 @@ const StockSelectorTable = () => {
     }
   }, [user])
   const [dataSource, setDataSource] = useState<any[]>([])
-  console.log({ dataSource })
 
   useEffect(() => {
     if (selectedFinanceAccountIds.length > 0 && selectedWarehouseId !== null) {
@@ -114,20 +115,6 @@ const StockSelectorTable = () => {
       })
     }
   }, [warehouseStock])
-
-  // useEffect(() => {
-  //   console.log('Selected finance account IDs:', selectedFinanceAccountIds) // Log selected account IDs
-  //   console.log('Selected warehouse ID:', selectedWarehouseId) // Log selected warehouse ID
-
-  //   if (selectedFinanceAccountIds.length > 0 && selectedWarehouseId !== null) {
-  //     // Log when the condition is met
-  //     console.log(
-  //       'Fetching stock for selected finance account IDs and warehouse'
-  //     )
-  //     // warehouseStock should automatically update based on selectedWarehouseId
-  //     // No need to manually call fetchStokBarang anymore
-  //   }
-  // }, [selectedFinanceAccountIds, selectedWarehouseId])
 
   const customDisplayRender = (value: any) => {
     return ''
@@ -217,50 +204,69 @@ const StockSelectorTable = () => {
   const calculateGapPrice = (gapPrice: number, qty: number) => {
     return gapPrice * qty
   }
-  const handleDiscountChange = (value: any, record: any) => {
+  const handleDiscountChange = (value: string, record: any) => {
     const selectedDiscount = discountRates.find((rate) => rate.label === value)
 
+    // Ambil harga retail atau basePrice (jika sebelumnya sudah tersimpan)
+    const basePrice =
+      selectedProductPrices[record.finance_account_id] || record.basePrice
+
     if (selectedDiscount) {
-      const basePrice = selectedProductPrices[record.finance_account_id]
+      // Jika diskon ditemukan, hitung harga diskon
+      const newPrice = calculateDiscount(basePrice, selectedDiscount.percentage)
+      const gapPrice = Number(basePrice) - Number(newPrice)
+      const gapPriceTotal = gapPrice * record.qty
 
-      if (basePrice) {
-        const newPrice = calculateDiscount(
-          basePrice,
-          selectedDiscount.percentage
+      setDataSource((prev) =>
+        prev.map((item: any) =>
+          item.finance_account_id === record.finance_account_id
+            ? {
+                ...item,
+                price: Number(newPrice),
+                subtotal: calculateSubtotal(newPrice, item.qty),
+                selectedDiscountValue: selectedDiscount.percentage, // Persentase diskon
+                selectedDiscount: selectedDiscount.label, // Label diskon yang dipilih
+                gapPrice: gapPrice, // Selisih antara harga asli dan harga diskon
+                gapPriceTotal: gapPriceTotal, // Selisih dikalikan qty
+              }
+            : item
         )
-        const gapPrice = Number(basePrice) - Number(newPrice)
-
-        const gapPriceTotal = gapPrice * record.qty
-
-        setDataSource((prev) =>
-          prev.map((item: any) =>
-            item.finance_account_id === record.finance_account_id
-              ? {
-                  ...item,
-                  price: Number(newPrice),
-                  subtotal: calculateSubtotal(newPrice, item.qty),
-                  selectedDiscountValue: selectedDiscount.percentage, // Discount percentage
-                  basePrice: basePrice, // Correct base price
-                  selectedDiscount: selectedDiscount.label, // Set to the selected discount label
-                  gapPrice: gapPrice, // Difference between original and new price
-                  gapPriceTotal: gapPriceTotal, // gapPrice multiplied by qty
-                }
-              : item
-          )
+      )
+    } else {
+      // Jika tidak ada diskon (misal Retail dipilih), kembalikan ke harga asli
+      setDataSource((prev) =>
+        prev.map((item: any) =>
+          item.finance_account_id === record.finance_account_id
+            ? {
+                ...item,
+                price: Number(basePrice), // Harga kembali ke retail
+                subtotal: calculateSubtotal(basePrice, item.qty), // Subtotal tanpa diskon
+                selectedDiscountValue: 0, // Tidak ada diskon
+                selectedDiscount: 'Retail', // Set label ke Retail
+                gapPrice: 0, // Tidak ada gap
+                gapPriceTotal: 0, // Tidak ada gap total
+              }
+            : item
         )
-      }
+      )
     }
   }
 
-  const warehouseMap = idWarehouse.reduce((map: any, warehouse: any) => {
-    map[warehouse.id] = warehouse.name
-    return map
-  }, {})
+  const warehouseMap = gudangdb
+    ? gudangdb.reduce((map: any, warehouse: any) => {
+        map[warehouse.id] = warehouse.name
+        return map
+      }, {})
+    : {}
+
   const warehouseId = warehouseMap[selectedWarehouseId as any]
-  const untukTag = idWarehouse.reduce((map: any, warehouse: any) => {
-    map[warehouse.id] = warehouse.name
-    return map
-  }, {})
+  const untukTag = gudangdb
+    ? gudangdb.reduce((map: any, warehouse: any) => {
+        map[warehouse.id] = warehouse.name
+        return map
+      }, {})
+    : {}
+
   const forTag = untukTag[selectedWarehouseId as any]
 
   useEffect(() => {
@@ -272,20 +278,24 @@ const StockSelectorTable = () => {
   const handleWarehouseChange = (value: number | string) => {
     setSelectedWarehouseId(value)
 
-    setSelectedContact(null)
+    // setSelectedContact(null)
 
-    const matchingTag = idDataTag.find((tag) => tag.name === forTag)
+    const matchingTag = Array.isArray(tagDb)
+      ? tagDb.find((tag) => tag.name === forTag)
+      : undefined
+
     setSelectag(matchingTag ? [matchingTag.id] : [])
-
-    const bangke = idWarehouse.reduce((map: any, warehouse: any) => {
-      map[warehouse.id] = warehouse.name
-      return map
-    }, {})
+    const bangke = gudangdb
+      ? gudangdb.reduce((map: any, warehouse: any) => {
+          map[warehouse.id] = warehouse.name
+          return map
+        }, {})
+      : {}
 
     const namaBangke = bangke[value as any]
 
     const findMatchingBank = (namaGudang: string) => {
-      return fiAc?.children?.find((bank) =>
+      return akunBanks?.find((bank) =>
         bank.name.startsWith(`KAS PENJUALAN_${namaGudang}`)
       )
     }
@@ -297,10 +307,13 @@ const StockSelectorTable = () => {
     } else {
     }
   }
+  const retailDiscount =
+    discountRates.find((rate) => rate.label === 'Retail 10%')?.percentage || 0
 
   const handleOkClick = () => {
     setDropdownVisible(false)
 
+    // Filter barang-barang yang dipilih
     const selectedItems = barangs!.filter((item: any) =>
       selectedFinanceAccountIds.includes(item.id)
     )
@@ -313,23 +326,42 @@ const StockSelectorTable = () => {
               (existingItem) => existingItem.finance_account_id === item.id
             )
         )
-        .map((item) => ({
-          finance_account_id: item.id,
-          finance_account_name: item.name,
-          basePrice: item.price,
-          price: Number(discountedPrices[item.id]) || item.price,
-          qty: 1,
-          selectedDiscount: selectedPrices[item.id] || 'Retail 10%',
-          selectedDiscountValue: selectedDiscounts[item.id],
-          gapPrice: priceDifferences[item.id],
-          subtotal: Number(discountedPrices[item.id]) || item.price,
+        .map((item) => {
+          // Hitung harga retail dengan diskon 10% secara default
+          const retailPrice = item.price - (item.price * retailDiscount) / 100
 
-          satuan: item.unit?.name,
-        }))
+          return {
+            finance_account_id: item.id,
+            finance_account_name: item.name,
+            basePrice: item.price, // Harga dasar
+
+            // Jika ada diskon yang sudah diterapkan, gunakan harga dengan diskon. Jika tidak, gunakan harga retail.
+            price: Number(discountedPrices[item.id]) || retailPrice,
+
+            qty: 1, // Default quantity 1
+
+            // Jika tidak ada diskon yang dipilih, gunakan 'Retail 10%' sebagai default
+            selectedDiscount: selectedPrices[item.id] || 'Retail 10%',
+
+            // Jika ada diskon yang dipilih, gunakan nilai diskon. Jika tidak, gunakan diskon retail (10%)
+            selectedDiscountValue: selectedDiscounts[item.id] || retailDiscount,
+
+            // Jika ada selisih harga (gap), simpan nilai tersebut. Jika tidak, biarkan kosong
+            gapPrice:
+              priceDifferences[item.id] ||
+              (item.price - retailPrice).toFixed(2),
+
+            // Subtotal = Harga setelah diskon dikali qty, default menggunakan retail price jika tidak ada diskon
+            subtotal: Number(discountedPrices[item.id]) || retailPrice,
+
+            satuan: item.unit?.name, // Nama satuan produk
+          }
+        })
 
       return [...prev, ...newItems]
     })
 
+    // Set ulang finance account IDs
     setSelectedFinanceAccountIds(selectedFinanceAccountIds.map(String))
   }
 
@@ -382,7 +414,7 @@ const StockSelectorTable = () => {
     setSelectedDifference(difference)
   }
 
-  const { idDataTag } = useIdNamaTag()
+  // const { idDataTag } = useIdNamaTag()
 
   const [paymentForm] = Form.useForm()
 
@@ -393,7 +425,6 @@ const StockSelectorTable = () => {
   }
   const [selectedContact, setSelectedContact] = useState<number | null>(null)
   console.log({ selectedContact })
-
   const handleContactChange = (value: number) => {
     setSelectedContact(value)
   }
@@ -448,6 +479,7 @@ const StockSelectorTable = () => {
   }, [totalSubtotal, amountPaid])
 
   const { fiAc } = useFiac()
+
   const [selectedBank, setSelectedBank] = useState<any | null>(null)
 
   const [status, setStatus] = useState<number | undefined>()
@@ -506,22 +538,25 @@ const StockSelectorTable = () => {
   // }
   const isSaveDisabled = !selectedContact || !selectedBank
 
+  const handleSetAmountPaid = () => {
+    setAmountPaid(totalSubtotal)
+  }
   const handleSave = () => {
     if (isSaveDisabled) return // Jangan lanjut jika salah satu masih kosong
 
-    const saveTag = idDataTag.reduce((map: any, tag: any) => {
+    const saveTag = tagDb?.reduce((map: any, tag: any) => {
       map[tag.name] = tag.id
       return map
     }, {})
 
     const saveIdTags = selectTag
       .map((id: number) => {
-        const tag = idDataTag.find((item: any) => item.id === id)
+        const tag = tagDb?.find((item: any) => item.id === id)
         return tag ? { id: tag.id, name: tag.name } : null
       })
       .filter(Boolean)
 
-    const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
+    const accountMap = akunBanks?.reduce((map: any, warehouse: any) => {
       map[warehouse.name] = warehouse.id
       return map
     }, {})
@@ -533,6 +568,7 @@ const StockSelectorTable = () => {
     }, {})
     const saveContactName = saveNameContact[selectedContact as any]
     console.log({ saveContactName })
+
     const saveNamaGudang = idWarehouse.reduce((map: any, warehouse: any) => {
       map[warehouse.id] = warehouse.name
       return map
@@ -672,18 +708,20 @@ const StockSelectorTable = () => {
       key: 'price',
       render: (text: number, record: any) => (
         <div style={{ textAlign: 'right' }}>
-          <div>{Math.floor(text).toLocaleString('id-ID')}</div>{' '}
+          <div>{Math.floor(record.price).toLocaleString('id-ID')}</div>{' '}
           <Select
-            defaultValue={record.selectedDiscount}
+            value={record.selectedDiscount} // Gunakan value untuk memastikan sinkronisasi
             style={{
               width: '120px',
               fontSize: '12px',
               marginTop: '4px',
               textAlign: 'right',
             }}
-            onChange={(value) => handleDiscountChange(value, record)}
+            onChange={(value) => handleDiscountChange(value, record)} // Panggil handleDiscountChange saat nilai diubah
             bordered={false}
           >
+            <Select.Option value="Retail">Retail</Select.Option>{' '}
+            {/* Opsi default untuk Retail */}
             {discountRates.map((rate) => (
               <Select.Option key={rate.label} value={rate.label}>
                 {rate.label}
@@ -693,7 +731,6 @@ const StockSelectorTable = () => {
         </div>
       ),
     },
-
     {
       title: 'Qty',
       dataIndex: 'qty',
@@ -711,7 +748,7 @@ const StockSelectorTable = () => {
               handleQtyChange(floatValue || 0, record) // Pastikan handleQtyChange menerima angka
             }}
             customInput={Input}
-            style={{ textAlign: 'right', width: '70px' }}
+            style={{ textAlign: 'left', width: '70px' }}
           />
         </div>
       ),
@@ -883,15 +920,16 @@ const StockSelectorTable = () => {
               onChange={handleTag}
               value={selectTag} // pastikan selectTag digunakan di sini
             >
-              {idDataTag?.map((product) => (
-                <Select.Option
-                  key={product.id}
-                  value={product.id}
-                  label={product.name}
-                >
-                  {product.name}
-                </Select.Option>
-              ))}
+              {Array.isArray(tagDb) &&
+                tagDb.map((product: any) => (
+                  <Select.Option
+                    key={product.id}
+                    value={product.id}
+                    label={product.name}
+                  >
+                    {product.name}
+                  </Select.Option>
+                ))}
             </Select>
           </Col>
         </Row>
@@ -1096,7 +1134,17 @@ const StockSelectorTable = () => {
           </Row>
 
           <Row gutter={16} style={{ marginBottom: '10px' }}>
-            <Col span={12}>
+            <Col
+              span={12}
+              onClick={handleSetAmountPaid} // Attach the click event to the entire column
+              style={{
+                cursor: 'pointer',
+                padding: '10px',
+                borderRadius: '4px',
+
+                transition: 'background-color 0.3s',
+              }}
+            >
               <span
                 style={{
                   ...labelStyle,
@@ -1117,6 +1165,7 @@ const StockSelectorTable = () => {
               >
                 :
               </span>
+
               <NumericFormat
                 placeholder="Nilai Pembayaran"
                 value={amountPaid}
@@ -1194,7 +1243,7 @@ const StockSelectorTable = () => {
                     .includes(input.toLowerCase())
                 }
               >
-                {fiAc?.children?.map((e) => (
+                {akunBanks?.map((e) => (
                   <Select.Option key={e.id} value={e.name}>
                     {e.name}
                   </Select.Option>

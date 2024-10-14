@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import { Typography, Divider, Table, Row, Col } from 'antd'
 import { useGetTransactionByIdQuery } from '../../hooks/transactionHooks'
 import { useParams } from 'react-router-dom'
@@ -6,7 +6,10 @@ import {
   useGetGudangByIdQuery,
   useGetWarehousesQuery,
 } from '../../hooks/warehouseHooks'
-import { useGetPelangganByIdQuery } from '../../hooks/contactHooks'
+import {
+  useGetContactsQuery,
+  useGetPelangganByIdQuery,
+} from '../../hooks/contactHooks'
 import { useGetBarangByIdQuery } from '../../hooks/barangHooks'
 
 const { Title, Text } = Typography
@@ -17,13 +20,14 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
   )
+  const [contactName, setContactName] = useState<string>('Unknown Contact')
 
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
   const barangName = getPosDetail?.items?.[0]?.name
 
-  const contactName = getPosDetail?.contacts?.[0]?.name
+  // const contactName = getPosDetail?.contacts?.[0]?.name
   const gudangName = getPosDetail?.warehouses?.[0]?.name
 
   const tglTransaksi = getPosDetail?.trans_date ?? 0
@@ -54,9 +58,24 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const getDetailDetil = barangs?.find(
     (gedung: any) => gedung.name === barangName
   )
-  console.log({ getDetailDetil })
 
+  const { data: contacts } = useGetContactsQuery()
+
+  useEffect(() => {
+    if (allTransactions && contacts) {
+      const contactId = getPosDetail?.contacts?.[0]?.id
+      const contact = contacts.find((c: any) => c.id === contactId)
+      if (contact) {
+        setContactName(contact.name)
+      }
+    }
+  }, [allTransactions, contacts])
   const columns = [
+    {
+      title: 'Barang',
+      dataIndex: 'name',
+      key: 'name',
+    },
     {
       title: 'Qty',
       dataIndex: 'qty',
@@ -68,16 +87,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         </div>
       ),
     },
-    {
-      title: 'Barang',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Sat',
-      key: 'unit_id',
-      dataIndex: 'unit_id',
-    },
+
     {
       title: 'Harga',
       dataIndex: 'price',
@@ -117,7 +127,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <img
               src={photoGudang}
               alt="Gudang"
-              style={{ width: '50%', height: 'auto' }}
+              style={{ width: '100%', height: '100%' }}
             />
           )}
         </Col>
@@ -136,7 +146,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
       <br />
       <Row>
         <Col span={12}>
-          <span>Kepada Yth: {contactName}</span>
+          <span>Pelanggan: {contactName}</span>
         </Col>
         <Col span={12} style={{ textAlign: 'right' }}>
           <span>{refNumber}</span>
@@ -144,7 +154,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
 
         <Col span={12} style={{ textAlign: 'left' }}>
           <span>
-            di_ : {alamatPelanggan} - {telponPelanggan}
+            {alamatPelanggan} - {telponPelanggan}
           </span>
         </Col>
 

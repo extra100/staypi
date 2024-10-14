@@ -107,10 +107,10 @@ class Witholding {
   public witholding_percent!: number
 }
 class Contact {
-  @prop({ required: true })
+  @prop()
   public id!: number
 
-  @prop({ required: true })
+  @prop()
   public name!: string
 }
 class Warehouses {

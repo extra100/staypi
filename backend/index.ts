@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 import express, { Request, Response } from 'express'
 import mongoose from 'mongoose'
 import path from 'path'
+import akunBankRouter from './src/routers/akunBankRouter'
 import { barangRouter } from './src/routers/barangRouter'
 import barangTerjualRouter from './src/routers/barangTerjualRouter'
 // import barangRouter from './routers/barangRouter'
@@ -45,6 +46,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/api/products', productRouter)
 app.use('/api/warehouses', warehouseRouter)
 app.use('/api/tags', tagRouter)
+app.use('/api/akunbanks', akunBankRouter)
 app.use('/api/contacts', contactRouter)
 app.use('/api/barangs', barangRouter)
 app.use('/api/transactions', transactionRouter)

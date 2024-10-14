@@ -4,6 +4,7 @@ import { Table, Tag } from 'antd'
 import { useGetTransaksisQuery } from '../hooks/transactionHooks'
 import { useIdInvoice } from './api/takeSingleInvoice'
 import UserContext from '../contexts/UserContext'
+import { useGetContactsQuery } from '../hooks/contactHooks'
 
 const ListTransaksi: React.FC = () => {
   const userContext = useContext(UserContext)
@@ -11,6 +12,8 @@ const ListTransaksi: React.FC = () => {
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
   )
+  const { data: contacts } = useGetContactsQuery()
+
   useEffect(() => {
     if (user) {
       setSelectedWarehouseId(user.id_outlet)
@@ -27,7 +30,12 @@ const ListTransaksi: React.FC = () => {
     setSelectedRefNumber(ref_number)
   }
 
-  // Filter the data by warehouse ID and sort by date (e.g., 'createdAt')
+  // Helper function to get contact name by contact id
+  const getContactName = (contactId: string) => {
+    const contact = contacts?.find((c: any) => c.id === contactId)
+    return contact ? contact.name : 'Unknown Contact'
+  }
+
   const filteredData = data
     ?.filter(
       (transaction) => transaction.warehouse_id === Number(user?.id_outlet)
@@ -35,7 +43,7 @@ const ListTransaksi: React.FC = () => {
     ?.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    ) // Sort by latest date
+    )
 
   const columns = [
     {
@@ -53,8 +61,9 @@ const ListTransaksi: React.FC = () => {
     },
     {
       title: 'Contact Name',
-      dataIndex: ['contacts', 0, 'name'], // Access the first contact's name
+      dataIndex: ['contacts', 0, 'id'],
       key: 'contact_name',
+      render: (contactId: string) => getContactName(contactId),
     },
     {
       title: 'Status',

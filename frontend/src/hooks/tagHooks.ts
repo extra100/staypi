@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../apiClient'
 import { Tag } from '../types/Tag'
-
+export const useGetTagsQueryDb = () =>
+  useQuery({
+    queryKey: ['tags'],
+    queryFn: async () => (await apiClient.get<Tag[]>(`/api/tags`)).data,
+  })
 export const useGetTagsQuery = () =>
   useQuery({
     queryKey: ['tags'],
