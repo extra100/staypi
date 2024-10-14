@@ -40,7 +40,7 @@ const { Option } = Select
 const DetailKledo: React.FC = () => {
   const { ref_number } = useParams<{ ref_number?: string }>()
   const addPosMutation = useAddTransactionMutation()
-
+  //
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
   )

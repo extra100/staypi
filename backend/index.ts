@@ -4,6 +4,7 @@ import express, { Request, Response } from 'express'
 import mongoose from 'mongoose'
 import path from 'path'
 import { barangRouter } from './src/routers/barangRouter'
+import barangTerjualRouter from './src/routers/barangTerjualRouter'
 // import barangRouter from './routers/barangRouter'
 
 import { contactRouter } from './src/routers/contactRouter'
@@ -54,6 +55,7 @@ app.use('/api/orders', orderRouter)
 
 app.use('/api/keys', keyRouter)
 app.use('/api/pindah', warehouseTransferRouter)
+app.use('/api/barters', barangTerjualRouter)
 
 console.log(path.join(__dirname, 'frontend/dist'))
 

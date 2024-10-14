@@ -32,7 +32,7 @@ const BatchProcessWarehouses = () => {
       newWarehouses.forEach((warehouse) => updatedSet.add(warehouse.id))
       return updatedSet
     })
-
+    //
     // setAllWarehouses((prevWarehouses) => [...prevWarehouses, ...newWarehouses])
 
     if (warehouses.length === batchSize) {

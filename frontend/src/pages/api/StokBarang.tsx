@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { HOST } from '../../config'
 import TOKEN from '../../token'
-
+//
 interface PropertyStokBarang {
   productId: string
   warehouseId: number

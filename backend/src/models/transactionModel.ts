@@ -26,7 +26,7 @@ export class Transaction {
   public due!: number
   @prop({ required: true })
   public include_tax!: number
-
+  //
   @prop({ required: true })
   public term_id!: number
 

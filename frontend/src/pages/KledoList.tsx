@@ -57,7 +57,7 @@ const ListTransaksi: React.FC = () => {
       render: (status_id: number) => {
         let color = ''
         let text = ''
-
+        //
         switch (status_id) {
           case 1:
             color = 'red'

@@ -60,7 +60,7 @@ const ProductStocksPage: React.FC = () => {
     const warehouse = idWarehouse.find((w) => w.id === id)
     return warehouse ? warehouse.name : 'Unknown Warehouse'
   }
-
+  //
   const { data: idaDataBarang } = useGetProductsQuery()
   console.log({ idaDataBarang })
   const getProductName = (id: any) => {

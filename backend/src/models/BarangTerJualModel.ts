@@ -69,7 +69,7 @@ class GrandTotal {
 
   @prop({ default: 0 })
   public tax!: number
-
+  //
   @prop({ required: true })
   public discount_amount!: number
 

@@ -38,7 +38,7 @@ export function useIdInvoice(ref_number: string) {
             },
           }
         )
-
+        //
         if (!responGudang.ok) {
           throw new Error('Failed to fetch data from API')
         }

@@ -22,7 +22,7 @@ const BatchProcessWarehouses = () => {
 
   useEffect(() => {
     if (!warehouses || warehouses.length === 0) return
-
+    //
     const newWarehouses = warehouses.filter(
       (warehouse) => !warehouseSet.has(warehouse.id)
     )

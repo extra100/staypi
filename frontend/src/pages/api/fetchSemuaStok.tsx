@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { HOST } from '../../config'
 import TOKEN from '../../token'
-
+//
 export interface WarehouseStock {
   id: number
   name: string

@@ -6,7 +6,7 @@ export interface Warehouse {
   id: number
   name: string
 }
-
+//
 export function useIdWarehouse() {
   const [loading, setLoading] = useState(true)
   const [idWarehouse, setIdWarehouse] = useState<Warehouse[]>([])

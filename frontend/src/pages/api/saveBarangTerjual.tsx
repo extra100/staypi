@@ -13,7 +13,7 @@ const BatchProcessBarters = () => {
   const [isProcessing, setIsProcessing] = useState(false)
   const [allBarters, setAllBarters] = useState<Barter[]>([])
   const [barterSet, setBarterSet] = useState(new Set())
-
+  //
   const {
     data: barters,
     refetch,
