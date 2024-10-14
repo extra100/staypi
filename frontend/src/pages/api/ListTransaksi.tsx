@@ -1,9 +1,21 @@
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Table } from 'antd'
 import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
+import UserContext from '../../contexts/UserContext'
 
 const TransactionTable: React.FC = () => {
   const { data, isLoading, error } = useGetTransaksisQuery()
+  const userContext = useContext(UserContext)
+  const { user } = userContext || {}
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
+    null
+  )
+  console.log({ selectedWarehouseId })
+  useEffect(() => {
+    if (user) {
+      setSelectedWarehouseId(user.id_outlet)
+    }
+  }, [user])
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -12,6 +24,11 @@ const TransactionTable: React.FC = () => {
   if (error) {
     return <div>Error loading data</div>
   }
+
+  // Filter transactions based on user.id_outlet
+  const filteredData = data?.filter(
+    (transaction) => transaction.warehouse_id === Number(user?.id_outlet)
+  )
 
   const columns = [
     {
@@ -44,7 +61,7 @@ const TransactionTable: React.FC = () => {
   return (
     <Table
       columns={columns}
-      dataSource={data?.map((transaction) => ({
+      dataSource={filteredData?.map((transaction) => ({
         key: transaction.ref_number, // Key for each row
         ref_number: transaction.ref_number,
         trans_date: transaction.trans_date,
