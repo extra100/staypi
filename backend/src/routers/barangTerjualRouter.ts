@@ -127,7 +127,7 @@ const fetchBartersByPage = async (
       },
     }
   )
-
+  //
   const data = response.data.data.data.map((item: any) => ({
     warehouse_id: item.warehouse_id ?? 0,
     amount: item.amount,

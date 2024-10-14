@@ -74,7 +74,7 @@ const StockSelectorTable = () => {
   console.log({ contacts })
 
   const { saveInvoiceData } = SaveApi()
-
+  //
   const addPosMutation = useAddTransactionMutation()
 
   const [productQuantities, setProductQuantities] = useState<{

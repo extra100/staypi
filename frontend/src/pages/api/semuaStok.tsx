@@ -123,11 +123,7 @@ const ListStok: React.FC = () => {
         />
       </Space>
 
-      <Table
-        columns={columns}
-        dataSource={filteredProducts}
-        pagination={true}
-      />
+      <Table columns={columns} dataSource={filteredProducts} />
     </div>
   )
 }
