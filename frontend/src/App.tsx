@@ -222,6 +222,15 @@ function App() {
                   >
                     History Transfer
                   </Link>
+                  <Link className="nav-link header-link p-1 px-3" to={`/ibo`}>
+                    Nota Baru
+                  </Link>
+                  <Link
+                    className="nav-link header-link p-1 px-3"
+                    to={`/listkledo`}
+                  >
+                    List Penjualan
+                  </Link>
                   {/* <Link className="nav-link header-link p-1 px-3" to={`/ibo`}>
                     POS
                   </Link>

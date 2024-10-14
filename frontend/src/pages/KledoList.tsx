@@ -11,26 +11,32 @@ const ListTransaksi: React.FC = () => {
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
   )
-  console.log({ selectedWarehouseId })
   useEffect(() => {
     if (user) {
       setSelectedWarehouseId(user.id_outlet)
     }
   }, [user])
+
   const { data } = useGetTransaksisQuery()
   const [selectedRefNumber, setSelectedRefNumber] = useState<string | null>(
     null
   )
-  console.log({ selectedRefNumber })
   const { getIdAtInvoice } = useIdInvoice(selectedRefNumber || '')
-  console.log({ getIdAtInvoice })
 
   const handleRefNumberClick = (ref_number: string) => {
     setSelectedRefNumber(ref_number)
   }
-  const filteredData = data?.filter(
-    (transaction) => transaction.warehouse_id === Number(user?.id_outlet)
-  )
+
+  // Filter the data by warehouse ID and sort by date (e.g., 'createdAt')
+  const filteredData = data
+    ?.filter(
+      (transaction) => transaction.warehouse_id === Number(user?.id_outlet)
+    )
+    ?.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    ) // Sort by latest date
+
   const columns = [
     {
       title: 'Nomor',
@@ -57,7 +63,7 @@ const ListTransaksi: React.FC = () => {
       render: (status_id: number) => {
         let color = ''
         let text = ''
-        //
+
         switch (status_id) {
           case 1:
             color = 'red'

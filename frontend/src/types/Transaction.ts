@@ -5,6 +5,7 @@ export type Transaction = {
 
   sales_id: number | null
   status_id: number
+  createdAt: string
 
   term_id: number
   due: number
