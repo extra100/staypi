@@ -110,7 +110,7 @@ class Contact {
   @prop({ required: true })
   public id!: number
 
-  @prop()
+  @prop({ required: true })
   public name!: string
 }
 class Warehouses {
