@@ -604,9 +604,9 @@ const StockSelectorTable = () => {
       column_name: '',
     }
 
-    // saveInvoiceData(invoiceData)
+    saveInvoiceData(invoiceData)
     addPosMutation.mutate(invoiceData as any)
-    // navigate('/listkledo')
+    navigate('/listkledo')
   }
 
   const columns = [
