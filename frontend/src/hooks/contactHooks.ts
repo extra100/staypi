@@ -33,7 +33,11 @@ export const useGetContactsQuery = () =>
     queryKey: ['contacts'],
     queryFn: async () => (await apiClient.get<Contact[]>(`/api/contacts`)).data,
   })
-
+export const useGetPelangganByIdQuery = (name: any) =>
+  useQuery<Contact[]>(
+    ['contacts', name],
+    async () => (await apiClient.get<Contact[]>(`/api/contacts/${name}`)).data
+  )
 export const useGetThenAddContactsQuery = (batchSize: number, offset: number) =>
   useQuery({
     queryKey: ['contacts', batchSize, offset],

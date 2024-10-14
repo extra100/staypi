@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { DatePicker, Input } from 'antd'
+import { Col, DatePicker, Row, Slider } from 'antd'
 import dayjs from 'dayjs'
 import type { Dayjs } from 'dayjs'
-
-const { RangePicker } = DatePicker
 
 interface DateRangeProps {
   value?: [string, string]
@@ -11,8 +9,7 @@ interface DateRangeProps {
   onChange?: (dates: [string, string]) => void
   onDifferenceChange?: (diff: number) => void
   onSave?: (startDate: string, endDate: string, selisih: number) => void
-
-  defaultValue?: string[] | undefined // Tambahkan prop defaultValue
+  defaultValue?: string[] | undefined
 }
 
 const DateRange: React.FC<DateRangeProps> = (props) => {
@@ -22,12 +19,13 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
   )
 
   const [endDate, setEndDate] = useState<Dayjs>(
-    props.value ? dayjs(props.value[1]) : currentDate.add(30, 'days')
+    props.value ? dayjs(props.value[1]) : currentDate.add(0, 'days')
   )
 
   const [dateDifference, setDateDifference] = useState<number>(
-    props.difference !== undefined ? props.difference : 30
+    props.difference !== undefined ? props.difference : 0
   )
+
   useEffect(() => {
     if (props.difference !== undefined && props.difference !== dateDifference) {
       setDateDifference(props.difference)
@@ -42,7 +40,6 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
       ])
     }
   }, [startDate, endDate])
-  useEffect(() => {}, [startDate, endDate])
 
   useEffect(() => {
     if (props.onDifferenceChange) {
@@ -61,63 +58,79 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
     }
   }
 
-  const handleEndDateChange = (
-    date: Dayjs | null,
-    dateString: string | string[]
-  ) => {
-    if (date) {
-      setEndDate(date)
-      const newDifference = date.diff(startDate, 'days')
-      setDateDifference(newDifference)
+  const handleTerminChange = (value: number) => {
+    const newEndDate = startDate.add(value, 'days')
+    setEndDate(newEndDate)
+    setDateDifference(value)
+
+    if (props.onDifferenceChange) {
+      props.onDifferenceChange(value)
     }
   }
 
-  const handleDifferenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const diffInput = e.target.value ? parseInt(e.target.value, 10) : 0
+  const marks = {
+    0: <strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;COD</strong>,
+    10: <strong>10</strong>,
+    14: <strong>14</strong>,
+    30: <strong>30</strong>,
+  }
 
-    if (!isNaN(diffInput)) {
-      if (startDate && endDate) {
-        const newEndDate = startDate.add(diffInput, 'days')
-        setEndDate(newEndDate)
-        setDateDifference(diffInput)
-      }
+  const labelStyle = {
+    display: 'inline-block' as const,
+    minWidth: '120px' as const,
+    textAlign: 'left' as const,
+  }
 
-      if (props.onDifferenceChange) {
-        props.onDifferenceChange(diffInput)
-      }
-    }
+  const labelColonStyle = {
+    display: 'inline-block' as const,
+    minWidth: '10px' as const,
+    textAlign: 'left' as const,
+  }
+
+  const sliderWrapperStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    width: '70%',
   }
 
   return (
-    <div style={{ display: 'flex' }}>
-      <div style={{ flex: 1, marginRight: '20px' }}>
-        <div style={{ marginBottom: '8px' }}>Tgl. Transaksi</div>
-        <DatePicker
-          value={startDate as any}
-          onChange={handleStartDateChange}
-          style={{ width: '100%' }}
-        />
-      </div>
-
-      <div style={{ flex: 1, marginRight: '20px' }}>
-        <div style={{ marginBottom: '8px' }}>Tgl. Jatuh Tempo</div>
-
-        <DatePicker
-          value={endDate as any}
-          onChange={handleEndDateChange}
-          style={{ width: '100%' }}
-        />
-      </div>
-
-      <div style={{ flex: 1 }}>
-        <div style={{ marginBottom: '8px' }}>Termin</div>
-
-        <Input
-          value={dateDifference !== null ? dateDifference.toString() : ''}
-          onChange={handleDifferenceChange}
-          style={{ width: '100%' }}
-        />
-      </div>
+    <div style={{ padding: '0px' }}>
+      <Row gutter={16} style={{ marginBottom: '10px' }}>
+        <Col span={12}>
+          <span style={labelStyle}>Tgl. Transaksi</span>
+          <span style={labelColonStyle}>:</span>
+          <DatePicker
+            style={{ width: '70%' }}
+            value={startDate as any}
+            onChange={handleStartDateChange}
+          />
+        </Col>
+        {/* <Col span={12}>
+          <span style={labelStyle}>Tgl. Jatuh Tempo</span>
+          <span style={labelColonStyle}>:</span>
+          <DatePicker
+            style={{ width: '70%' }}
+            value={endDate as any}
+            onChange={(date) => setEndDate(date!)}
+          />
+        </Col> */}
+        <Col span={12} style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={labelStyle}>Termin (Hari)</span>
+          <span style={labelColonStyle}>: </span>
+          <div style={sliderWrapperStyle}>
+            <Slider
+              marks={marks}
+              step={null}
+              defaultValue={dateDifference}
+              value={dateDifference}
+              onChange={handleTerminChange}
+              min={0}
+              max={30}
+              style={{ width: '100%' }}
+            />
+          </div>
+        </Col>
+      </Row>
     </div>
   )
 }

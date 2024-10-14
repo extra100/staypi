@@ -12,22 +12,31 @@ export function SaveApi() {
     setError(null)
     setSuccess(false)
 
+    console.log('Sending invoice data:', invoiceData) // Log invoice data before sending
+
     try {
       const response = await fetch(`${HOST}/finance/invoices`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${TOKEN}`,
+          'Content-Type': 'application/json', // Ensure content type is set
         },
         body: JSON.stringify(invoiceData),
       })
 
+      console.log('Response status:', response.status) // Log response status
+      console.log('Response headers:', response.headers) // Log response headers
+
       if (!response.ok) {
         const errorData = await response.json()
+        console.log('Error response data:', errorData) // Log error response data
         throw new Error(`Failed to save invoice data: ${errorData.message}`)
       }
 
+      console.log('Invoice data saved successfully') // Log success message
       setSuccess(true)
     } catch (error: any) {
+      console.error('Error saving invoice data:', error) // Log error details
       setError(error.message)
     } finally {
       setLoading(false)

@@ -76,24 +76,16 @@ export const useUpdateTransactionMutation = () => {
 
   return useMutation(
     async (updatedTransaction: Transaction) => {
-      try {
-        const response = await apiClient.put<Transaction>(
-          `/api/transactions/${updatedTransaction.ref_number}`,
-          updatedTransaction
-        )
-
-        return response.data // Mengembalikan data dari respons
-      } catch (error: any) {
-        throw new Error(`Failed to update transaction: ${error.message}`)
-      }
+      const { ref_number, ...updatedData } = updatedTransaction
+      return apiClient.put<Transaction>(
+        `/api/transactions/${ref_number}`,
+        updatedData
+      )
     },
     {
       onSuccess: () => {
+        // Invalidate queries to refetch the data after update
         queryClient.invalidateQueries(['transactions'])
-      },
-      onError: (error: Error) => {
-        console.error('Mutation error:', error.message)
-        // Anda bisa tambahkan handling error tambahan di sini
       },
     }
   )

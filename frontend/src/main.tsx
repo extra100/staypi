@@ -63,8 +63,10 @@ import BatchProcessContacts from './pages/api/SaveContact'
 import BarangList from './pages/api/barangPage'
 import TransactionTable from './pages/api/ListTransaksi'
 import Receipt from './pages/api/printNota'
+import ListStok from './pages/api/semuaStok'
 import ReceiptJalan from './pages/api/ReceiptJalan'
 import BatchProcessProducts from './pages/api/saveProduct'
+import BatchProcessBarangTerjuals from './pages/api/saveBarangTerjual'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -93,6 +95,8 @@ const router = createBrowserRouter(
       <Route path="/savetag" element={<BatchProcessTags />} />
       <Route path="/savecontact" element={<BatchProcessContacts />} />
       <Route path="/po" element={<ProductStocksTable />} />
+      <Route path="/langsungstok" element={<ListStok />} />
+      <Route path="/terjual" element={<BatchProcessBarangTerjuals />} />
       <Route
         path="/FinanceAccountIDSameTable"
         element={<FinanceAccountIDSameTable />}

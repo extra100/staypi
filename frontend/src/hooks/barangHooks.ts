@@ -12,3 +12,8 @@ export const useGetBarangsQuery = () =>
     queryKey: ['barangs'],
     queryFn: async () => (await apiClient.get<Barang[]>(`/api/barangs`)).data,
   })
+export const useGetBarangByIdQuery = (name: any) =>
+  useQuery<Barang[]>(
+    ['contacts', name],
+    async () => (await apiClient.get<Barang[]>(`/api/contacts/${name}`)).data
+  )

@@ -9,6 +9,12 @@ export const useGetWarehousesQuery = () =>
     queryFn: async () =>
       (await apiClient.get<Warehouse[]>(`/api/warehouses`)).data,
   })
+export const useGetGudangByIdQuery = (name: any) =>
+  useQuery<Warehouse[]>(
+    ['warehouses', name],
+    async () =>
+      (await apiClient.get<Warehouse[]>(`/api/warehouses/${name}`)).data
+  )
 export const useGetSimpanWarehousesQuery = () =>
   useQuery({
     queryKey: ['warehouses'],

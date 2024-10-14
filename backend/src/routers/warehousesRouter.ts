@@ -83,7 +83,7 @@ const fetchAllWarehouses = async (perPage: number): Promise<Warehouse[]> => {
 
   return allWarehouses
 }
-//get from monggo
+
 warehouseRouter.get(
   '/',
   asyncHandler(async (req, res) => {

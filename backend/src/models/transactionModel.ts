@@ -2,8 +2,6 @@ import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
 
 @modelOptions({ schemaOptions: { timestamps: true } })
 export class Transaction {
-  public _id?: string
-
   @prop({ required: true })
   public trans_date?: string
 
@@ -74,7 +72,7 @@ export class Transaction {
 class Item {
   @prop({ required: true })
   public finance_account_id!: number
-  @prop({ required: true })
+  @prop()
   public name!: string
 
   @prop({ required: true })
@@ -93,6 +91,8 @@ class Item {
   public discount_amount!: number
   @prop()
   public unit_id!: number
+  @prop()
+  public satuan!: string
 }
 
 class Witholding {
@@ -100,17 +100,17 @@ class Witholding {
   public witholding_account_id!: number
   @prop({ required: true })
   public name!: string
-  @prop({ required: true })
+  @prop()
   public witholding_amount!: number
 
-  @prop({ required: true })
+  @prop()
   public witholding_percent!: number
 }
 class Contact {
   @prop({ required: true })
   public id!: number
 
-  @prop({ required: true })
+  @prop()
   public name!: string
 }
 class Warehouses {

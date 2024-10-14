@@ -17,7 +17,10 @@ import {
   Divider,
   message,
 } from 'antd'
-import { useGetTransactionByIdQuery } from '../../hooks/transactionHooks'
+import {
+  useAddTransactionMutation,
+  useGetTransactionByIdQuery,
+} from '../../hooks/transactionHooks'
 import { Link, useParams } from 'react-router-dom'
 import { AiOutlinePrinter } from 'react-icons/ai'
 import PosPrintKomponent from './PosPrintCok'
@@ -28,17 +31,25 @@ import { saveToApiNextPayment } from './NextPayment'
 import { useReactToPrint } from 'react-to-print'
 import Receipt from './printNota'
 import ReceiptJalan from './ReceiptJalan'
+import { useIdInvoice } from './takeSingleInvoice'
+import { useIdWarehouse } from './namaWarehouse'
 
 const { Title, Text } = Typography
 const { Option } = Select
 
 const DetailKledo: React.FC = () => {
   const { ref_number } = useParams<{ ref_number?: string }>()
+  const addPosMutation = useAddTransactionMutation()
 
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
   )
 
+  const { getIdAtInvoice } = useIdInvoice(ref_number || '')
+
+  const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
+  const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
+  console.log({ refNumber })
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
@@ -68,8 +79,36 @@ const DetailKledo: React.FC = () => {
       alert('Jumlah bayar tidak boleh melebihi total tagihan')
     }
   }
+
+  const { idWarehouse } = useIdWarehouse()
+
   const [selectedBank, setSelectedBank] = useState<any | null>(null)
 
+  const handleWarehouseChange = (value: number | string) => {
+    console.log('Selected Warehouse ID:', value)
+
+    const bangke = idWarehouse.reduce((map: any, warehouse: any) => {
+      map[warehouse.id] = warehouse.name
+      return map
+    }, {})
+
+    const namaBangke = bangke[value as any]
+
+    const findMatchingBank = (namaGudang: string) => {
+      return fiAc?.children?.find((bank) =>
+        bank.name.startsWith(`KAS PENJUALAN_${namaGudang}`)
+      )
+    }
+
+    const matchingBank = findMatchingBank(namaBangke)
+
+    if (matchingBank) {
+      setSelectedBank(matchingBank.name)
+      console.log('Matching Bank Found:', matchingBank.name)
+    } else {
+      console.log('No matching bank found.')
+    }
+  }
   const today = dayjs().format('DD-MM-YYYY')
   const { saveNextPayment } = saveToApiNextPayment()
   const handleFormSubmit = (values: any) => {
@@ -77,16 +116,66 @@ const DetailKledo: React.FC = () => {
       map[warehouse.name] = warehouse.id
       return map
     }, {})
+
     const accountId = accountMap[selectedBank as any]
+
+    if (refNumber) {
+      const invoiceData = {
+        withholdings: [
+          {
+            witholding_account_id: accountId,
+            name: selectedBank,
+            down_payment: amountPaid || 0,
+            witholding_percent: 0,
+            witholding_amount: 0,
+          },
+        ],
+      }
+
+      const existingInvoice = allTransactions?.find(
+        (transaction) => transaction.ref_number === refNumber
+      )
+
+      if (existingInvoice) {
+        const updatedWithholdings = [
+          ...existingInvoice.witholdings,
+          ...invoiceData.withholdings,
+        ]
+
+        const updatedInvoice = {
+          ...existingInvoice,
+          witholdings: updatedWithholdings,
+        }
+
+        addPosMutation.mutate(updatedInvoice)
+      } else {
+        console.error('Invoice with ref_number not found:', refNumber)
+      }
+    } else {
+      console.error('No valid ref_number found.')
+    }
+
     const payload = {
-      amount: values.jumlahBayar,
+      amount: amountPaid,
       attachment: [],
       bank_account_id: accountId,
-      business_tran_id: null,
+      business_tran_id: invoiceId,
+      witholding_amount: amountPaid,
+
       memo: values.catatan || null,
       trans_date: values.tanggalBayar.format('YYYY-MM-DD'),
       witholdings: [],
     }
+
+    console.log('Payload:', payload)
+
+    saveNextPayment(payload)
+      .then((response: any) => {
+        console.log('Payment saved successfully:', response)
+      })
+      .catch((error: any) => {
+        console.error('Error saving payment:', error)
+      })
   }
   const printNota = useRef<HTMLDivElement>(null)
 
@@ -102,33 +191,63 @@ const DetailKledo: React.FC = () => {
 
   const columns = [
     {
+      title: 'No',
+      key: 'no',
+      align: 'center', // Header rata tengah
+      render: (_: any, __: any, index: number) => (
+        <div style={{ textAlign: 'center' }}>{index + 1}</div>
+      ),
+    },
+    {
       title: 'Barang',
       dataIndex: 'name',
       key: 'name',
+      align: 'center', // Header tetap rata tengah
+      render: (name: string) => (
+        <div style={{ textAlign: 'left' }}>
+          {name !== undefined ? name : ''}
+        </div>
+      ), // Konten rata kiri
     },
+
     {
       title: 'Qty',
       dataIndex: 'qty',
       key: 'qty',
+      align: 'center', // Header rata tengah
+      render: (qty: number) => (
+        <div style={{ textAlign: 'center' }}>
+          {qty !== undefined ? qty : '0'}
+        </div>
+      ),
     },
     {
       title: 'Satuan',
       key: 'unit_id',
       dataIndex: 'unit_id',
+      align: 'center', // Header rata tengah
     },
     {
       title: 'Harga',
       dataIndex: 'price',
       key: 'price',
-      render: (price: number) =>
-        price !== undefined ? `Rp ${price.toLocaleString()}` : 'Rp 0',
+      align: 'center', // Header rata tengah
+      render: (price: number) => (
+        <div style={{ textAlign: 'right' }}>
+          {price !== undefined ? `${price.toLocaleString()}` : 'Rp 0'}
+        </div>
+      ),
     },
     {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
-      render: (amount: number) =>
-        amount !== undefined ? `Rp ${amount.toLocaleString()}` : 'Rp 0',
+      align: 'center', // Header rata tengah
+      render: (amount: number) => (
+        <div style={{ textAlign: 'right' }}>
+          {amount !== undefined ? `${amount.toLocaleString()}` : 'Rp 0'}
+        </div>
+      ),
     },
   ]
 
@@ -222,7 +341,7 @@ const DetailKledo: React.FC = () => {
       {/* Transaction Table */}
       <Table
         dataSource={getPosDetail?.items || []}
-        columns={columns}
+        columns={columns as any}
         pagination={false}
         rowKey="_id"
         style={{ marginTop: '20px' }}
@@ -279,7 +398,7 @@ const DetailKledo: React.FC = () => {
                     <Text strong>{witholding.name}</Text>
                   </Col>
                   <Col span={12} style={{ textAlign: 'right' }}>
-                    <Text strong>{witholding.witholding_amount}</Text>
+                    <Text strong>{getPosDetail?.down_payment || []}</Text>
                   </Col>
                 </Row>
               ))}
@@ -341,9 +460,9 @@ const DetailKledo: React.FC = () => {
             <Col span={12}>
               <Select
                 placeholder="Pilih bank"
-                value={selectedBank as number}
+                value={selectedBank as any}
                 onChange={(value) => setSelectedBank(value)}
-                style={{ marginTop: '16px', width: '100%' }}
+                style={{ width: '100%' }}
               >
                 {fiAc?.children?.map((e) => (
                   <Select.Option key={e.id} value={e.name}>
@@ -354,7 +473,7 @@ const DetailKledo: React.FC = () => {
             </Col>
             <Col span={12}>
               <Form.Item name="catatan">
-                <Input.TextArea rows={2} placeholder="Catatan" />
+                <Input placeholder="Catatan" />
               </Form.Item>
             </Col>
           </Row>
