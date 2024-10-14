@@ -32,7 +32,7 @@ const BatchProcessWarehouses = () => {
       return updatedSet
     })
 
-    setAllWarehouses((prevWarehouses) => [...prevWarehouses, ...newWarehouses])
+    // setAllWarehouses((prevWarehouses) => [...prevWarehouses, ...newWarehouses])
 
     if (warehouses.length === batchSize) {
       setTimeout(() => setOffset((prevOffset) => prevOffset + batchSize), 500)

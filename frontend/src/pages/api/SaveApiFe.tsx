@@ -6,55 +6,64 @@ const SaveInvoiceComponent = () => {
 
   const handleSave = () => {
     const invoiceData = {
-      trans_date: '2024-07-31',
-      due_date: '2024-07-31',
-      contact_id: 4323,
-      contact_shipping_address_id: null,
-      sales_id: null,
-      status_id: 1,
-      include_tax: 0,
-      term_id: 1,
-      ref_number: 'INV/99999',
-      memo: '',
+      // business_tran_id: 176596,
+      amount: 156499,
+      amount_after_tax: 0,
       attachment: [],
+      column_name: '',
+      sales_id: 193769,
+      user_id: 193769,
+
+      contact_id: 3850,
+      contacts: [
+        {
+          id: 3850,
+          name: 'UD GLORY TRUSS',
+        },
+      ],
+      down_payment: 145,
+      down_payment_bank_account_id: 1471,
+      due: 156354,
+      due_date: '2024-11-10',
+      include_tax: 0,
       items: [
         {
-          finance_account_id: 3,
-          tax_id: null,
+          amount: 156499,
+          discount_amount: 41601,
+          finance_account_id: 203,
+          discount_percent: 21,
           desc: '',
+          price: 78249.5,
           qty: 1,
-          price: 2,
-          amount: 2,
-          price_after_tax: 2,
-          amount_after_tax: 2,
-          tax_manual: 0,
-          discount_percent: 0,
-          unit_id: 1,
+          tax_id: null,
         },
       ],
+      memo: '',
+      message: '',
+      ref_number: 'INV/GR/398477',
+
+      status_id: 3,
+      tags: [18],
+      term_id: 1,
+      trans_date: '2024-10-11',
+      warehouse_id: 18,
+      warehouses: [
+        {
+          warehouse_id: 18,
+          name: 'GRAHA STEEL',
+        },
+      ],
+      witholding_account_id: 1471,
+      witholding_amount: 145,
+      witholding_percent: 0,
       witholdings: [
         {
-          witholding_account_id: 1,
-          witholding_amount: 0,
-          witholding_percent: 0,
+          witholding_account_id: 1471,
+          name: 'KAS PENJUALAN_GRAHA STEEL',
+          down_payment: 145,
         },
       ],
-      warehouse_id: 7,
-      additional_discount_percent: 0,
-      additional_discount_amount: 0,
-      message: '',
-      tags: [7],
-
-      shipping_cost: 0,
-      shipping_date: null,
-      shipping_comp_id: null,
-      shipping_tracking: null,
-      delivery_ids: null,
-      witholding_percent: 0,
-      witholding_amount: 0,
-      witholding_account_id: 1,
     }
-
     saveInvoiceData(invoiceData)
   }
 

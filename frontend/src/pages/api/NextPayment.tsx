@@ -12,22 +12,30 @@ export function saveToApiNextPayment() {
     setError(null)
     setSuccess(false)
 
+    console.log('Data before saving:', invoiceData) // Log data before saving
+
     try {
       const response = await fetch(`${HOST}/finance/bankTrans/invoicePayment`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${TOKEN}`,
+          'Content-Type': 'application/json', // Ensure Content-Type header is set
         },
         body: JSON.stringify(invoiceData),
       })
 
       if (!response.ok) {
         const errorData = await response.json()
+        console.error('Error saving data:', errorData) // Log error data if request fails
         throw new Error(`Failed to save invoice data: ${errorData.message}`)
       }
 
+      const savedData = await response.json()
+      console.log('Data after saving:', savedData) // Log data after saving
+
       setSuccess(true)
     } catch (error: any) {
+      console.error('Error occurred:', error.message) // Log the error message
       setError(error.message)
     } finally {
       setLoading(false)

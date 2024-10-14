@@ -434,7 +434,7 @@ const ProductStocksPage: React.FC = () => {
               </Form.Item>
             </div>
           </div>
-          <Form.Item name="referensi" label="Pesan">
+          <Form.Item name="referensi" label="Pesan" hidden>
             <Input placeholder="Pesan" />
           </Form.Item>
           <Table
