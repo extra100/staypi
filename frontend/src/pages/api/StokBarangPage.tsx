@@ -640,7 +640,7 @@ const StockSelectorTable = () => {
       column_name: '',
     }
 
-    saveInvoiceData(invoiceData)
+    // saveInvoiceData(invoiceData)
     addPosMutation.mutate(invoiceData as any)
     navigate('/listkledo')
   }
@@ -790,294 +790,317 @@ const StockSelectorTable = () => {
     textAlign: 'left' as const,
   }
   return (
-    <div>
-      <div style={{ paddingBottom: '0px' }}>
-        <Row gutter={16} style={{ marginBottom: '10px' }}>
-          <Col span={12}>
-            <span style={labelStyle}>Nama Pelanggan</span>
-            <span style={labelColonStyle}>:</span>
-            <Select
-              showSearch
-              placeholder="Select a Contact"
-              style={{ width: '70%' }}
-              optionFilterProp="label"
-              filterOption={(input: any, option: any) =>
-                option?.label
-                  ?.toString()
-                  .toLowerCase()
-                  .includes(input.toLowerCase())
-              }
-              value={selectedContact}
-              onChange={handleContactChange}
-            >
-              {Array.isArray(contacts) &&
-                contacts
-                  .filter((contact) => contact.group?.name === warehouseId)
-                  .map((item) => (
-                    <Select.Option
-                      key={item.id}
-                      value={item.id}
-                      label={item.name}
-                    >
-                      {item.name}
-                    </Select.Option>
-                  ))}
-            </Select>
-          </Col>
-          <Col span={12}>
-            <span style={labelStyle}>Outlet</span>
-            <span style={labelColonStyle}>:</span>
-            <Select
-              placeholder="Warehouse"
-              showSearch
-              style={{ width: '70%' }}
-              optionFilterProp="label" // Mengacu ke label (teks yang ditampilkan)
-              filterOption={(input: any, option: any) =>
-                option?.label
-                  ?.toString()
-                  .toLowerCase()
-                  .includes(input.toLowerCase())
-              }
-              value={selectedWarehouseId}
-              onChange={handleWarehouseChange}
-            >
-              {idWarehouse?.map((warehouse) => (
-                <Select.Option
-                  key={warehouse.id}
-                  value={warehouse.id}
-                  label={warehouse.name}
-                >
-                  {warehouse.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Col>
-        </Row>
-
-        <Row gutter={16} style={{ marginBottom: '10px' }}>
-          <Col span={12}>
-            <span style={labelStyle}>Piutang/Pelanggan</span>
-            <span style={labelColonStyle}>:</span>
-            <Input
-              style={{ width: '70%' }}
-              value={formatRupiah(selectedReceivable)}
-              readOnly
-            />
-          </Col>
-
-          <Col span={12}>
-            <span style={labelStyle}>Piutang/Outlet</span>
-            <span style={labelColonStyle}>:</span>
-            <Input
-              style={{ width: '70%' }}
-              value={formatRupiah(totalReceivable)}
-              readOnly
-            />
-          </Col>
-        </Row>
-
-        <Row gutter={16} style={{ marginBottom: '10px' }}>
-          <Col span={12}>
-            <span style={labelStyle}>Platform</span>
-            <span style={labelColonStyle}>:</span>
-            <Input
-              style={{ width: '70%' }}
-              value={formatRupiah(20000000)}
-              readOnly
-            />
-          </Col>
-          <Col span={12}>
-            <span style={labelStyle}>Platform</span>
-            <span style={labelColonStyle}>:</span>
-            <Input
-              style={{ width: '70%' }}
-              value={formatRupiah(400000000)}
-              readOnly
-            />
-          </Col>
-        </Row>
-        <Row gutter={16} style={{ marginBottom: '10px' }}>
-          <Col span={12}>
-            <span style={labelStyle}>No Invoice</span>
-            <span style={labelColonStyle}>:</span>
-            <Input style={{ width: '70%' }} value={currentIdPos} readOnly />
-          </Col>
-          <Col span={12}>
-            <span style={labelStyle}>Nama Tag</span>
-            <span style={labelColonStyle}>:</span>
-            <Select
-              mode="multiple"
-              placeholder="Tag"
-              showSearch
-              style={{ width: '70%' }}
-              optionFilterProp="label"
-              filterOption={(input: any, option: any) =>
-                option?.label
-                  ?.toString()
-                  .toLowerCase()
-                  .includes(input.toLowerCase())
-              }
-              onChange={handleTag}
-              value={selectTag} // pastikan selectTag digunakan di sini
-            >
-              {Array.isArray(tagDb) &&
-                tagDb.map((product: any) => (
+    <>
+      <div
+        style={{
+          background: 'white',
+          padding: '20px',
+          // marginBottom: '10px',
+          borderRadius: '10px 10px 0px 0px',
+          fontSize: '30px',
+          borderBottom: '1px',
+        }}
+      >
+        Tambah Tagihan
+      </div>
+      <div
+        style={{
+          background: 'white',
+          padding: '20px',
+          marginBottom: '20px',
+          borderRadius: '0px 0px 10px 10px',
+        }}
+      >
+        <div style={{ paddingBottom: '0px', border: 'red' }}>
+          <Row gutter={16} style={{ marginBottom: '10px' }}>
+            <Col span={12}>
+              <span style={labelStyle}>Nama Pelanggan</span>
+              <span style={labelColonStyle}>:</span>
+              <Select
+                showSearch
+                placeholder="Select a Contact"
+                style={{ width: '70%' }}
+                optionFilterProp="label"
+                filterOption={(input: any, option: any) =>
+                  option?.label
+                    ?.toString()
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                value={selectedContact}
+                onChange={handleContactChange}
+              >
+                {Array.isArray(contacts) &&
+                  contacts
+                    .filter((contact) => contact.group?.name === warehouseId)
+                    .map((item) => (
+                      <Select.Option
+                        key={item.id}
+                        value={item.id}
+                        label={item.name}
+                      >
+                        {item.name}
+                      </Select.Option>
+                    ))}
+              </Select>
+            </Col>
+            <Col span={12}>
+              <span style={labelStyle}>Outlet</span>
+              <span style={labelColonStyle}>:</span>
+              <Select
+                placeholder="Warehouse"
+                showSearch
+                style={{ width: '70%' }}
+                optionFilterProp="label" // Mengacu ke label (teks yang ditampilkan)
+                filterOption={(input: any, option: any) =>
+                  option?.label
+                    ?.toString()
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                value={selectedWarehouseId}
+                onChange={handleWarehouseChange}
+              >
+                {idWarehouse?.map((warehouse) => (
                   <Select.Option
-                    key={product.id}
-                    value={product.id}
-                    label={product.name}
+                    key={warehouse.id}
+                    value={warehouse.id}
+                    label={warehouse.name}
                   >
-                    {product.name}
+                    {warehouse.name}
                   </Select.Option>
                 ))}
-            </Select>
-          </Col>
-        </Row>
-      </div>
+              </Select>
+            </Col>
+          </Row>
 
-      <Form.Item style={{ paddingTop: '0px' }}>
-        <DateRange
-          onChange={(dates) => {
-            setSelectedDates(dates)
-          }}
-          onDifferenceChange={(diff) => {
-            setSelectedDifference(diff)
-          }}
-          onSave={handleDateRangeSave}
-        />
-      </Form.Item>
-      <div>
-        <Button
-          type="primary"
-          onClick={handleOkClick}
-          style={{ marginRight: '20px', width: '120px' }}
-        >
-          Pilih Barang
-        </Button>
-        <Select
-          mode="multiple"
-          placeholder="Pilih Barang"
-          style={{ width: '100%', marginTop: '10px' }}
-          optionFilterProp="items"
-          filterOption={false}
-          onChange={handleProductChange}
-          value={selectedFinanceAccountIds}
-          showSearch
-          onSearch={handleSearch}
-          open={dropdownVisible}
-          onDropdownVisibleChange={(open) => setDropdownVisible(open)}
-          dropdownRender={(menu) => (
-            <div style={{ minWidth: '800px', padding: '8px' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  fontWeight: 'bold',
-                  padding: '8px',
-                  borderBottom: '1px solid #e8e8e8',
-                  backgroundColor: '#f5f5f5',
-                }}
+          <Row gutter={16} style={{ marginBottom: '10px' }}>
+            <Col span={12}>
+              <span style={labelStyle}>Piutang/Pelanggan</span>
+              <span style={labelColonStyle}>:</span>
+              <Input
+                style={{ width: '70%' }}
+                value={formatRupiah(selectedReceivable)}
+                readOnly
+              />
+            </Col>
+
+            <Col span={12}>
+              <span style={labelStyle}>Piutang/Outlet</span>
+              <span style={labelColonStyle}>:</span>
+              <Input
+                style={{ width: '70%' }}
+                value={formatRupiah(totalReceivable)}
+                readOnly
+              />
+            </Col>
+          </Row>
+
+          <Row gutter={16} style={{ marginBottom: '10px' }}>
+            <Col span={12}>
+              <span style={labelStyle}>Platform</span>
+              <span style={labelColonStyle}>:</span>
+              <Input
+                style={{ width: '70%' }}
+                value={formatRupiah(20000000)}
+                readOnly
+              />
+            </Col>
+            <Col span={12}>
+              <span style={labelStyle}>Platform</span>
+              <span style={labelColonStyle}>:</span>
+              <Input
+                style={{ width: '70%' }}
+                value={formatRupiah(400000000)}
+                readOnly
+              />
+            </Col>
+          </Row>
+          <Row gutter={16} style={{ marginBottom: '10px' }}>
+            <Col span={12}>
+              <span style={labelStyle}>No Invoice</span>
+              <span style={labelColonStyle}>:</span>
+              <Input style={{ width: '70%' }} value={currentIdPos} readOnly />
+            </Col>
+            <Col span={12}>
+              <span style={labelStyle}>Nama Tag</span>
+              <span style={labelColonStyle}>:</span>
+              <Select
+                mode="multiple"
+                placeholder="Tag"
+                showSearch
+                style={{ width: '70%' }}
+                optionFilterProp="label"
+                filterOption={(input: any, option: any) =>
+                  option?.label
+                    ?.toString()
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                onChange={handleTag}
+                value={selectTag} // pastikan selectTag digunakan di sini
               >
-                <span style={{ flex: 2, textAlign: 'left' }}>Nama Barang</span>
-                <span style={{ flex: 1, textAlign: 'center' }}>Qty</span>
-                <span style={{ flex: 1, textAlign: 'center' }}>Price</span>
-                {/* <span style={{ flex: 1, textAlign: 'center' }}>Satuan</span> */}
-
-                {discountRates.map((rate) => (
-                  <span
-                    key={rate.label}
-                    style={{ flex: 1, textAlign: 'center' }}
-                  >
-                    {rate.label}
-                  </span>
-                ))}
-              </div>
-              <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
-                {menu}
-              </div>
-            </div>
-          )}
-          tagRender={customDisplayRender as any}
-        >
-          {Array.isArray(barangs) &&
-            barangs
-              .filter((item) =>
-                item.name.toLowerCase().includes(searchValue.toLowerCase())
-              )
-              .map((product) => {
-                const stockQuantity =
-                  warehouseStock.find((stock: any) => stock.id === product.id)
-                    ?.stock || 0
-                if (stockQuantity === 0) return null
-
-                return (
-                  <Select.Option
-                    key={product.id}
-                    value={product.id}
-                    label={product.id}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '8px',
-                        borderBottom: '1px solid #e8e8e8',
-                      }}
+                {Array.isArray(tagDb) &&
+                  tagDb.map((product: any) => (
+                    <Select.Option
+                      key={product.id}
+                      value={product.id}
+                      label={product.name}
                     >
-                      <span style={{ flex: 2, textAlign: 'left' }}>
-                        {product.name}
-                      </span>
-                      <span style={{ flex: 1, textAlign: 'center' }}>
-                        {Number(stockQuantity).toLocaleString('id-ID')}{' '}
-                      </span>
-                      <span style={{ flex: 1, textAlign: 'center' }}>
-                        {Number(product.price).toLocaleString('id-ID', {
-                          minimumFractionDigits: 0,
-                        })}{' '}
-                      </span>
-                      {/* 
+                      {product.name}
+                    </Select.Option>
+                  ))}
+              </Select>
+            </Col>
+          </Row>
+        </div>
+        <Form.Item style={{ paddingTop: '0px' }}>
+          <DateRange
+            onChange={(dates) => {
+              setSelectedDates(dates)
+            }}
+            onDifferenceChange={(diff) => {
+              setSelectedDifference(diff)
+            }}
+            onSave={handleDateRangeSave}
+          />
+        </Form.Item>
+        <div>
+          <Button
+            type="primary"
+            onClick={handleOkClick}
+            style={{ marginRight: '20px', width: '120px' }}
+          >
+            Pilih Barang
+          </Button>
+          <Select
+            mode="multiple"
+            placeholder="Pilih Barang"
+            style={{ width: '100%', marginTop: '10px' }}
+            optionFilterProp="items"
+            filterOption={false}
+            onChange={handleProductChange}
+            value={selectedFinanceAccountIds}
+            showSearch
+            onSearch={handleSearch}
+            open={dropdownVisible}
+            onDropdownVisibleChange={(open) => setDropdownVisible(open)}
+            dropdownRender={(menu) => (
+              <div style={{ minWidth: '800px', padding: '8px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontWeight: 'bold',
+                    padding: '8px',
+                    borderBottom: '1px solid #e8e8e8',
+                    backgroundColor: '#f5f5f5',
+                  }}
+                >
+                  <span style={{ flex: 2, textAlign: 'left' }}>
+                    Nama Barang
+                  </span>
+                  <span style={{ flex: 1, textAlign: 'center' }}>Qty</span>
+                  <span style={{ flex: 1, textAlign: 'center' }}>Price</span>
+                  {/* <span style={{ flex: 1, textAlign: 'center' }}>Satuan</span> */}
+
+                  {discountRates.map((rate) => (
+                    <span
+                      key={rate.label}
+                      style={{ flex: 1, textAlign: 'center' }}
+                    >
+                      {rate.label}
+                    </span>
+                  ))}
+                </div>
+                <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                  {menu}
+                </div>
+              </div>
+            )}
+            tagRender={customDisplayRender as any}
+          >
+            {Array.isArray(barangs) &&
+              barangs
+                .filter((item) =>
+                  item.name.toLowerCase().includes(searchValue.toLowerCase())
+                )
+                .map((product) => {
+                  const stockQuantity =
+                    warehouseStock.find((stock: any) => stock.id === product.id)
+                      ?.stock || 0
+                  if (stockQuantity === 0) return null
+
+                  return (
+                    <Select.Option
+                      key={product.id}
+                      value={product.id}
+                      label={product.id}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '8px',
+                          borderBottom: '1px solid #e8e8e8',
+                        }}
+                      >
+                        <span style={{ flex: 2, textAlign: 'left' }}>
+                          {product.name}
+                        </span>
+                        <span style={{ flex: 1, textAlign: 'center' }}>
+                          {Number(stockQuantity).toLocaleString('id-ID')}{' '}
+                        </span>
+                        <span style={{ flex: 1, textAlign: 'center' }}>
+                          {Number(product.price).toLocaleString('id-ID', {
+                            minimumFractionDigits: 0,
+                          })}{' '}
+                        </span>
+                        {/* 
                       <span style={{ flex: 1, textAlign: 'center' }}>
                         {product.unit?.name}
                       </span> */}
 
-                      {discountRates.map((rate) => {
-                        const discountedPrice = (
-                          product.price -
-                          (product.price * rate.percentage) / 100
-                        ).toFixed(2)
-                        const formattedPrice = Number(
-                          discountedPrice
-                        ).toLocaleString('id-ID', { minimumFractionDigits: 0 })
+                        {discountRates.map((rate) => {
+                          const discountedPrice = (
+                            product.price -
+                            (product.price * rate.percentage) / 100
+                          ).toFixed(2)
+                          const formattedPrice = Number(
+                            discountedPrice
+                          ).toLocaleString('id-ID', {
+                            minimumFractionDigits: 0,
+                          })
 
-                        return (
-                          <span
-                            key={rate.label}
-                            onClick={() =>
-                              handlePriceClick(rate.label, product)
-                            }
-                            style={{
-                              flex: 1,
-                              textAlign: 'center',
-                              backgroundColor:
-                                selectedPrices[product.id] === rate.label
-                                  ? '#AF8700'
-                                  : 'transparent',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            {formattedPrice}{' '}
-                          </span>
-                        )
-                      })}
-                    </div>
-                  </Select.Option>
-                )
-              })}
-        </Select>
+                          return (
+                            <span
+                              key={rate.label}
+                              onClick={() =>
+                                handlePriceClick(rate.label, product)
+                              }
+                              style={{
+                                flex: 1,
+                                textAlign: 'center',
+                                backgroundColor:
+                                  selectedPrices[product.id] === rate.label
+                                    ? '#AF8700'
+                                    : 'transparent',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {formattedPrice}{' '}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    </Select.Option>
+                  )
+                })}
+          </Select>
 
-        {/* <div>
+          {/* <div>
           {warehouseStock.length > 0 ? (
             warehouseStock.map((item) => (
               <div key={item.id}>
@@ -1091,180 +1114,181 @@ const StockSelectorTable = () => {
             <p>No stock data available</p>
           )}
         </div> */}
-        <Table
-          dataSource={dataSource}
-          columns={columns}
-          rowKey="finance_account_id"
-          style={{ marginTop: '20px' }}
-        />
+          <Table
+            dataSource={dataSource}
+            columns={columns}
+            rowKey="finance_account_id"
+            style={{ marginTop: '20px', marginBottom: '20px' }}
+            pagination={false}
+          />
 
-        <Form style={{ paddingBottom: '0px' }} form={paymentForm}>
-          <Row gutter={16} style={{ marginBottom: '10px' }}>
-            <Col span={12}>
-              <span
-                style={{
-                  ...labelStyle,
-                  fontSize: '16px',
-                  fontFamily: 'Times',
-                }}
+          <Form
+            style={{
+              paddingBottom: '0px',
+              justifyItems: 'right',
+              border: '1px',
+            }}
+            form={paymentForm}
+          >
+            <Row gutter={16} style={{ marginBottom: '10px' }}>
+              <Col span={12}>
+                <span
+                  style={{
+                    ...labelStyle,
+                    fontSize: '16px',
+                    fontFamily: 'Times',
+                  }}
+                >
+                  Total
+                </span>
+                <span
+                  style={{
+                    ...labelColonStyle,
+                    fontSize: '16px',
+                    fontFamily: 'Times',
+                  }}
+                >
+                  :
+                </span>
+                <Input
+                  style={{
+                    width: '70%',
+                    textAlign: 'right',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    fontFamily: 'Times', // Mengganti font
+                  }}
+                  value={formatRupiah(totalSubtotal)}
+                  readOnly
+                />
+              </Col>
+            </Row>
+
+            <Row gutter={16} style={{ marginBottom: '10px' }}>
+              <Col span={12}>
+                <span
+                  style={{
+                    ...labelStyle,
+                    fontSize: '16px',
+                    fontFamily: 'Times',
+                    fontWeight: 'bold',
+                    cursor: 'pointer', // Make cursor pointer for interactivity
+                  }}
+                  onClick={handleSetAmountPaid} // Click event only on this span
+                >
+                  Jumlah Bayar
+                </span>
+                <span
+                  style={{
+                    ...labelColonStyle,
+                    fontSize: '16px',
+                    fontFamily: 'Times',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  :
+                </span>
+
+                <NumericFormat
+                  placeholder="Nilai Pembayaran"
+                  value={amountPaid}
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  decimalScale={2}
+                  allowNegative={false}
+                  onValueChange={(values) => {
+                    const { floatValue } = values
+                    setAmountPaid(floatValue || 0)
+                  }}
+                  customInput={Input}
+                  max={totalSubtotal}
+                  style={{
+                    width: '70%',
+                    textAlign: 'right',
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    fontFamily: 'Times', // Mengganti font
+                  }}
+                />
+              </Col>
+            </Row>
+
+            <Row gutter={16} style={{ marginBottom: '10px' }}>
+              <Col span={12}>
+                <span
+                  style={{
+                    ...labelStyle,
+                    fontSize: '16px',
+
+                    fontFamily: 'Times',
+                  }}
+                >
+                  Sisa Tagihan
+                </span>
+                <span
+                  style={{
+                    ...labelColonStyle,
+                    fontSize: '16px',
+
+                    fontFamily: 'Times',
+                  }}
+                >
+                  :
+                </span>
+                <Input
+                  value={formatRupiah(piutang)}
+                  style={{
+                    width: '70%',
+                    textAlign: 'right',
+                    fontSize: '16px',
+
+                    fontFamily: 'Courier New, monospace', // Mengganti font
+                  }}
+                />
+              </Col>
+            </Row>
+
+            <Row gutter={16} style={{ marginBottom: '10px' }}>
+              <Col span={12}>
+                <span style={labelStyle}>Pilih Bank</span>
+                <span style={labelColonStyle}>:</span>
+                <Select
+                  showSearch // Menampilkan kolom pencarian
+                  placeholder="Pilih bank"
+                  value={selectedBank as any}
+                  onChange={(value) => setSelectedBank(value)}
+                  style={{ width: '70%' }}
+                  optionFilterProp="children" // Melakukan pencarian berdasarkan teks yang ditampilkan
+                  filterOption={(input: any, option: any) =>
+                    option?.children
+                      ?.toString()
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {akunBanks?.map((e) => (
+                    <Select.Option key={e.id} value={e.name}>
+                      {e.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Col>
+            </Row>
+            <Row>
+              <Button
+                onClick={handleSave}
+                type="primary"
+                style={{ marginTop: '10px', width: '45%' }}
+                // disabled={limitizeTrans}
+                disabled={isSaveDisabled} // Tombol dinonaktifkan jika salah satu masih kosong
               >
-                Total
-              </span>
-              <span
-                style={{
-                  ...labelColonStyle,
-                  fontSize: '16px',
-                  fontFamily: 'Times',
-                }}
-              >
-                :
-              </span>
-              <Input
-                style={{
-                  width: '70%',
-                  textAlign: 'right',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  fontFamily: 'Times', // Mengganti font
-                }}
-                value={formatRupiah(totalSubtotal)}
-                readOnly
-              />
-            </Col>
-          </Row>
-
-          <Row gutter={16} style={{ marginBottom: '10px' }}>
-            <Col
-              span={12}
-              onClick={handleSetAmountPaid} // Attach the click event to the entire column
-              style={{
-                cursor: 'pointer',
-                padding: '10px',
-                borderRadius: '4px',
-
-                transition: 'background-color 0.3s',
-              }}
-            >
-              <span
-                style={{
-                  ...labelStyle,
-                  fontSize: '16px',
-                  fontFamily: 'Times',
-                  fontWeight: 'bold',
-                }}
-              >
-                Jumlah Bayar
-              </span>
-              <span
-                style={{
-                  ...labelColonStyle,
-                  fontSize: '16px',
-                  fontFamily: 'Times',
-                  fontWeight: 'bold',
-                }}
-              >
-                :
-              </span>
-
-              <NumericFormat
-                placeholder="Nilai Pembayaran"
-                value={amountPaid}
-                thousandSeparator="."
-                decimalSeparator=","
-                decimalScale={2}
-                allowNegative={false}
-                onValueChange={(values) => {
-                  const { floatValue } = values
-                  setAmountPaid(floatValue || 0)
-                }}
-                customInput={Input}
-                max={totalSubtotal}
-                style={{
-                  width: '70%',
-                  textAlign: 'right',
-                  fontSize: '24px',
-                  fontWeight: 'bold',
-                  fontFamily: 'Times', // Mengganti font
-                }}
-              />
-            </Col>
-          </Row>
-
-          <Row gutter={16} style={{ marginBottom: '10px' }}>
-            <Col span={12}>
-              <span
-                style={{
-                  ...labelStyle,
-                  fontSize: '16px',
-
-                  fontFamily: 'Times',
-                }}
-              >
-                Sisa Tagihan
-              </span>
-              <span
-                style={{
-                  ...labelColonStyle,
-                  fontSize: '16px',
-
-                  fontFamily: 'Times',
-                }}
-              >
-                :
-              </span>
-              <Input
-                value={formatRupiah(piutang)}
-                style={{
-                  width: '70%',
-                  textAlign: 'right',
-                  fontSize: '16px',
-
-                  fontFamily: 'Courier New, monospace', // Mengganti font
-                }}
-              />
-            </Col>
-          </Row>
-
-          <Row gutter={16} style={{ marginBottom: '10px' }}>
-            <Col span={12}>
-              <span style={labelStyle}>Pilih Bank</span>
-              <span style={labelColonStyle}>:</span>
-              <Select
-                showSearch // Menampilkan kolom pencarian
-                placeholder="Pilih bank"
-                value={selectedBank as any}
-                onChange={(value) => setSelectedBank(value)}
-                style={{ width: '70%' }}
-                optionFilterProp="children" // Melakukan pencarian berdasarkan teks yang ditampilkan
-                filterOption={(input: any, option: any) =>
-                  option?.children
-                    ?.toString()
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-              >
-                {akunBanks?.map((e) => (
-                  <Select.Option key={e.id} value={e.name}>
-                    {e.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Col>
-          </Row>
-          <Row>
-            <Button
-              onClick={handleSave}
-              type="primary"
-              style={{ marginTop: '10px', width: '45%' }}
-              // disabled={limitizeTrans}
-              disabled={isSaveDisabled} // Tombol dinonaktifkan jika salah satu masih kosong
-            >
-              SIMPAN
-            </Button>
-          </Row>
-        </Form>
+                Simpan
+              </Button>
+            </Row>
+          </Form>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

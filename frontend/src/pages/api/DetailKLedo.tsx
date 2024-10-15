@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   Table,
   Typography,
@@ -33,6 +33,7 @@ import Receipt from './printNota'
 import ReceiptJalan from './ReceiptJalan'
 import { useIdInvoice } from './takeSingleInvoice'
 import { useIdWarehouse } from './namaWarehouse'
+import { useGetContactsQuery } from '../../hooks/contactHooks'
 
 const { Title, Text } = Typography
 const { Option } = Select
@@ -44,6 +45,7 @@ const DetailKledo: React.FC = () => {
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
   )
+  const { data: contacts } = useGetContactsQuery()
 
   const { getIdAtInvoice } = useIdInvoice(ref_number || '')
 
@@ -53,7 +55,7 @@ const DetailKledo: React.FC = () => {
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
-  const contactName = getPosDetail?.contacts?.[0]?.name
+  // const contactName = getPosDetail?.contacts?.[0]?.name
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const tagName = getPosDetail?.tages?.[0]?.name
   const due = getPosDetail?.due ?? 0
@@ -79,7 +81,17 @@ const DetailKledo: React.FC = () => {
       alert('Jumlah bayar tidak boleh melebihi total tagihan')
     }
   }
+  const [contactName, setContactName] = useState<string>('Unknown Contact')
 
+  useEffect(() => {
+    if (allTransactions && contacts) {
+      const contactId = getPosDetail?.contacts?.[0]?.id
+      const contact = contacts.find((c: any) => c.id === contactId)
+      if (contact) {
+        setContactName(contact.name)
+      }
+    }
+  }, [allTransactions, contacts])
   const { idWarehouse } = useIdWarehouse()
 
   const [selectedBank, setSelectedBank] = useState<any | null>(null)

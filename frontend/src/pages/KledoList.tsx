@@ -112,7 +112,14 @@ const ListTransaksi: React.FC = () => {
   ]
 
   return (
-    <div>
+    <div
+      style={{
+        background: 'white',
+        padding: '20px',
+        marginBottom: '20px',
+        borderRadius: '10px',
+      }}
+    >
       <h1>Daftar Transaksi</h1>
       <Table
         dataSource={filteredData}
