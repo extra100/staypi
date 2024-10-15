@@ -39,6 +39,7 @@ import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
 import { useGetTagsQueryDb } from '../../hooks/tagHooks'
 import { AnyRecord } from 'dns'
 import { useGetAkunBanksQueryDb } from '../../hooks/akunBankHooks'
+import { DeleteOutlined } from '@ant-design/icons'
 
 const { Option } = Select
 const { Title, Text } = Typography
@@ -678,55 +679,22 @@ const StockSelectorTable = () => {
               return (
                 <Select.Option key={product.id} value={product.id}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ paddingRight: '16px' }}>{product.name}</span>
                     <Badge
                       count={stockQuantity}
                       overflowCount={Infinity}
                       style={{
-                        backgroundColor: '#AF8700',
-                        borderColor: '#AF8700',
+                        backgroundColor: '#52C41A',
+                        borderColor: '#52C41A',
                         color: 'white',
-                        marginRight: '8px',
+                        marginLeft: 'auto',
+                        marginRight: '50px',
                       }}
                     />
-                    <span style={{ paddingRight: '16px' }}>{product.name}</span>
                   </div>
                 </Select.Option>
               )
             })}
-          </Select>
-        </div>
-      ),
-    },
-    {
-      title: 'Satuan',
-      dataIndex: 'satuan',
-      key: 'satuan',
-    },
-    {
-      title: 'Harga',
-      dataIndex: 'price',
-      key: 'price',
-      render: (text: number, record: any) => (
-        <div style={{ textAlign: 'right' }}>
-          <div>{Math.floor(record.price).toLocaleString('id-ID')}</div>{' '}
-          <Select
-            value={record.selectedDiscount} // Gunakan value untuk memastikan sinkronisasi
-            style={{
-              width: '120px',
-              fontSize: '12px',
-              marginTop: '4px',
-              textAlign: 'right',
-            }}
-            onChange={(value) => handleDiscountChange(value, record)} // Panggil handleDiscountChange saat nilai diubah
-            bordered={false}
-          >
-            <Select.Option value="Retail">Retail</Select.Option>{' '}
-            {/* Opsi default untuk Retail */}
-            {discountRates.map((rate) => (
-              <Select.Option key={rate.label} value={rate.label}>
-                {rate.label}
-              </Select.Option>
-            ))}
           </Select>
         </div>
       ),
@@ -754,6 +722,46 @@ const StockSelectorTable = () => {
       ),
     },
     {
+      title: 'Satuan',
+      dataIndex: 'satuan',
+      key: 'satuan',
+    },
+    {
+      title: 'Harga',
+      dataIndex: 'price',
+      key: 'price',
+      render: (text: number, record: any) => (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <div style={{ textAlign: 'right' }}>
+            {Math.floor(record.price).toLocaleString('id-ID')}
+          </div>
+          <Select
+            value={record.selectedDiscount}
+            style={{
+              width: '120px',
+              fontSize: '12px',
+              marginLeft: '6px', // Tambahkan margin agar ada jarak antara harga dan select
+            }}
+            onChange={(value) => handleDiscountChange(value, record)}
+            bordered={false}
+          >
+            <Select.Option value="Retail">Retail</Select.Option>
+            {discountRates.map((rate) => (
+              <Select.Option key={rate.label} value={rate.label}>
+                {rate.label}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+      ),
+    },
+    {
       title: 'Subtotal',
       dataIndex: 'subtotal',
       key: 'subtotal',
@@ -765,16 +773,23 @@ const StockSelectorTable = () => {
     },
 
     {
-      title: 'Action',
+      title: '',
       key: 'action',
       render: (text: any, record: any) => (
-        <Button
-          type="primary"
-          danger
-          onClick={() => handleDelete(record.finance_account_id)}
-        >
-          Delete
-        </Button>
+        <div>
+          <DeleteOutlined
+            style={{
+              color: 'red',
+              border: '0.5px solid red',
+              padding: '4px',
+              fontSize: '16px',
+              lineHeight: '16px',
+              borderRadius: '4px',
+            }}
+            type="primary"
+            onClick={() => handleDelete(record.finance_account_id)}
+          />
+        </div>
       ),
     },
   ]
@@ -1085,7 +1100,7 @@ const StockSelectorTable = () => {
                                 textAlign: 'center',
                                 backgroundColor:
                                   selectedPrices[product.id] === rate.label
-                                    ? '#AF8700'
+                                    ? '#52C41A'
                                     : 'transparent',
                                 cursor: 'pointer',
                               }}
@@ -1136,7 +1151,6 @@ const StockSelectorTable = () => {
                   style={{
                     ...labelStyle,
                     fontSize: '16px',
-                    fontFamily: 'Times',
                   }}
                 >
                   Total
@@ -1145,7 +1159,6 @@ const StockSelectorTable = () => {
                   style={{
                     ...labelColonStyle,
                     fontSize: '16px',
-                    fontFamily: 'Times',
                   }}
                 >
                   :
@@ -1156,7 +1169,6 @@ const StockSelectorTable = () => {
                     textAlign: 'right',
                     fontSize: '16px',
                     fontWeight: 'bold',
-                    fontFamily: 'Times', // Mengganti font
                   }}
                   value={formatRupiah(totalSubtotal)}
                   readOnly
@@ -1170,8 +1182,7 @@ const StockSelectorTable = () => {
                   style={{
                     ...labelStyle,
                     fontSize: '16px',
-                    fontFamily: 'Times',
-                    fontWeight: 'bold',
+
                     cursor: 'pointer', // Make cursor pointer for interactivity
                   }}
                   onClick={handleSetAmountPaid} // Click event only on this span
@@ -1182,8 +1193,6 @@ const StockSelectorTable = () => {
                   style={{
                     ...labelColonStyle,
                     fontSize: '16px',
-                    fontFamily: 'Times',
-                    fontWeight: 'bold',
                   }}
                 >
                   :
@@ -1207,7 +1216,7 @@ const StockSelectorTable = () => {
                     textAlign: 'right',
                     fontSize: '24px',
                     fontWeight: 'bold',
-                    fontFamily: 'Times', // Mengganti font
+                    color: '#007BFF',
                   }}
                 />
               </Col>
@@ -1219,8 +1228,6 @@ const StockSelectorTable = () => {
                   style={{
                     ...labelStyle,
                     fontSize: '16px',
-
-                    fontFamily: 'Times',
                   }}
                 >
                   Sisa Tagihan
@@ -1229,8 +1236,6 @@ const StockSelectorTable = () => {
                   style={{
                     ...labelColonStyle,
                     fontSize: '16px',
-
-                    fontFamily: 'Times',
                   }}
                 >
                   :
@@ -1241,8 +1246,6 @@ const StockSelectorTable = () => {
                     width: '70%',
                     textAlign: 'right',
                     fontSize: '16px',
-
-                    fontFamily: 'Courier New, monospace', // Mengganti font
                   }}
                 />
               </Col>
