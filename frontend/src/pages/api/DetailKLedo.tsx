@@ -34,6 +34,7 @@ import ReceiptJalan from './ReceiptJalan'
 import { useIdInvoice } from './takeSingleInvoice'
 import { useIdWarehouse } from './namaWarehouse'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
+import { useGetAkunBanksQueryDb } from '../../hooks/akunBankHooks'
 
 const { Title, Text } = Typography
 const { Option } = Select
@@ -46,6 +47,7 @@ const DetailKledo: React.FC = () => {
     ref_number as string
   )
   const { data: contacts } = useGetContactsQuery()
+  const { data: akunBanks } = useGetAkunBanksQueryDb()
 
   const { getIdAtInvoice } = useIdInvoice(ref_number || '')
 
@@ -201,6 +203,16 @@ const DetailKledo: React.FC = () => {
     content: () => printSuratJalan.current,
   })
 
+  const akunBank = useGetAkunBanksQueryDb()
+
+  const tele = akunBank?.data
+
+  const matchingTele = tele?.find((item) => {
+    const nameParts = item.name.split('_')
+    return nameParts[1] === gudangName
+  })
+  const matchingName = matchingTele?.name
+  console.log({ matchingName })
   const columns = [
     {
       title: 'No',
@@ -471,12 +483,20 @@ const DetailKledo: React.FC = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Select
+                showSearch // Menampilkan kolom pencarian
                 placeholder="Pilih bank"
-                value={selectedBank as any}
+                value={matchingName as any}
                 onChange={(value) => setSelectedBank(value)}
                 style={{ width: '100%' }}
+                optionFilterProp="children"
+                filterOption={(input: any, option: any) =>
+                  option?.children
+                    ?.toString()
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
               >
-                {fiAc?.children?.map((e) => (
+                {akunBanks?.map((e) => (
                   <Select.Option key={e.id} value={e.name}>
                     {e.name}
                   </Select.Option>

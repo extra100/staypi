@@ -78,6 +78,78 @@ const StockSelectorTable = () => {
 
   const { saveInvoiceData } = SaveApi()
   //
+
+  const [warehouseName, setWarehouseName] = useState<string | null>(null)
+  const getWarehouseName = () => {
+    if (!gudangdb || !selectedWarehouseId) return null
+
+    const selectedWarehouse = gudangdb.find(
+      (warehouse: { id: number; name: string }) =>
+        warehouse.id === Number(selectedWarehouseId)
+    )
+    return selectedWarehouse ? selectedWarehouse.name : null
+  }
+
+  useEffect(() => {
+    const name = getWarehouseName()
+    setWarehouseName(name)
+    if (name) {
+    }
+  }, [gudangdb, selectedWarehouseId])
+
+  const [tagName, setTagName] = useState<string[] | null>(null)
+  console.log({ tagName })
+  const [bankAccountName, setBankAccountName] = useState<string | null>(null)
+  const [bankAccountId, setBankAccountId] = useState<string | null>(null)
+  const getTagName = () => {
+    if (!tagDb || !warehouseName) return null
+
+    const matchingTags = tagDb.filter(
+      (tag: { name: string }) => tag.name === warehouseName
+    )
+
+    return matchingTags.length > 0 ? matchingTags.map((tag) => tag.name) : null
+  }
+  useEffect(() => {
+    const names = getTagName()
+    setTagName(names)
+  }, [warehouseName, tagDb])
+
+  const tagId = tagName
+    ? tagDb?.filter((tag) => tagName.includes(tag.name)).map((tag) => tag.id)
+    : null
+  console.log({ tagId })
+
+  const getBankAccountName = () => {
+    if (!akunBanks || !warehouseName) return null
+
+    const matchingBankAccount = akunBanks.find((bank: { name: string }) => {
+      const parts = bank.name.split('_')
+      return parts[1] === warehouseName
+    })
+    return matchingBankAccount ? matchingBankAccount.name : null
+  }
+  useEffect(() => {
+    const name = getBankAccountName()
+    setBankAccountName(name)
+  }, [warehouseName, akunBanks])
+
+  const getBankAccountId = () => {
+    if (!akunBanks || !warehouseName) return null
+
+    const matchingBankAccount = akunBanks.find(
+      (bank: { name: any; id: any }) => {
+        const parts = bank.name.split('_')
+        return parts[1] === warehouseName
+      }
+    )
+    return matchingBankAccount ? matchingBankAccount.id : null
+  }
+
+  useEffect(() => {
+    const id = getBankAccountId()
+    setBankAccountId(id as any)
+  }, [warehouseName, akunBanks])
   const addPosMutation = useAddTransactionMutation()
 
   const [productQuantities, setProductQuantities] = useState<{
@@ -420,7 +492,7 @@ const StockSelectorTable = () => {
   const [paymentForm] = Form.useForm()
 
   const [selectTag, setSelectag] = useState<any[]>([]) // Inisialisasi sebagai array kosong
-
+  console.log({ selectTag })
   const handleTag = (value: any[]) => {
     setSelectag(value) // Value di sini berupa array karena mode multiple
   }
@@ -537,7 +609,7 @@ const StockSelectorTable = () => {
 
   //   saveToApiNextPayment(invoiceData)
   // }
-  const isSaveDisabled = !selectedContact || !selectedBank
+  const isSaveDisabled = !selectedContact || !bankAccountId
 
   const handleSetAmountPaid = () => {
     setAmountPaid(totalSubtotal)
@@ -605,8 +677,10 @@ const StockSelectorTable = () => {
       })),
       witholdings: [
         {
-          witholding_account_id: accountId,
-          name: selectedBank,
+          witholding_account_id: accountId || bankAccountId,
+
+          name: selectedBank || bankAccountName,
+
           down_payment: amountPaid || 0,
           witholding_percent: 0,
           witholding_amount: 0,
@@ -626,22 +700,23 @@ const StockSelectorTable = () => {
       ],
       // ...
       tages: saveIdTags.map((tag) => ({
-        id: tag?.id,
-        name: tag?.name,
+        id: tag?.id || tagId,
+        name: tag?.name || tagName,
       })),
       due: piutang,
       down_payment: amountPaid || 0,
       down_payment_bank_account_id: accountId,
-      witholding_account_id: accountId,
+      witholding_account_id: accountId || bankAccountId,
+
       message: catatan,
-      tags: selectTag,
+      tags: selectTag || tagId,
 
       witholding_amount: 0,
       witholding_percent: 0,
       column_name: '',
     }
 
-    // saveInvoiceData(invoiceData)
+    saveInvoiceData(invoiceData)
     addPosMutation.mutate(invoiceData as any)
     navigate('/listkledo')
   }
@@ -953,7 +1028,7 @@ const StockSelectorTable = () => {
                     .includes(input.toLowerCase())
                 }
                 onChange={handleTag}
-                value={selectTag} // pastikan selectTag digunakan di sini
+                value={selectTag}
               >
                 {Array.isArray(tagDb) &&
                   tagDb.map((product: any) => (
@@ -1258,7 +1333,7 @@ const StockSelectorTable = () => {
                 <Select
                   showSearch // Menampilkan kolom pencarian
                   placeholder="Pilih bank"
-                  value={selectedBank as any}
+                  value={bankAccountName || selectedBank}
                   onChange={(value) => setSelectedBank(value)}
                   style={{ width: '70%' }}
                   optionFilterProp="children" // Melakukan pencarian berdasarkan teks yang ditampilkan

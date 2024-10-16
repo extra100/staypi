@@ -48,7 +48,6 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
   )
   const alamatPelanggan = getPelangganDetil?.address ?? 0
   const telponPelanggan = getPelangganDetil?.phone ?? 0
-  console.log({ alamatPelanggan })
 
   //
   const { data: barangs } = useGetBarangByIdQuery(name as unknown)
