@@ -29,6 +29,11 @@
     box-sizing: border-box;
   }
 }
+@media print {
+  .hide-print {
+    display: none;
+  }
+}
 
 .overlay {
   display: none;
