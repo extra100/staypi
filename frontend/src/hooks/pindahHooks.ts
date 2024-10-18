@@ -36,3 +36,25 @@ export const useGetWarehouseTransferByRefQuery = (ref_number: string) => {
     }
   )
 }
+export const useUpdateWarehouseTransferMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation<
+    WarehouseTransfer,
+    Error,
+    { ref_number: string; updatedData: Partial<WarehouseTransfer> }
+  >(
+    async ({ ref_number, updatedData }) => {
+      const response = await apiClient.put<WarehouseTransfer>(
+        `/api/pindah/${ref_number}`,
+        updatedData
+      )
+      return response.data
+    },
+    {
+      onSuccess: (data, { ref_number }) => {
+        queryClient.invalidateQueries(['pindah', ref_number])
+      },
+    }
+  )
+}

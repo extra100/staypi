@@ -49,6 +49,7 @@ const StockSelectorTable = () => {
   const navigate = useNavigate()
 
   const { dataStokBarang, fetchStokBarang } = useStokBarang()
+  console.log({ dataStokBarang })
 
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
@@ -98,9 +99,11 @@ const StockSelectorTable = () => {
   }, [gudangdb, selectedWarehouseId])
 
   const [tagName, setTagName] = useState<string[] | null>(null)
-  console.log({ tagName })
+
   const [bankAccountName, setBankAccountName] = useState<string | null>(null)
+
   const [bankAccountId, setBankAccountId] = useState<string | null>(null)
+
   const getTagName = () => {
     if (!tagDb || !warehouseName) return null
 
@@ -118,7 +121,6 @@ const StockSelectorTable = () => {
   const tagId = tagName
     ? tagDb?.filter((tag) => tagName.includes(tag.name)).map((tag) => tag.id)
     : null
-  console.log({ tagId })
 
   const getBankAccountName = () => {
     if (!akunBanks || !warehouseName) return null
@@ -174,7 +176,8 @@ const StockSelectorTable = () => {
       })
     }
   }, [selectedFinanceAccountIds, selectedWarehouseId])
-
+  console.log({ selectedFinanceAccountIds })
+  console.log({ selectedWarehouseId })
   useEffect(() => {
     if (warehouseStock) {
       setProductQuantities((prevQuantities) => {
@@ -280,12 +283,10 @@ const StockSelectorTable = () => {
   const handleDiscountChange = (value: string, record: any) => {
     const selectedDiscount = discountRates.find((rate) => rate.label === value)
 
-    // Ambil harga retail atau basePrice (jika sebelumnya sudah tersimpan)
     const basePrice =
       selectedProductPrices[record.finance_account_id] || record.basePrice
 
     if (selectedDiscount) {
-      // Jika diskon ditemukan, hitung harga diskon
       const newPrice = calculateDiscount(basePrice, selectedDiscount.percentage)
       const gapPrice = Number(basePrice) - Number(newPrice)
       const gapPriceTotal = gapPrice * record.qty
@@ -297,27 +298,26 @@ const StockSelectorTable = () => {
                 ...item,
                 price: Number(newPrice),
                 subtotal: calculateSubtotal(newPrice, item.qty),
-                selectedDiscountValue: selectedDiscount.percentage, // Persentase diskon
-                selectedDiscount: selectedDiscount.label, // Label diskon yang dipilih
-                gapPrice: gapPrice, // Selisih antara harga asli dan harga diskon
-                gapPriceTotal: gapPriceTotal, // Selisih dikalikan qty
+                selectedDiscountValue: selectedDiscount.percentage,
+                selectedDiscount: selectedDiscount.label,
+                gapPrice: gapPrice,
+                gapPriceTotal: gapPriceTotal,
               }
             : item
         )
       )
     } else {
-      // Jika tidak ada diskon (misal Retail dipilih), kembalikan ke harga asli
       setDataSource((prev) =>
         prev.map((item: any) =>
           item.finance_account_id === record.finance_account_id
             ? {
                 ...item,
-                price: Number(basePrice), // Harga kembali ke retail
-                subtotal: calculateSubtotal(basePrice, item.qty), // Subtotal tanpa diskon
-                selectedDiscountValue: 0, // Tidak ada diskon
-                selectedDiscount: 'Retail', // Set label ke Retail
-                gapPrice: 0, // Tidak ada gap
-                gapPriceTotal: 0, // Tidak ada gap total
+                price: Number(basePrice),
+                subtotal: calculateSubtotal(basePrice, item.qty),
+                selectedDiscountValue: 0,
+                selectedDiscount: 'Retail',
+                gapPrice: 0,
+                gapPriceTotal: 0,
               }
             : item
         )
@@ -386,7 +386,6 @@ const StockSelectorTable = () => {
   const handleOkClick = () => {
     setDropdownVisible(false)
 
-    // Filter barang-barang yang dipilih
     const selectedItems = barangs!.filter((item: any) =>
       selectedFinanceAccountIds.includes(item.id)
     )
@@ -400,41 +399,34 @@ const StockSelectorTable = () => {
             )
         )
         .map((item) => {
-          // Hitung harga retail dengan diskon 10% secara default
           const retailPrice = item.price - (item.price * retailDiscount) / 100
 
           return {
             finance_account_id: item.id,
             finance_account_name: item.name,
-            basePrice: item.price, // Harga dasar
+            basePrice: item.price,
 
-            // Jika ada diskon yang sudah diterapkan, gunakan harga dengan diskon. Jika tidak, gunakan harga retail.
             price: Number(discountedPrices[item.id]) || retailPrice,
 
-            qty: 1, // Default quantity 1
+            qty: 1,
 
-            // Jika tidak ada diskon yang dipilih, gunakan 'Retail 10%' sebagai default
             selectedDiscount: selectedPrices[item.id] || 'Retail 10%',
 
-            // Jika ada diskon yang dipilih, gunakan nilai diskon. Jika tidak, gunakan diskon retail (10%)
             selectedDiscountValue: selectedDiscounts[item.id] || retailDiscount,
 
-            // Jika ada selisih harga (gap), simpan nilai tersebut. Jika tidak, biarkan kosong
             gapPrice:
               priceDifferences[item.id] ||
               (item.price - retailPrice).toFixed(2),
 
-            // Subtotal = Harga setelah diskon dikali qty, default menggunakan retail price jika tidak ada diskon
             subtotal: Number(discountedPrices[item.id]) || retailPrice,
 
-            satuan: item.unit?.name, // Nama satuan produk
+            satuan: item.unit?.name,
           }
         })
 
       return [...prev, ...newItems]
     })
 
-    // Set ulang finance account IDs
     setSelectedFinanceAccountIds(selectedFinanceAccountIds.map(String))
   }
 
@@ -453,11 +445,11 @@ const StockSelectorTable = () => {
         item.finance_account_id === record.finance_account_id
           ? {
               ...item,
-              qty: value, // Update the quantity
-              price: newPrice, // Update the price
-              subtotal: calculateSubtotal(newPrice, value), // Update subtotal with new price and quantity
-              gapPrice: gapPrice, // Difference between base price and discounted price
-              gapPriceTotal: gapPriceTotal, // Multiply gapPrice by new quantity
+              qty: value,
+              price: newPrice,
+              subtotal: calculateSubtotal(newPrice, value),
+              gapPrice: gapPrice,
+              gapPriceTotal: gapPriceTotal,
             }
           : item
       )
@@ -487,17 +479,15 @@ const StockSelectorTable = () => {
     setSelectedDifference(difference)
   }
 
-  // const { idDataTag } = useIdNamaTag()
-
   const [paymentForm] = Form.useForm()
 
-  const [selectTag, setSelectag] = useState<any[]>([]) // Inisialisasi sebagai array kosong
-  console.log({ selectTag })
+  const [selectTag, setSelectag] = useState<any[]>([])
+
   const handleTag = (value: any[]) => {
-    setSelectag(value) // Value di sini berupa array karena mode multiple
+    setSelectag(value)
   }
   const [selectedContact, setSelectedContact] = useState<number | null>(null)
-  console.log({ selectedContact })
+
   const handleContactChange = (value: number) => {
     setSelectedContact(value)
   }
@@ -553,9 +543,12 @@ const StockSelectorTable = () => {
 
   const { fiAc } = useFiac()
 
-  const [selectedBank, setSelectedBank] = useState<any | null>(null)
+  const [selectedBank, setSelectedBank] = useState<any | null>(bankAccountName)
 
   const [status, setStatus] = useState<number | undefined>()
+  useEffect(() => {
+    setSelectedBank(bankAccountName)
+  }, [bankAccountName])
 
   const evaluateStatus = () => {
     if (amountPaid === null || amountPaid === 0) {
@@ -587,35 +580,15 @@ const StockSelectorTable = () => {
   const stringInv = currentIdPos as any
 
   const [catatan, setCatatan] = useState('')
+  const [yangMana, setYangMana] = useState()
 
-  // const { saveNextPayment } = saveToApiNextPayment()
-
-  // const handlePembayaran = () => {
-  //   const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
-  //     map[warehouse.name] = warehouse.id
-  //     return map
-  //   }, {})
-  //   const accountId = accountMap[selectedBank as any]
-
-  //   const invoiceData = {
-  //     trans_date: formatDate(selectedDates[0]),
-  //     attachment: [],
-  //     amount: amountPaid || 0,
-  //     down_payment_bank_account_id: accountId,
-  //     bank_account_id: accountId,
-  //     business_tran_id: null,
-  //     memo: catatan,
-  //   }
-
-  //   saveToApiNextPayment(invoiceData)
-  // }
   const isSaveDisabled = !selectedContact || !bankAccountId
 
   const handleSetAmountPaid = () => {
     setAmountPaid(totalSubtotal)
   }
   const handleSave = () => {
-    if (isSaveDisabled) return // Jangan lanjut jika salah satu masih kosong
+    if (isSaveDisabled) return
 
     const saveTag = tagDb?.reduce((map: any, tag: any) => {
       map[tag.name] = tag.id
@@ -634,13 +607,13 @@ const StockSelectorTable = () => {
       return map
     }, {})
     const accountId = accountMap[selectedBank as any]
+    setYangMana(accountId)
 
     const saveNameContact = idContact.reduce((map: any, warehouse: any) => {
       map[warehouse.id] = warehouse.name
       return map
     }, {})
     const saveContactName = saveNameContact[selectedContact as any]
-    console.log({ saveContactName })
 
     const saveNamaGudang = idWarehouse.reduce((map: any, warehouse: any) => {
       map[warehouse.id] = warehouse.name
@@ -678,9 +651,7 @@ const StockSelectorTable = () => {
       witholdings: [
         {
           witholding_account_id: accountId || bankAccountId,
-
           name: selectedBank || bankAccountName,
-
           down_payment: amountPaid || 0,
           witholding_percent: 0,
           witholding_amount: 0,
@@ -705,7 +676,7 @@ const StockSelectorTable = () => {
       })),
       due: piutang,
       down_payment: amountPaid || 0,
-      down_payment_bank_account_id: accountId,
+      down_payment_bank_account_id: accountId || bankAccountId,
       witholding_account_id: accountId || bankAccountId,
 
       message: catatan,
@@ -785,10 +756,10 @@ const StockSelectorTable = () => {
             allowNegative={false}
             thousandSeparator="."
             decimalSeparator=","
-            decimalScale={0} // Bisa sesuaikan jika perlu angka desimal
+            decimalScale={0}
             onValueChange={(values) => {
               const { floatValue } = values
-              handleQtyChange(floatValue || 0, record) // Pastikan handleQtyChange menerima angka
+              handleQtyChange(floatValue || 0, record)
             }}
             customInput={Input}
             style={{ textAlign: 'left', width: '70px' }}
@@ -821,7 +792,7 @@ const StockSelectorTable = () => {
             style={{
               width: '120px',
               fontSize: '12px',
-              marginLeft: '6px', // Tambahkan margin agar ada jarak antara harga dan select
+              marginLeft: '6px',
             }}
             onChange={(value) => handleDiscountChange(value, record)}
             bordered={false}
@@ -941,7 +912,7 @@ const StockSelectorTable = () => {
                 placeholder="Warehouse"
                 showSearch
                 style={{ width: '70%' }}
-                optionFilterProp="label" // Mengacu ke label (teks yang ditampilkan)
+                optionFilterProp="label"
                 filterOption={(input: any, option: any) =>
                   option?.label
                     ?.toString()
@@ -1093,7 +1064,6 @@ const StockSelectorTable = () => {
                   </span>
                   <span style={{ flex: 1, textAlign: 'center' }}>Qty</span>
                   <span style={{ flex: 1, textAlign: 'center' }}>Price</span>
-                  {/* <span style={{ flex: 1, textAlign: 'center' }}>Satuan</span> */}
 
                   {discountRates.map((rate) => (
                     <span
@@ -1258,9 +1228,9 @@ const StockSelectorTable = () => {
                     ...labelStyle,
                     fontSize: '16px',
 
-                    cursor: 'pointer', // Make cursor pointer for interactivity
+                    cursor: 'pointer',
                   }}
-                  onClick={handleSetAmountPaid} // Click event only on this span
+                  onClick={handleSetAmountPaid}
                 >
                   Jumlah Bayar
                 </span>
@@ -1332,11 +1302,13 @@ const StockSelectorTable = () => {
                 <span style={labelColonStyle}>:</span>
                 <Select
                   showSearch // Menampilkan kolom pencarian
-                  placeholder="Pilih bank"
-                  value={bankAccountName || selectedBank}
+                  // placeholder="Pilih bank"
+                  //bangkok
+                  // value={bankAccountName || selectedBank}
+                  value={selectedBank}
                   onChange={(value) => setSelectedBank(value)}
                   style={{ width: '70%' }}
-                  optionFilterProp="children" // Melakukan pencarian berdasarkan teks yang ditampilkan
+                  optionFilterProp="children"
                   filterOption={(input: any, option: any) =>
                     option?.children
                       ?.toString()

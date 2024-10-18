@@ -20,11 +20,13 @@ import moment from 'moment'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useIdProduct } from './SingleProduct'
 import { useGetProductsQuery } from '../../hooks/productHooks'
+import { saveMutation } from './apiMutasi'
 
 const { Option } = Select
 
 const ProductStocksPage: React.FC = () => {
   const [productIdInput, setProductIdInput] = useState<string>('')
+  const { error, success, saveInvoiceMutasi } = saveMutation()
 
   const { idProduct } = useIdProduct(productIdInput)
   const navigate = useNavigate()
@@ -210,7 +212,7 @@ const ProductStocksPage: React.FC = () => {
       ),
     },
     {
-      title: 'Outlet',
+      title: 'Name Outlet',
       dataIndex: 'stok_terkini',
       key: 'stok_terkini',
       render: (_: any, record: any) => {
@@ -315,26 +317,30 @@ const ProductStocksPage: React.FC = () => {
     const transferData = {
       from_warehouse_id: warehouseDariId,
       to_warehouse_id: warehouseTujuanId,
-      from_warehouse_name: fromWarehouseName,
-      to_warehouse_name: toWarehouseName,
+      // from_warehouse_name: fromWarehouseName,
+      // to_warehouse_name: toWarehouseName,
 
-      trans_date: tanggal,
+      trans_date: '2024-10-17',
       ref_number: refNumber,
-      memo: values.referensi,
+      code: 1,
+      memo: null,
       items: dataSource.map((row) => ({
         product_id: row.id,
         product_name: row.name,
-        qty: row.transferQty,
+        qty: 0,
+        qty_minta: row.transferQty,
         before_qty_dari: qtyDari,
         before_qty_tujuan: qtyTujuan,
         unit_name: unitName,
       })),
     }
-
+    // saveInvoiceMutasi(transferData)
+    // addWarehouseTransfer(transferData as any)
+    navigate('/listpindah')
     try {
       await addWarehouseTransfer(transferData as any)
       message.success('Data transfer berhasil disimpan!')
-      navigate(`/listpindah`)
+      // navigate(`/listpindah`)
     } catch (error) {
       message.error('Terjadi kesalahan saat menyimpan data transfer')
       console.error('Error:', error)

@@ -56,5 +56,61 @@ warehouseTransferRouter.get(
     }
   })
 )
+warehouseTransferRouter.put(
+  '/:eid',
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      let warehouseTransfer = await WarehouseTransferModel.findOne({
+        ref_number: req.params.eid,
+      })
+
+      if (!warehouseTransfer) {
+        warehouseTransfer = await WarehouseTransferModel.findById(
+          req.params.eid
+        )
+      }
+
+      if (warehouseTransfer) {
+        const {
+          from_warehouse_id,
+          to_warehouse_id,
+          from_warehouse_name,
+          to_warehouse_name,
+          ref_number,
+          memo,
+          items,
+          attachment,
+          trans_date,
+        } = req.body
+
+        warehouseTransfer.from_warehouse_id =
+          from_warehouse_id || warehouseTransfer.from_warehouse_id
+        warehouseTransfer.to_warehouse_id =
+          to_warehouse_id || warehouseTransfer.to_warehouse_id
+        warehouseTransfer.from_warehouse_name =
+          from_warehouse_name || warehouseTransfer.from_warehouse_name
+        warehouseTransfer.to_warehouse_name =
+          to_warehouse_name || warehouseTransfer.to_warehouse_name
+        warehouseTransfer.ref_number =
+          ref_number || warehouseTransfer.ref_number
+        warehouseTransfer.memo = memo || warehouseTransfer.memo
+        warehouseTransfer.items = items || warehouseTransfer.items
+        warehouseTransfer.attachment =
+          attachment || warehouseTransfer.attachment
+        warehouseTransfer.trans_date =
+          trans_date || warehouseTransfer.trans_date
+
+        const updatedTransfer = await warehouseTransfer.save()
+
+        res.status(200).json(updatedTransfer)
+      } else {
+        res.status(404).json({ message: 'Warehouse transfer not found' })
+      }
+    } catch (error) {
+      console.error('Error updating warehouse transfer:', error)
+      res.status(500).json({ message: 'Server error' })
+    }
+  })
+)
 
 export default warehouseTransferRouter

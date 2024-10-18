@@ -14,6 +14,8 @@ const WarehouseTransferTable: React.FC = () => {
   }
 
   const { data: transfers } = useGetWarehouseTransfersQuery()
+  console.log({ transfers })
+
   const { idWarehouse } = useIdWarehouse()
   const navigate = useNavigate()
 
@@ -24,8 +26,7 @@ const WarehouseTransferTable: React.FC = () => {
     })
     return map
   }, [idWarehouse])
-
-  // Filter transfers and sort by createdAt in descending order
+  console.log({ warehouseMap })
   const dataSource = Array.isArray(transfers)
     ? transfers
         .filter(

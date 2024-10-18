@@ -16,10 +16,12 @@ import {
   Space,
   Divider,
   message,
+  Spin,
 } from 'antd'
 import {
   useAddTransactionMutation,
   useGetTransactionByIdQuery,
+  useUpdateTransactionMutation,
 } from '../../hooks/transactionHooks'
 import { Link, useParams } from 'react-router-dom'
 import { AiOutlinePrinter } from 'react-icons/ai'
@@ -35,13 +37,32 @@ import { useIdInvoice } from './takeSingleInvoice'
 import { useIdWarehouse } from './namaWarehouse'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
 import { useGetAkunBanksQueryDb } from '../../hooks/akunBankHooks'
+import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
+import { NumericFormat } from 'react-number-format'
 
+import type { Dayjs } from 'dayjs'
 const { Title, Text } = Typography
 const { Option } = Select
 
 const DetailKledo: React.FC = () => {
+  const [showButtons, setShowButtons] = useState(false)
+  const currentDate = dayjs()
+  const [startDate, setStartDate] = useState<Dayjs>(currentDate)
+  console.log({ startDate })
+  const handleStartDateChange = (date: Dayjs | null) => {
+    if (date) {
+      setStartDate(date)
+    }
+  }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowButtons(true)
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [])
   const { ref_number } = useParams<{ ref_number?: string }>()
-  const addPosMutation = useAddTransactionMutation()
+  const updatePosMutation = useUpdateTransactionMutation()
   //
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
@@ -53,18 +74,27 @@ const DetailKledo: React.FC = () => {
 
   const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
   const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
-  console.log({ refNumber })
+
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
   // const contactName = getPosDetail?.contacts?.[0]?.name
   const gudangName = getPosDetail?.warehouses?.[0]?.name
+  const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
+
   const tagName = getPosDetail?.tages?.[0]?.name
-  const due = getPosDetail?.due ?? 0
+
   const amount = getPosDetail?.amount ?? 0
   const witholdings = getPosDetail?.witholdings || []
   const items = getPosDetail?.items || []
+  const totalDownPayment = witholdings.reduce(
+    (sum: number, witholding: any) => {
+      return sum + (witholding.down_payment || 0)
+    },
+    0
+  )
 
+  const due = amount - totalDownPayment
   const totalDiscount = items.reduce((total: number, item: any) => {
     return total + (item.discount_amount || 0)
   }, 0)
@@ -73,7 +103,10 @@ const DetailKledo: React.FC = () => {
   const { fiAc } = useFiac()
 
   const [amountPaid, setAmountPaid] = useState<number | null>(null)
-  console.log({ amountPaid })
+  const formatNumber = (num: number) => {
+    return num.toLocaleString('en-US')
+  }
+
   const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value)
 
@@ -82,6 +115,9 @@ const DetailKledo: React.FC = () => {
     } else {
       alert('Jumlah bayar tidak boleh melebihi total tagihan')
     }
+  }
+  const handleSetAmountPaid = () => {
+    setAmountPaid(due)
   }
   const [contactName, setContactName] = useState<string>('Unknown Contact')
 
@@ -97,32 +133,8 @@ const DetailKledo: React.FC = () => {
   const { idWarehouse } = useIdWarehouse()
 
   const [selectedBank, setSelectedBank] = useState<any | null>(null)
+  console.log({ selectedBank })
 
-  const handleWarehouseChange = (value: number | string) => {
-    console.log('Selected Warehouse ID:', value)
-
-    const bangke = idWarehouse.reduce((map: any, warehouse: any) => {
-      map[warehouse.id] = warehouse.name
-      return map
-    }, {})
-
-    const namaBangke = bangke[value as any]
-
-    const findMatchingBank = (namaGudang: string) => {
-      return fiAc?.children?.find((bank) =>
-        bank.name.startsWith(`KAS PENJUALAN_${namaGudang}`)
-      )
-    }
-
-    const matchingBank = findMatchingBank(namaBangke)
-
-    if (matchingBank) {
-      setSelectedBank(matchingBank.name)
-      console.log('Matching Bank Found:', matchingBank.name)
-    } else {
-      console.log('No matching bank found.')
-    }
-  }
   const today = dayjs().format('DD-MM-YYYY')
   const { saveNextPayment } = saveToApiNextPayment()
   const handleFormSubmit = (values: any) => {
@@ -137,11 +149,11 @@ const DetailKledo: React.FC = () => {
       const invoiceData = {
         withholdings: [
           {
-            witholding_account_id: accountId,
-            name: selectedBank,
+            witholding_account_id: accountId || bankAccountId,
+            name: selectedBank || bankAccountName,
             down_payment: amountPaid || 0,
             witholding_percent: 0,
-            witholding_amount: 0,
+            witholding_amount: amountPaid || 0,
           },
         ],
       }
@@ -161,7 +173,7 @@ const DetailKledo: React.FC = () => {
           witholdings: updatedWithholdings,
         }
 
-        addPosMutation.mutate(updatedInvoice)
+        updatePosMutation.mutate(updatedInvoice)
       } else {
         console.error('Invoice with ref_number not found:', refNumber)
       }
@@ -172,10 +184,9 @@ const DetailKledo: React.FC = () => {
     const payload = {
       amount: amountPaid,
       attachment: [],
-      bank_account_id: accountId,
+      bank_account_id: accountId || bankAccountId,
       business_tran_id: invoiceId,
       witholding_amount: amountPaid,
-
       memo: values.catatan || null,
       trans_date: values.tanggalBayar.format('YYYY-MM-DD'),
       witholdings: [],
@@ -211,13 +222,69 @@ const DetailKledo: React.FC = () => {
     const nameParts = item.name.split('_')
     return nameParts[1] === gudangName
   })
+
+  const [bankAccountName, setBankAccountName] = useState<string | null>(null)
+  console.log({ bankAccountName })
+  const [bankAccountId, setBankAccountId] = useState<string | null>(null)
+
+  const [warehouseName, setWarehouseName] = useState<string | null>(null)
+  const { data: gudangdb } = useGetWarehousesQuery()
+
+  const getWarehouseName = () => {
+    if (!gudangdb || !gudangId) return null
+
+    const selectedWarehouse = gudangdb.find(
+      (warehouse: { id: number; name: string }) =>
+        warehouse.id === Number(gudangId)
+    )
+    return selectedWarehouse ? selectedWarehouse.name : null
+  }
+
+  useEffect(() => {
+    const name = getWarehouseName()
+    setWarehouseName(name)
+    if (name) {
+    }
+  }, [gudangdb, gudangId])
+  const getBankAccountName = () => {
+    if (!akunBanks || !warehouseName) return null
+
+    const matchingBankAccount = akunBanks.find((bank: { name: string }) => {
+      const parts = bank.name.split('_')
+      return parts[1] === warehouseName
+    })
+    return matchingBankAccount ? matchingBankAccount.name : null
+  }
+  useEffect(() => {
+    const name = getBankAccountName()
+    setBankAccountName(name)
+  }, [warehouseName, akunBanks])
+  const getBankAccountId = () => {
+    if (!akunBanks || !warehouseName) return null
+
+    const matchingBankAccount = akunBanks.find(
+      (bank: { name: any; id: any }) => {
+        const parts = bank.name.split('_')
+        return parts[1] === warehouseName
+      }
+    )
+    return matchingBankAccount ? matchingBankAccount.id : null
+  }
   const matchingName = matchingTele?.name
-  console.log({ matchingName })
+  useEffect(() => {
+    if (bankAccountName) {
+      setSelectedBank(bankAccountName)
+    }
+  }, [bankAccountName])
+  useEffect(() => {
+    const id = getBankAccountId()
+    setBankAccountId(id as any)
+  }, [warehouseName, akunBanks])
   const columns = [
     {
-      title: 'No',
+      title: 'Nosfsfs',
       key: 'no',
-      align: 'center', // Header rata tengah
+      align: 'center',
       render: (_: any, __: any, index: number) => (
         <div style={{ textAlign: 'center' }}>{index + 1}</div>
       ),
@@ -238,7 +305,7 @@ const DetailKledo: React.FC = () => {
       title: 'Qty',
       dataIndex: 'qty',
       key: 'qty',
-      align: 'center', // Header rata tengah
+      align: 'center',
       render: (qty: number) => (
         <div style={{ textAlign: 'center' }}>
           {qty !== undefined ? qty : '0'}
@@ -249,13 +316,13 @@ const DetailKledo: React.FC = () => {
       title: 'Satuan',
       key: 'unit_id',
       dataIndex: 'unit_id',
-      align: 'center', // Header rata tengah
+      align: 'center',
     },
     {
       title: 'Harga',
       dataIndex: 'price',
       key: 'price',
-      align: 'center', // Header rata tengah
+      align: 'center',
       render: (price: number) => (
         <div style={{ textAlign: 'right' }}>
           {price !== undefined ? `${price.toLocaleString()}` : 'Rp 0'}
@@ -266,7 +333,7 @@ const DetailKledo: React.FC = () => {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
-      align: 'center', // Header rata tengah
+      align: 'center',
       render: (amount: number) => (
         <div style={{ textAlign: 'right' }}>
           {amount !== undefined ? `${amount.toLocaleString()}` : 'Rp 0'}
@@ -293,23 +360,25 @@ const DetailKledo: React.FC = () => {
               )}
             </Col>
             <Col>
-              {/* <a href={`/printnota/${ref_number}`}>PRINT</a> */}
-              <div>
-                <button onClick={printNotaHandler}>Print Nota</button>
-                <div style={{ display: 'none' }}>
-                  {' '}
-                  <Receipt ref={printNota} />
-                </div>
-              </div>
-              <div>
-                <button onClick={printSuratJalanHandler}>
-                  Print Surat Jalan
-                </button>
-                <div style={{ display: 'none' }}>
-                  {' '}
-                  <ReceiptJalan ref={printSuratJalan} />
-                </div>
-              </div>
+              {showButtons && ( // Conditionally render the buttons after 2 seconds
+                <>
+                  <div>
+                    <button onClick={printNotaHandler}>Print Nota</button>
+                    <div style={{ display: 'none' }}>
+                      <Receipt ref={printNota} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <button onClick={printSuratJalanHandler}>
+                      Print Surat Jalan
+                    </button>
+                    <div style={{ display: 'none' }}>
+                      <ReceiptJalan ref={printSuratJalan} />
+                    </div>
+                  </div>
+                </>
+              )}
             </Col>
           </Row>
         }
@@ -332,6 +401,7 @@ const DetailKledo: React.FC = () => {
             <Title level={5}>{getPosDetail?.ref_number || []}</Title>
           </Col>
         </Row>
+
         <Row gutter={16}>
           <Col span={12}>
             <div style={{ marginBottom: '0px' }}>
@@ -387,7 +457,7 @@ const DetailKledo: React.FC = () => {
                 <Text strong>Sub Total</Text>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>{subTotal}</Text>
+                <Text strong>{formatNumber(subTotal)}</Text>
               </Col>
             </Row>
             <Row style={{ marginTop: '8px' }}>
@@ -395,7 +465,7 @@ const DetailKledo: React.FC = () => {
                 <Text strong>Total Diskon</Text>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>{totalDiscount}</Text>
+                <Text strong>{formatNumber(totalDiscount)}</Text>
               </Col>
             </Row>
             <Row style={{ marginTop: '8px' }}>
@@ -403,7 +473,7 @@ const DetailKledo: React.FC = () => {
                 <Text strong>Total setelah diskon</Text>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>{amount}</Text>
+                <Text strong>{formatNumber(amount)}</Text>
               </Col>
             </Row>
             <Row style={{ marginTop: '8px' }}>
@@ -411,7 +481,7 @@ const DetailKledo: React.FC = () => {
                 <Title level={4}>Total</Title>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Title level={4}>{amount}</Title>
+                <Title level={4}>{formatNumber(amount)}</Title>
               </Col>
             </Row>
             <Divider style={{ margin: '16px 0' }} />
@@ -422,7 +492,7 @@ const DetailKledo: React.FC = () => {
                     <Text strong>{witholding.name}</Text>
                   </Col>
                   <Col span={12} style={{ textAlign: 'right' }}>
-                    <Text strong>{getPosDetail?.down_payment || []}</Text>
+                    <Text strong>{formatNumber(witholding.down_payment)}</Text>
                   </Col>
                 </Row>
               ))}
@@ -438,7 +508,7 @@ const DetailKledo: React.FC = () => {
               <Col span={12} style={{ textAlign: 'right' }}>
                 <Text strong style={{ fontSize: '20px' }}>
                   {' '}
-                  {due}
+                  {formatNumber(due)}
                 </Text>
               </Col>
             </Row>
@@ -449,21 +519,49 @@ const DetailKledo: React.FC = () => {
         <Form layout="vertical" onFinish={handleFormSubmit}>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item
-                name="jumlahBayar"
-                label="Jumlah Bayar"
-                rules={[
-                  { required: true, message: 'Masukkan jumlah pembayaran' },
-                ]}
+              <span
+                style={{
+                  // ...labelStyle,
+                  fontSize: '16px',
+
+                  cursor: 'pointer',
+                }}
+                onClick={handleSetAmountPaid}
               >
-                <Input
-                  type="number"
-                  value={amountPaid as any}
-                  onChange={handleAmountPaidChange}
-                  max={due}
-                />
-              </Form.Item>
+                Jumlah Bayar
+              </span>
+              <span
+                style={{
+                  // ...labelColonStyle,
+                  fontSize: '16px',
+                }}
+              >
+                :
+              </span>
+
+              <NumericFormat
+                placeholder="Nilai Pembayaran"
+                value={amountPaid as any}
+                thousandSeparator="."
+                decimalSeparator=","
+                decimalScale={2}
+                allowNegative={false}
+                onValueChange={(values) => {
+                  const { floatValue } = values
+                  setAmountPaid(floatValue || 0)
+                }}
+                customInput={Input}
+                max={due}
+                style={{
+                  width: '100%',
+                  textAlign: 'right',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  color: '#007BFF',
+                }}
+              />
             </Col>
+
             <Col span={12}>
               <Form.Item
                 name="tanggalBayar"
@@ -474,7 +572,8 @@ const DetailKledo: React.FC = () => {
               >
                 <DatePicker
                   style={{ width: '100%' }}
-                  defaultValue={dayjs()}
+                  value={startDate}
+                  onChange={handleStartDateChange}
                   format="DD-MM-YYYY"
                 />
               </Form.Item>
@@ -485,7 +584,7 @@ const DetailKledo: React.FC = () => {
               <Select
                 showSearch // Menampilkan kolom pencarian
                 placeholder="Pilih bank"
-                value={matchingName as any}
+                value={selectedBank}
                 onChange={(value) => setSelectedBank(value)}
                 style={{ width: '100%' }}
                 optionFilterProp="children"

@@ -4,11 +4,14 @@ import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
 export class TransferItem {
   @prop({ required: true })
   public product_id!: number
+  @prop()
+  public code!: number
   @prop({ required: true })
   public product_name!: string
   @prop({ required: true })
   public qty!: number
-
+  @prop({ required: true })
+  public qty_minta!: number
   @prop({ required: true })
   public before_qty_dari!: number
   @prop({ required: true })
@@ -27,10 +30,10 @@ export class WarehouseTransfer {
   @prop({ required: true })
   public to_warehouse_id!: number
 
-  @prop({ required: true })
+  @prop()
   public from_warehouse_name!: string
 
-  @prop({ required: true })
+  @prop()
   public to_warehouse_name!: string
 
   @prop()

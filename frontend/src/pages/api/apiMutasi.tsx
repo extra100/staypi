@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { CLIENT_ID, CLIENT_SECRET, HOST } from '../../config'
 import TOKEN from '../../token'
 
-export function SaveApi() {
+export function saveMutation() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  const saveInvoiceData = async (invoiceData: any) => {
+  const saveInvoiceMutasi = async (invoiceData: any) => {
     setLoading(true)
     setError(null)
     setSuccess(false)
@@ -15,7 +15,7 @@ export function SaveApi() {
     console.log('Sending invoice data:', invoiceData)
 
     try {
-      const response = await fetch(`${HOST}/finance/invoices`, {
+      const response = await fetch(`${HOST}/finance/warehouses/transfers`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${TOKEN}`,
@@ -47,6 +47,6 @@ export function SaveApi() {
     loading,
     error,
     success,
-    saveInvoiceData,
+    saveInvoiceMutasi,
   }
 }

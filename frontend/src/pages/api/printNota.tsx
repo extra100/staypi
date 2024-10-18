@@ -29,6 +29,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
 
   // const contactName = getPosDetail?.contacts?.[0]?.name
   const gudangName = getPosDetail?.warehouses?.[0]?.name
+  console.log({ gudangName })
 
   const tglTransaksi = getPosDetail?.trans_date ?? 0
   const refNumber = getPosDetail?.ref_number ?? 0
@@ -36,10 +37,13 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const totalSemua = getPosDetail?.amount ?? 0
   const piutang = getPosDetail?.due ?? 0
   //
-  const { data: gudang } = useGetGudangByIdQuery(name as unknown)
+  const { data: gudang } = useGetWarehousesQuery()
+  console.log({ gudang })
   const getGudangDetail = gudang?.find(
     (gedung: any) => gedung.name === gudangName
   )
+  console.log({ getGudangDetail })
+
   const namaGudang = getGudangDetail?.name ?? 0
   const codeGudang = getGudangDetail?.code ?? 0
   const photoGudang = getGudangDetail?.photo ?? 0
@@ -126,7 +130,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <img
               src={photoGudang}
               alt="Gudang"
-              style={{ width: '100%', height: '100%' }}
+              style={{ width: '57%', height: '57%' }}
             />
           )}
         </Col>
