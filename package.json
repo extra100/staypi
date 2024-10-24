@@ -1,5 +1,5 @@
 {
-  "name": "sehat",
+  "name": "penjualan",
   "version": "1.0.0",
   "description": "## Lessons",
   "main": "index.js",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/extra100/sehat.git"
+    "url": "git+https://github.com/extra100/penjualan.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/extra100/sehat"
+    "url": "https://github.com/extra100/penjualan"
   },
-  "homepage": "https://github.com/extra100/sehat#readme",
+  "homepage": "https://github.com/extra100/penjualan#readme",
   "engines": {
     "node": "20.10.0"
   },
