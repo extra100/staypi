@@ -212,7 +212,7 @@ const WarehouseTransferDetail: React.FC = () => {
       },
     },
     {
-      title: 'Barang',
+      title: 'Item',
       dataIndex: 'product_name',
       key: 'product_name',
     },
