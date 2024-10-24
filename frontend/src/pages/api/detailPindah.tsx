@@ -46,7 +46,6 @@ const WarehouseTransferDetail: React.FC = () => {
       warehouseMap[warehouse.id] = warehouse.id
     })
   }
-
   const productMap: Record<number, string> = {}
   idaDataBarang.forEach((barang) => {
     productMap[barang.id] = barang.name
@@ -60,7 +59,25 @@ const WarehouseTransferDetail: React.FC = () => {
   const fromWarehouseCode = idWarehouseMonggo?.find(
     (warehouse) => warehouse.name === fromWarehouseId
   )?.code
+  //
+  if (idWarehouseMonggo && Array.isArray(idWarehouseMonggo)) {
+    idWarehouseMonggo.forEach((warehouse) => {
+      warehouseMap[warehouse.id] = warehouse.name
+    })
+  }
+  const productMapan: Record<number, string> = {}
+  idaDataBarang.forEach((barang) => {
+    productMap[barang.id] = barang.name
+  })
 
+  const fromWarehouseName =
+    warehouseMap[transfer.from_warehouse_id] || transfer.from_warehouse_name
+  const toWarehouseName =
+    warehouseMap[transfer.to_warehouse_id] || transfer.to_warehouse_name
+
+  const fromWarehouseCodes = idWarehouseMonggo?.find(
+    (warehouse) => warehouse.name === fromWarehouseId
+  )?.code
   const [title, setTitle] = useState('TRANSFER . . . ')
 
   useEffect(() => {
@@ -76,7 +93,7 @@ const WarehouseTransferDetail: React.FC = () => {
   const handleTransferQtyChange = (value: number, index: number) => {
     setTransferQty((prevTransferQty) => {
       const updatedTransferQty = [...prevTransferQty]
-      updatedTransferQty[index] = value // Mengupdate nilai pada index tertentu
+      updatedTransferQty[index] = value
       return updatedTransferQty
     })
   }
@@ -123,7 +140,7 @@ const WarehouseTransferDetail: React.FC = () => {
         product_name: item.product_name,
         qty_minta: item.qty_minta,
         unit_name: item.unit_name,
-        transferQty: 0, // Default value
+        transferQty: 0,
       }))
       setDataSource(initialDataSource)
     }
@@ -154,6 +171,7 @@ const WarehouseTransferDetail: React.FC = () => {
       })),
     }
     handlePrint()
+    saveInvoiceMutasi(transferData)
 
     try {
       message.success('Data transfer berhasil disimpan!')
@@ -195,8 +213,8 @@ const WarehouseTransferDetail: React.FC = () => {
     },
     {
       title: 'Barang',
-      dataIndex: 'product_id',
-      key: 'product_id',
+      dataIndex: 'product_name',
+      key: 'product_name',
     },
     {
       title: 'Qty',
@@ -224,6 +242,7 @@ const WarehouseTransferDetail: React.FC = () => {
     //     return <span>{`From: ${fromQty} | To: ${toQty}`}</span>
     //   },
     // },
+
     {
       title: 'Satuan',
       dataIndex: 'unit_name',
@@ -269,7 +288,7 @@ const WarehouseTransferDetail: React.FC = () => {
               <Col span={24}>
                 <Row>
                   <Col span={6}>
-                    <Text>Referensi</Text>
+                    <Text>Referensi dasfsg</Text>
                   </Col>
                   <Col span={12}>
                     <Text strong>: {transfer.ref_number}</Text>
@@ -287,7 +306,7 @@ const WarehouseTransferDetail: React.FC = () => {
                     <Text strong>: {transfer.trans_date}</Text>
                   </Col>
                   <Col span={6} style={{ textAlign: 'center' }}>
-                    <Text strong>{fromWarehouseId}</Text>
+                    <Text strong>{fromWarehouseName}</Text>
                   </Col>
                 </Row>
 
@@ -296,7 +315,7 @@ const WarehouseTransferDetail: React.FC = () => {
                     <Text>Alamat Peminta</Text>
                   </Col>
                   <Col span={12}>
-                    <Text italic>: {fromWarehouseCode || '-'}</Text>
+                    <Text italic>: {fromWarehouseCodes || '-'}</Text>
                   </Col>
 
                   <Col span={6} style={{ textAlign: 'center' }}>
@@ -312,7 +331,7 @@ const WarehouseTransferDetail: React.FC = () => {
                     <Text>: -</Text>
                   </Col>
                   <Col span={6} style={{ textAlign: 'center' }}>
-                    <Text strong>{toWarehouseId}</Text>
+                    <Text strong>{toWarehouseName}</Text>
                   </Col>
                 </Row>
               </Col>
