@@ -87,7 +87,7 @@ const BarangSold: React.FC = () => {
         dataSource={tableData} // Gunakan tableData sebagai sumber data tabel
         columns={columns}
         rowKey={(record) => `${record.finance_account_id}`} // Pastikan ini unik
-        pagination={true}
+        pagination={false}
       />
     </div>
   )

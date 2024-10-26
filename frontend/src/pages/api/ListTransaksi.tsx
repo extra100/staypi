@@ -70,7 +70,7 @@ const TransactionTable: React.FC = () => {
         contacts: transaction.contacts, // Contains contact details
         tags: transaction.tages, // Contains tag details
       }))}
-      pagination={{ pageSize: 10 }} // Optional pagination
+      pagination={false} // Optional pagination
     />
   )
 }
