@@ -1229,7 +1229,7 @@ const StockSelectorTable = () => {
           <Form
             style={{
               paddingBottom: '0px',
-              justifyItems: 'right',
+              // justifyItems: 'right',
               border: '1px',
             }}
             form={paymentForm}
