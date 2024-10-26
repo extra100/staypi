@@ -29,7 +29,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
 
   // const contactName = getPosDetail?.contacts?.[0]?.name
   const gudangName = getPosDetail?.warehouses?.[0]?.name
-  console.log({ gudangName })
+  // console.log({ gudangName })
 
   const tglTransaksi = getPosDetail?.trans_date ?? 0
   const refNumber = getPosDetail?.ref_number ?? 0
@@ -38,11 +38,11 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const piutang = getPosDetail?.due ?? 0
   //
   const { data: gudang } = useGetWarehousesQuery()
-  console.log({ gudang })
+  // console.log({ gudang })
   const getGudangDetail = gudang?.find(
     (gedung: any) => gedung.name === gudangName
   )
-  console.log({ getGudangDetail })
+  // console.log({ getGudangDetail })
 
   const namaGudang = getGudangDetail?.name ?? 0
   const codeGudang = getGudangDetail?.code ?? 0

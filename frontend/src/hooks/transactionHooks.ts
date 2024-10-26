@@ -46,51 +46,48 @@ export const useAddTransactionMutation = () => {
   )
 }
 
-// export const useUpdateTransactionMutation = () => {
-//   const queryClient = useQueryClient()
-
-//   return useMutation(
-//     (murahnye: Transaction) => {
-//       return apiClient
-//         .put<Transaction>(
-//           `/api/transactions/${murahnye.ref_number}`,
-//           murahnye
-//         )
-//         .then((response) => {
-//           return response.data
-//         })
-//     },
-//     {
-//       onSuccess: () => {
-//         queryClient.invalidateQueries(['transactions'])
-//       },
-//       onError: (error: any) => {
-//         console.error('Error updating transaction:', error)
-//       },
-//     }
-//   )
-// }
-
 export const useUpdateTransactionMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation(
-    async (updatedTransaction: Transaction) => {
-      const { ref_number, ...updatedData } = updatedTransaction
-
-      return apiClient.put<Transaction>(
-        `/api/transactions/${ref_number}`,
-        updatedData
-      )
+    (murahnye: Transaction) => {
+      return apiClient
+        .put<Transaction>(`/api/transactions/${murahnye.ref_number}`, murahnye)
+        .then((response) => {
+          return response.data
+        })
     },
     {
       onSuccess: () => {
-        // Invalidate queries to refetch the data after update
         queryClient.invalidateQueries(['transactions'])
+      },
+      onError: (error: any) => {
+        console.error('Error updating transaction:', error)
       },
     }
   )
 }
+
+// export const useUpdateTransactionMutation = () => {
+//   const queryClient = useQueryClient()
+
+//   return useMutation(
+//     async (updatedTransaction: Transaction) => {
+//       const { ref_number, ...updatedData } = updatedTransaction
+
+//       return apiClient.put<Transaction>(
+//         `/api/transactions/${ref_number}`,
+//         updatedData
+//       )
+//     },
+//     {
+//       onSuccess: () => {
+//         // Invalidate queries to refetch the data after update
+//         queryClient.invalidateQueries(['transactions'])
+//       },
+//     }
+//   )
+// }
 
 // export const useAddReturnMutation = () => {
 //   const queryClient = useQueryClient()

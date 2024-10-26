@@ -1,7 +1,7 @@
 export type Transaction = {
   trans_date: string
   jalur: string
-  _id: string
+  // _id: string
   unique_id: number
   due_date: string
   contact_id: number

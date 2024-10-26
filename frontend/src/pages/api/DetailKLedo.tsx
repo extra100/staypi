@@ -245,7 +245,8 @@ const DetailKledo: React.FC = () => {
       business_tran_id: invoiceId,
       witholding_amount: amountPaid,
       memo: values.catatan || null,
-      trans_date: values.tanggalBayar.format('YYYY-MM-DD'),
+      // trans_date: values.tanggalBayar.format('YYYY-MM-DD'),
+      trans_date: '2024-10-26',
       witholdings: [],
     }
 

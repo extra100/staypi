@@ -156,7 +156,7 @@ const WarehouseTransferDetail: React.FC = () => {
     const transferData = {
       from_warehouse_id: fromWarehouseId,
       to_warehouse_id: toWarehouseId,
-      trans_date: '2024-10-25',
+      trans_date: '2024-10-26',
       ref_number: validRefNumber,
       memo: '',
       code: 2,
@@ -172,8 +172,8 @@ const WarehouseTransferDetail: React.FC = () => {
         before_qty_tujuan: toQtyState[row.product_id] || 0,
       })),
     }
-    // handlePrint()
-    // saveInvoiceMutasi(transferData)
+    handlePrint()
+    saveInvoiceMutasi(transferData)
 
     try {
       message.success('Data transfer berhasil disimpan!')

@@ -54,7 +54,7 @@ transactionRouter.put(
 
     if (onlyHereSpos) {
       const {
-        _id,
+        // _id,
         trans_date,
         due_date,
         contact_id,
@@ -78,7 +78,7 @@ transactionRouter.put(
         witholding_account_id,
       } = req.body
 
-      onlyHereSpos._id = _id || onlyHereSpos._id
+      // onlyHereSpos._id = _id || onlyHereSpos._id
       onlyHereSpos.trans_date = trans_date || onlyHereSpos.trans_date
       onlyHereSpos.due_date = due_date || onlyHereSpos.due_date
       onlyHereSpos.reason_id = reason_id || onlyHereSpos.reason_id
