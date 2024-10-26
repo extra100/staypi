@@ -131,7 +131,7 @@ const ListTransaksi: React.FC = () => {
         dataSource={filteredData}
         columns={columns}
         rowKey="_id"
-        pagination={{ pageSize: 10 }}
+        pagination={false}
       />
     </div>
   )
