@@ -5,6 +5,8 @@ export class TransferItem {
   @prop({ required: true })
   public product_id!: number
   @prop()
+  public finance_account_id!: number
+  @prop()
   public code!: number
   @prop({ required: true })
   public product_name!: string

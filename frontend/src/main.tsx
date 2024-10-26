@@ -31,6 +31,7 @@ import OutletPage from './pages/outlet/OutletPage'
 // import TransactionPages from './pages/transaction/TransactionPage'
 
 import StokBarangPage from './pages/api/StokBarangPage'
+
 // import WarehouseDropdown from './pages/api/WarehouseDropdown'
 import { SaveApi } from './pages/api/SaveApi'
 import SaveInvoiceComponent from './pages/api/SaveApiFe'
@@ -69,6 +70,12 @@ import BatchProcessProducts from './pages/api/saveProduct'
 import BatchProcessBarangTerjuals from './pages/api/saveBarangTerjual'
 import BatchProcessAkunBanks from './pages/api/saveAkunBank'
 import SimpanMutasi from './pages/api/simpanMutasi'
+import Aneh from './pages/api/returnInvoicePage'
+import Polosan from './pages/Polosan'
+import TransactionList from './pages/ListTransaksi'
+import PerhitunganComponent from './pages/api/perhitungan'
+import SoldKomponen from './pages/api/barangSold'
+import BarangSold from './pages/api/barangSold'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -108,6 +115,7 @@ const router = createBrowserRouter(
       <Route path="/fiac" element={<FinanceAccountDisplay />} />
       <Route path="/listkledo" element={<ListTransaksi />} />
       <Route path="/detailkledo/:ref_number" element={<DetailKledo />} />
+      <Route path="/returninvoice/:ref_number" element={<Aneh />} />
       <Route path="/printnota/:ref_number" element={<Receipt />} />
       <Route path="/printsuratjalan/:ref_number" element={<ReceiptJalan />} />
       <Route path="/listpindah" element={<ListPindah />} />
@@ -115,6 +123,11 @@ const router = createBrowserRouter(
       <Route path="/tabelbarang" element={<ProductTable />} />
       <Route path="/barangdb" element={<BarangList />} />
       <Route path="/transaksi" element={<TransactionTable />} />
+      <Route path="/polosan" element={<Polosan />} />
+      <Route path="/bismillah" element={<TransactionList />} />
+      <Route path="/perhitungannya" element={<PerhitunganComponent />} />
+      <Route path="/hitunglah" element={<BarangSold />} />
+
       <Route path="/printnota" element={<Receipt />} />
       <Route
         path="/transfer-detail/:ref_number"

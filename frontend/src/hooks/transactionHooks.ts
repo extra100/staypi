@@ -77,6 +77,7 @@ export const useUpdateTransactionMutation = () => {
   return useMutation(
     async (updatedTransaction: Transaction) => {
       const { ref_number, ...updatedData } = updatedTransaction
+
       return apiClient.put<Transaction>(
         `/api/transactions/${ref_number}`,
         updatedData
@@ -90,6 +91,23 @@ export const useUpdateTransactionMutation = () => {
     }
   )
 }
+
+// export const useAddReturnMutation = () => {
+//   const queryClient = useQueryClient()
+
+//   return useMutation(
+//     (regak: Return) => {
+//       const { _id, ...dataToSend } = regak
+
+//       return apiClient.post<Return>(`/api/transactions`, dataToSend)
+//     },
+//     {
+//       onSuccess: () => {
+//         queryClient.invalidateQueries(['returns'])
+//       },
+//     }
+//   )
+// }
 
 export const useDeleteTransactionMutation = () => {
   const queryClient = useQueryClient()

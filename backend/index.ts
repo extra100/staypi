@@ -13,10 +13,14 @@ import { contactRouter } from './src/routers/contactRouter'
 import { keyRouter } from './src/routers/keyRouter'
 import { orderRouter } from './src/routers/orderRouter'
 import outletRouter from './src/routers/outletRouter'
+import perhitunganRouter from './src/routers/perthitunganRouter'
 import warehouseTransferRouter from './src/routers/pindahRouter'
 import productRouter from './src/routers/productRouter'
+import { returnRouter } from './src/routers/returnRouter'
+import soldBarangRouter from './src/routers/soldBarangRouter'
 import tagRouter from './src/routers/tagRouter'
 import transactionRouter from './src/routers/transactionRouter'
+import transaksiPolosanRouter from './src/routers/transaksiPolosanRouter'
 import { userRouter } from './src/routers/userRouter'
 import warehouseRouter from './src/routers/warehousesRouter'
 
@@ -40,8 +44,9 @@ app.use(
     origin: ['http://localhost:5173'],
   })
 )
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+
+app.use(express.json({ limit: '200mb' })) // Set payload limit for JSON requests
+app.use(express.urlencoded({ extended: true, limit: '200mb' })) // Set payload limit for URL-encoded data
 
 app.use('/api/products', productRouter)
 app.use('/api/warehouses', warehouseRouter)
@@ -50,14 +55,21 @@ app.use('/api/akunbanks', akunBankRouter)
 app.use('/api/contacts', contactRouter)
 app.use('/api/barangs', barangRouter)
 app.use('/api/transactions', transactionRouter)
+app.use('/api/returns', returnRouter)
+app.use('/api/pindah', warehouseTransferRouter)
+
+app.use('/api/transaksipolosans', transaksiPolosanRouter)
+
+app.use('/api/sold-barang', soldBarangRouter)
 
 app.use('/api/users', userRouter)
 app.use('/api/outlets', outletRouter)
 app.use('/api/orders', orderRouter)
 
 app.use('/api/keys', keyRouter)
-app.use('/api/pindah', warehouseTransferRouter)
+// app.use('/api/pindah', warehouseTransferRouter)
 app.use('/api/barters', barangTerjualRouter)
+app.use('/api/perhitungans', perhitunganRouter)
 
 console.log(path.join(__dirname, 'frontend/dist'))
 

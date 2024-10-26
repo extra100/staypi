@@ -1,4 +1,6 @@
 export type WarehouseTransfer = {
+  trans_date: string
+  _id: string
   from_warehouse_id: number
   to_warehouse_id: number
   code: number
@@ -8,13 +10,14 @@ export type WarehouseTransfer = {
   memo: string
   items: TransferItem[]
   attachment: any[]
-  trans_date: string
 }
 
 export type TransferItem = {
+  finance_account_id: number
   product_id: number
   product_name: number
   qty: number
   qty_minta: number
   unit_name: string
 }
+// export const WarehouseTransferModel = getModelForClass(WarehouseTransfer)

@@ -1,9 +1,8 @@
-export type Transaction = {
+export type Return = {
   trans_date: string
-  jalur: string
   _id: string
-  unique_id: number
   due_date: string
+  jalur: string
   contact_id: number
 
   sales_id: number | null
@@ -13,6 +12,7 @@ export type Transaction = {
   term_id: number
   due: number
   ref_number: string
+  ref_transaksi: string
   memo: string
   amount: number
   amount_after_tax: number

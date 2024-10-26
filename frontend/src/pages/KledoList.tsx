@@ -59,6 +59,7 @@ const ListTransaksi: React.FC = () => {
         </a>
       ),
     },
+
     {
       title: 'Contact Name',
       dataIndex: ['contacts', 0, 'id'],
@@ -108,6 +109,11 @@ const ListTransaksi: React.FC = () => {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
+    },
+    {
+      title: '',
+      dataIndex: 'reason_id',
+      key: 'reason_id',
     },
   ]
 

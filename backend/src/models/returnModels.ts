@@ -1,21 +1,19 @@
 import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
 
 @modelOptions({ schemaOptions: { timestamps: true } })
-export class Transaction {
+export class Return {
   @prop({ required: true })
   public trans_date?: string
   @prop({ required: true })
   public jalur?: string
   @prop({ required: true })
   public due_date?: string
-  @prop({ required: true })
-  public unique_id!: number
+
   @prop({ required: true })
   public contact_id!: number
   @prop({ required: true })
   public amount!: number
-  @prop({ required: true })
-  public ref_transaksi!: string
+
   @prop({ required: true })
   public down_payment!: number
   @prop({ required: true })
@@ -36,6 +34,8 @@ export class Transaction {
 
   @prop({ required: true })
   public ref_number!: string
+  @prop({ required: true })
+  public ref_transaksi!: string
   @prop({ required: true })
   public externalId!: number
   @prop()
@@ -137,4 +137,4 @@ class Tages {
   public name!: string
 }
 
-export const TransactionModel = getModelForClass(Transaction)
+export const ReturnModel = getModelForClass(Return)

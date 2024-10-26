@@ -65,7 +65,23 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
       }
     }
   }, [allTransactions, contacts])
+  const [fromQtyState, setFromQtyState] = useState<{ [key: number]: number }>(
+    {}
+  )
+  const generateSerialNumber = (productId: number): string => {
+    const fromQty = fromQtyState[productId] || 0
+    return `IBO${fromQty}**gor37`
+  }
   const columns = [
+    {
+      title: 'Nomor',
+      dataIndex: 'serial_number',
+      key: 'serial_number',
+      render: (_: any, record: any) => {
+        const serialNumber = generateSerialNumber(record.product_id)
+        return serialNumber
+      },
+    },
     {
       title: 'Barang',
       dataIndex: 'name',

@@ -58,6 +58,7 @@ const ProductStocksPage: React.FC = () => {
   const [dataSource, setDataSource] = useState<any[]>([])
 
   const { idWarehouse } = useIdWarehouse()
+  console.log({ idWarehouse })
   const getWarehouseNameById = (id: any) => {
     const warehouse = idWarehouse.find((w) => w.id === id)
     return warehouse ? warehouse.name : 'Unknown Warehouse'
@@ -326,6 +327,7 @@ const ProductStocksPage: React.FC = () => {
       memo: null,
       items: dataSource.map((row) => ({
         product_id: row.id,
+        finance_account_id: row.id,
         product_name: row.name,
         qty: 0,
         qty_minta: row.transferQty,
@@ -334,13 +336,13 @@ const ProductStocksPage: React.FC = () => {
         unit_name: unitName,
       })),
     }
-    // saveInvoiceMutasi(transferData)
-    // addWarehouseTransfer(transferData as any)
+    saveInvoiceMutasi(transferData)
+    addWarehouseTransfer(transferData as any)
     navigate('/listpindah')
     try {
       await addWarehouseTransfer(transferData as any)
       message.success('Data transfer berhasil disimpan!')
-      // navigate(`/listpindah`)
+      navigate(`/listpindah`)
     } catch (error) {
       message.error('Terjadi kesalahan saat menyimpan data transfer')
       console.error('Error:', error)

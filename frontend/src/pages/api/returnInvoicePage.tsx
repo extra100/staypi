@@ -23,7 +23,7 @@ import {
   useGetTransactionByIdQuery,
   useUpdateTransactionMutation,
 } from '../../hooks/transactionHooks'
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { AiOutlinePrinter } from 'react-icons/ai'
 import PosPrintKomponent from './PosPrintCok'
 import moment from 'moment'
@@ -44,25 +44,15 @@ import type { Dayjs } from 'dayjs'
 import { useVoidInvoice } from './voidInvoice'
 import { Transaction } from '../../types/Transaction'
 import { useUnvoidInvoice } from './unvoidInvoice'
+import { SaveReturnInvoice } from './returInvoice'
+import { v4 as uuidv4 } from 'uuid'
+import { useAddReturnMutation } from '../../hooks/returnHooks'
 import SingleDate from '../SingleDate'
-
-import {
-  EyeOutlined,
-  FileSearchOutlined,
-  RetweetOutlined,
-  RollbackOutlined,
-  RotateLeftOutlined,
-  EditOutlined,
-  CloseCircleOutlined,
-  UndoOutlined,
-  PrinterOutlined,
-  CarOutlined,
-} from '@ant-design/icons'
 
 const { Title, Text } = Typography
 const { Option } = Select
 
-const DetailKledo: React.FC = () => {
+const Aneh: React.FC = () => {
   const [showButtons, setShowButtons] = useState(false)
   const currentDate = dayjs()
   const [startDate, setStartDate] = useState<Dayjs>(currentDate)
@@ -91,19 +81,28 @@ const DetailKledo: React.FC = () => {
   const { getIdAtInvoice } = useIdInvoice(ref_number || '')
 
   const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
-  console.log({ invoiceId })
+
   const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
 
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
+
   // const contactName = getPosDetail?.contacts?.[0]?.name
+  const contactId = getPosDetail?.contacts?.[0]?.id
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
 
   const tagName = getPosDetail?.tages?.map((tag: any) => tag.name) || []
+  const tagId = getPosDetail?.tages?.map((tag: any) => tag.id) || []
+  const finance_account_id =
+    getPosDetail?.items?.map((item: any) => item.finance_account_id) || []
+  const qty = getPosDetail?.items?.[0]?.qty || null
+  const price = getPosDetail?.items?.[0]?.price || null
 
   const amount = getPosDetail?.amount ?? 0
+  const status_id = getPosDetail?.status_id ?? 0
+  const refTransaksi = getPosDetail?.ref_number ?? 0
   const witholdings = getPosDetail?.witholdings || []
   const items = getPosDetail?.items || []
   const totalDownPayment = witholdings.reduce(
@@ -113,6 +112,19 @@ const DetailKledo: React.FC = () => {
     0
   )
 
+  const generateShortInvoiceId = (idOutlet: string): string => {
+    const uuid = uuidv4()
+    const last4OfUUID = uuid.substr(uuid.length - 4)
+    const shortNumber = parseInt(last4OfUUID, 16) % 10000
+    return `RT-${gudangId}-${String(shortNumber).padStart(4, '0')}`
+  }
+
+  useEffect(() => {
+    if (gudangId) {
+      const newRefNumber = generateShortInvoiceId(gudangId as any)
+      setNewRefNomor(newRefNumber)
+    }
+  }, [gudangId]) // On
   const due = amount - totalDownPayment
   const totalDiscount = items.reduce((total: number, item: any) => {
     return total + (item.discount_amount || 0)
@@ -135,9 +147,7 @@ const DetailKledo: React.FC = () => {
       alert('Jumlah bayar tidak boleh melebihi total tagihan')
     }
   }
-  const handleSetAmountPaid = () => {
-    setAmountPaid(due)
-  }
+
   const [contactName, setContactName] = useState<string>('Unknown Contact')
 
   useEffect(() => {
@@ -154,45 +164,8 @@ const DetailKledo: React.FC = () => {
   const [selectedBank, setSelectedBank] = useState<any | null>(null)
 
   const today = dayjs().format('DD-MM-YYYY')
-  const { saveNextPayment } = saveToApiNextPayment()
-  const handleVoid = (values: any) => {
-    if (refNumber) {
-      const existingInvoice = allTransactions?.find(
-        (transaction) => transaction.ref_number === refNumber
-      )
-      if (existingInvoice) {
-        const updatedInvoice: Transaction = {
-          ...existingInvoice,
-          reason_id: 'void',
-        }
-
-        updatePosMutation.mutate(updatedInvoice)
-      } else {
-        console.error('Invoice with ref_number not found:', refNumber)
-      }
-    } else {
-      console.error('No valid ref_number found.')
-    }
-  }
-  const handleUnVoid = (values: any) => {
-    if (refNumber) {
-      const existingInvoice = allTransactions?.find(
-        (transaction) => transaction.ref_number === refNumber
-      )
-      if (existingInvoice) {
-        const updatedInvoice: Transaction = {
-          ...existingInvoice,
-          reason_id: 'unvoid',
-        }
-
-        updatePosMutation.mutate(updatedInvoice)
-      } else {
-        console.error('Invoice with ref_number not found:', refNumber)
-      }
-    } else {
-      console.error('No valid ref_number found.')
-    }
-  }
+  const { saveReturn } = SaveReturnInvoice()
+  const simpanReturn = useAddReturnMutation()
 
   const handleFormSubmit = (values: any) => {
     const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
@@ -204,13 +177,18 @@ const DetailKledo: React.FC = () => {
 
     if (refNumber) {
       const invoiceData = {
+        jalur: 'return',
+        ref_transaksi: newRefNomor,
+        // ref_number: newRefNomor,
+
+        trans_date: formatDate(selectedDates),
         withholdings: [
           {
             witholding_account_id: accountId || bankAccountId,
             name: selectedBank || bankAccountName,
             down_payment: amountPaid || 0,
             witholding_percent: 0,
-            witholding_amount: amountPaid || 0,
+            witholding_amount: hutang,
           },
         ],
       }
@@ -227,10 +205,15 @@ const DetailKledo: React.FC = () => {
 
         const updatedInvoice = {
           ...existingInvoice,
+          jalur: invoiceData.jalur,
+          trans_date: formatDate(selectedDates),
           witholdings: updatedWithholdings,
+          // ref_number: newRefNomor,
+          ref_transaksi: invoiceData.ref_transaksi, // Memastikan ref_transaksi diperbarui
         }
+        console.log('Updated Invoice:', updatedInvoice)
 
-        updatePosMutation.mutate(updatedInvoice)
+        simpanReturn.mutate(updatedInvoice as any)
       } else {
         console.error('Invoice with ref_number not found:', refNumber)
       }
@@ -239,25 +222,38 @@ const DetailKledo: React.FC = () => {
     }
 
     const payload = {
-      amount: amountPaid,
+      trans_date: formatDate(selectedDates),
+      contact_id: contactId,
+      status_id: status_id,
+      include_tax: 0,
+      ref_transaksi: refTransaksi,
+      ref_number: newRefNomor,
+      memo: '',
       attachment: [],
-      bank_account_id: accountId || bankAccountId,
       business_tran_id: invoiceId,
-      witholding_amount: amountPaid,
-      memo: values.catatan || null,
-      trans_date: values.tanggalBayar.format('YYYY-MM-DD'),
-      witholdings: [],
+      items:
+        getPosDetail?.items?.map((item: any, index: any) => ({
+          finance_account_id: item.finance_account_id,
+          tax_id: '',
+          desc: '',
+          qty_transaksi: item.qty,
+          qty: transferQty[index] || 0,
+
+          price: item.price,
+          amount: item.amount,
+          price_after_tax: 0,
+          amount_after_tax: 0,
+          // unit_id: 2,
+        })) || [],
     }
 
-    console.log('Payload:', payload)
-
-    saveNextPayment(payload)
-      .then((response: any) => {
-        console.log('Payment saved successfully:', response)
-      })
-      .catch((error: any) => {
-        console.error('Error saving payment:', error)
-      })
+    // saveReturn(payload)
+    //   .then((response: any) => {
+    //     console.log('Payment saved successfully:', response)
+    //   })
+    //   .catch((error: any) => {
+    //     console.error('Error saving payment:', error)
+    //   })
   }
   const printNota = useRef<HTMLDivElement>(null)
 
@@ -338,12 +334,76 @@ const DetailKledo: React.FC = () => {
     setBankAccountId(id as any)
   }, [warehouseName, akunBanks])
 
-  const [refNumbers, setRefNumber] = useState('')
+  const [newRefNomor, setNewRefNomor] = useState('')
+
   const { voidInvoice, voidLoading, voidError, voidSuccess } = useVoidInvoice(
     refNumber as any
   )
   const { unvoidInvoice, unvoidLoading, unvoidError, unvoidSuccess } =
     useUnvoidInvoice(refNumber as any)
+  //bisayok
+
+  const [transferQty, setTransferQty] = useState<number[]>([])
+  const [amounts, setAmounts] = useState<number[]>([])
+  const [aaadiskon, setAaaDiskon] = useState<number[]>([])
+
+  const [subTotalReturn, setSubTotal] = useState(0)
+  const [sumDiskon, setSumDiskon] = useState<number>(0)
+  const [totalSetelahDiskon, setTotalSetelahDiskon] = useState(0)
+  const [hutang, setHutang] = useState<number>(0)
+  const [confuse, setConfue] = useState<number>(0)
+
+  useEffect(() => {
+    const total = amounts.reduce((acc, curr) => acc + (curr || 0), 0)
+    const totalDiskons = aaadiskon.reduce((acc, curr) => acc + (curr || 0), 0)
+
+    const bingung = totalDownPayment - total
+
+    setConfue(bingung)
+    setSubTotal(total)
+    setSumDiskon(totalDiskons)
+    setTotalSetelahDiskon(total - totalDiskons)
+
+    if (total > totalDownPayment) {
+      setHutang(totalDownPayment)
+    } else {
+      setHutang(bingung)
+    }
+  }, [amounts, aaadiskon, totalDownPayment])
+
+  const handleSetAmountPaid = () => {
+    setAmountPaid(hutang)
+  }
+  // Function to handle changes in transfer quantity
+  const handleTransferQtyChange = (
+    value: number,
+    index: number,
+    price: number,
+    discount_amount: number
+  ) => {
+    // Update transfer quantity
+    setTransferQty((prevTransferQty) => {
+      const updatedTransferQty = [...prevTransferQty]
+      updatedTransferQty[index] = value
+      return updatedTransferQty
+    })
+
+    // Calculate and update the amount for this row
+    setAmounts((prevAmounts) => {
+      const updatedAmounts = [...prevAmounts]
+      updatedAmounts[index] = value * price
+      return updatedAmounts
+    })
+
+    // Calculate and update the total discount for this row
+    setAaaDiskon((prevDiscount) => {
+      // Ensure prevDiscount is an array to avoid iterability issues
+      const updatedTotalDiscount = [...(prevDiscount || [])]
+      updatedTotalDiscount[index] = value * discount_amount
+      return updatedTotalDiscount
+    })
+  }
+  const [isDiscountVisible, setIsDiscountVisible] = useState<boolean>(true) // Default is true
   const [selectedDates, setSelectedDates] = useState<string>()
 
   const handleDateRangeSave = (startDate: string) => {
@@ -353,59 +413,9 @@ const DetailKledo: React.FC = () => {
     const [day, month, year] = dateString.split('-')
     return `${year}-${month}-${day}`
   }
-
-  const navigate = useNavigate()
-
-  const menu = (
-    <Menu>
-      <Menu.Item key="lihatAudit" icon={<FileSearchOutlined />}>
-        Lihat Audit
-      </Menu.Item>
-      {getPosDetail?.reason_id !== 'void' && (
-        <Menu.Item
-          key="unvoid"
-          icon={<UndoOutlined />}
-          onClick={() => {
-            unvoidInvoice()
-            handleUnVoid(null)
-          }}
-          disabled={voidLoading}
-        >
-          {voidLoading ? 'Proses UnVoid...' : 'UnVoid'}
-        </Menu.Item>
-      )}
-      {getPosDetail?.reason_id !== 'unvoid' && (
-        <Menu.Item
-          key="void"
-          icon={<CloseCircleOutlined />}
-          onClick={() => {
-            voidInvoice()
-            handleVoid(null)
-          }}
-          disabled={voidLoading}
-        >
-          {voidLoading ? 'Proses Void...' : 'Void'}
-        </Menu.Item>
-      )}
-
-      <Menu.Item
-        key="retur"
-        icon={<RollbackOutlined />}
-        onClick={() => {
-          navigate(`/returninvoice/${ref_number}`)
-        }}
-      >
-        Retur
-      </Menu.Item>
-
-      <Menu.Item key="edit" icon={<EditOutlined />}>
-        Edit
-      </Menu.Item>
-    </Menu>
-  )
   const columns = [
     {
-      title: 'No',
+      title: 'NO',
       key: 'no',
       align: 'center',
       render: (_: any, __: any, index: number) => (
@@ -416,12 +426,12 @@ const DetailKledo: React.FC = () => {
       title: 'Barang',
       dataIndex: 'name',
       key: 'name',
-      align: 'center',
+      align: 'center', // Header tetap rata tengah
       render: (name: string) => (
         <div style={{ textAlign: 'left' }}>
           {name !== undefined ? name : ''}
         </div>
-      ),
+      ), // Konten rata kiri
     },
 
     {
@@ -435,11 +445,42 @@ const DetailKledo: React.FC = () => {
         </div>
       ),
     },
+
     {
       title: 'Satuan',
       key: 'unit_id',
       dataIndex: 'unit_id',
       align: 'center',
+    },
+    {
+      title: 'Jumlah TF',
+      dataIndex: 'transferQty',
+      key: 'transferQty',
+      render: (text: string, record: any, index: number) => (
+        <Input
+          type="number"
+          value={transferQty[index] || 0}
+          onChange={(e) =>
+            handleTransferQtyChange(
+              Number(e.target.value),
+              index,
+              record.price,
+              record.discount_amount
+            )
+          }
+        />
+      ),
+    },
+    {
+      title: 'Harga Dasar',
+      key: 'basePrice',
+      align: 'center',
+      render: (text: string, record: any) => {
+        const basePrice = (record.price || 0) + (record.discount_amount || 0)
+        return (
+          <div style={{ textAlign: 'right' }}>{basePrice.toLocaleString()}</div>
+        )
+      },
     },
     {
       title: 'Harga',
@@ -452,24 +493,57 @@ const DetailKledo: React.FC = () => {
         </div>
       ),
     },
+    isDiscountVisible && {
+      title: 'Discount per item',
+      dataIndex: 'discount_amount',
+      key: 'discount_amount',
+      align: 'center',
+      render: (discount_amount: number) => (
+        <div style={{ textAlign: 'right' }}>
+          {discount_amount !== undefined
+            ? `${discount_amount.toLocaleString()}`
+            : 'Rp 0'}
+        </div>
+      ),
+    },
+
+    {
+      title: 'total diskon',
+      dataIndex: 'total_diskon',
+      key: 'total_diskon',
+      align: 'center',
+      render: (text: any, record: any, index: number) => (
+        <div style={{ textAlign: 'right' }}>
+          {aaadiskon[index] !== undefined
+            ? `${aaadiskon[index].toLocaleString()}`
+            : 'Rp 0'}
+        </div>
+      ),
+    },
+
     {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
       align: 'center',
-      render: (amount: number) => (
+      render: (text: string, record: any, index: number) => (
         <div style={{ textAlign: 'right' }}>
-          {amount !== undefined ? `${amount.toLocaleString()}` : 'Rp 0'}
+          {amounts[index] !== undefined
+            ? `${amounts[index].toLocaleString()}`
+            : 'Rp 0'}
         </div>
       ),
     },
-  ]
+  ].filter(Boolean) // Remove `false` or `undefined` values
 
   return (
     <div style={{ padding: '20px' }}>
       <Card
         title={
           <Row align="middle" justify="space-between">
+            <Button onClick={() => setIsDiscountVisible((prev) => !prev)}>
+              Toggle Discount Column
+            </Button>
             <Col>
               {getPosDetail?.status_id === 1 && (
                 <Tag color="red">Belum Dibayar</Tag>
@@ -483,30 +557,8 @@ const DetailKledo: React.FC = () => {
               )}
             </Col>
 
-            <Dropdown
-              overlay={menu}
-              trigger={['click']}
-              placement="bottomRight"
-            >
-              <a
-                className="ant-dropdown-link"
-                onClick={(e) => e.preventDefault()}
-              >
-                <svg
-                  viewBox="64 64 896 896"
-                  focusable="false"
-                  data-icon="more"
-                  width="1em"
-                  height="1em"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M456 231a56 56 0 10112 0 56 56 0 10-112 0zm0 280a56 56 0 10112 0 56 56 0 10-112 0zm0 280a56 56 0 10112 0 56 56 0 10-112 0z" />
-                </svg>
-              </a>
-            </Dropdown>
             <Col>
-              {showButtons && (
+              {showButtons && ( // Conditionally render the buttons after 2 seconds
                 <>
                   <div>
                     <button onClick={printNotaHandler}>Print Nota</button>
@@ -526,31 +578,11 @@ const DetailKledo: React.FC = () => {
                 </>
               )}
             </Col>
-            {/* <Col>
-              {showButtons && (
-                <>
-                  <div>
-                    <button onClick={printNotaHandler}>Print Nota</button>
-                    <div style={{ display: 'none' }}>
-                      <Receipt ref={printNota} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <button onClick={printSuratJalanHandler}>
-                      Print Surat Jalan
-                    </button>
-                    <div style={{ display: 'none' }}>
-                      <ReceiptJalan ref={printSuratJalan} />
-                    </div>
-                  </div>
-                </>
-              )}
-            </Col> */}
           </Row>
         }
         bordered
       >
+        {/* Transaction Details */}
         <Row>
           <Col span={12}>
             <div style={{ marginBottom: '0px' }}>
@@ -564,7 +596,8 @@ const DetailKledo: React.FC = () => {
             <div style={{ marginBottom: '0px' }}>
               <Text strong>NOMOR:</Text>
             </div>
-            <Title level={5}>{getPosDetail?.ref_number || []}</Title>
+            {/* <Title level={5}>{getPosDetail?.ref_number || []}</Title> */}
+            <Title level={5}>{newRefNomor}</Title>
           </Col>
         </Row>
 
@@ -623,7 +656,7 @@ const DetailKledo: React.FC = () => {
                 <Text strong>Sub Total</Text>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>{formatNumber(subTotal)}</Text>
+                <Text strong>{formatNumber(subTotalReturn)}</Text>
               </Col>
             </Row>
             <Row style={{ marginTop: '8px' }}>
@@ -631,7 +664,7 @@ const DetailKledo: React.FC = () => {
                 <Text strong>Total Diskon</Text>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>{formatNumber(totalDiscount)}</Text>
+                <Text strong>{formatNumber(sumDiskon)}</Text>
               </Col>
             </Row>
             <Row style={{ marginTop: '8px' }}>
@@ -639,7 +672,7 @@ const DetailKledo: React.FC = () => {
                 <Text strong>Total setelah diskon</Text>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>{formatNumber(amount)}</Text>
+                <Text strong>{formatNumber(subTotalReturn)}</Text>
               </Col>
             </Row>
             <Row style={{ marginTop: '8px' }}>
@@ -647,7 +680,7 @@ const DetailKledo: React.FC = () => {
                 <Title level={4}>Total</Title>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Title level={4}>{formatNumber(amount)}</Title>
+                <Title level={4}>{formatNumber(subTotalReturn)}</Title>
               </Col>
             </Row>
             <Divider style={{ margin: '16px 0' }} />
@@ -668,13 +701,13 @@ const DetailKledo: React.FC = () => {
               <Col span={12} style={{ textAlign: 'right' }}>
                 <Text strong style={{ fontSize: '20px' }}>
                   {' '}
-                  Sisa Tagihan
+                  Jumlah Hutang
                 </Text>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
                 <Text strong style={{ fontSize: '20px' }}>
                   {' '}
-                  {formatNumber(due)}
+                  {formatNumber(hutang)}
                 </Text>
               </Col>
             </Row>
@@ -742,7 +775,7 @@ const DetailKledo: React.FC = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Select
-                showSearch // Menampilkan kolom pencarian
+                showSearch
                 placeholder="Pilih bank"
                 value={selectedBank}
                 onChange={(value) => setSelectedBank(value)}
@@ -781,4 +814,4 @@ const DetailKledo: React.FC = () => {
   )
 }
 
-export default DetailKledo
+export default Aneh

@@ -4,6 +4,15 @@ import asyncHandler from 'express-async-handler'
 import { TransactionModel } from '../models/transactionModel'
 
 export const transactionRouter = express.Router()
+transactionRouter.post(
+  '/',
+  asyncHandler(async (req, res) => {
+    const posData = req.body
+
+    const justPos = await TransactionModel.create(posData)
+    res.status(201).json(justPos)
+  })
+)
 
 transactionRouter.get(
   '/',
@@ -32,16 +41,6 @@ transactionRouter.get(
   })
 )
 
-transactionRouter.post(
-  '/',
-  asyncHandler(async (req, res) => {
-    const posData = req.body
-
-    const justPos = await TransactionModel.create(posData)
-    res.status(201).json(justPos)
-  })
-)
-
 transactionRouter.put(
   '/:eid',
   asyncHandler(async (req: Request, res: Response) => {
@@ -61,6 +60,7 @@ transactionRouter.put(
         contact_id,
         contact_shipping_address_id,
         sales_id,
+        reason_id,
         status_id,
         include_tax,
         term_id,
@@ -81,6 +81,7 @@ transactionRouter.put(
       onlyHereSpos._id = _id || onlyHereSpos._id
       onlyHereSpos.trans_date = trans_date || onlyHereSpos.trans_date
       onlyHereSpos.due_date = due_date || onlyHereSpos.due_date
+      onlyHereSpos.reason_id = reason_id || onlyHereSpos.reason_id
       onlyHereSpos.contact_id = contact_id || onlyHereSpos.contact_id
 
       onlyHereSpos.sales_id = sales_id || onlyHereSpos.sales_id

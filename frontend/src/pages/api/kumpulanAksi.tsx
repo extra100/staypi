@@ -23,7 +23,7 @@ import {
   useGetTransactionByIdQuery,
   useUpdateTransactionMutation,
 } from '../../hooks/transactionHooks'
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { AiOutlinePrinter } from 'react-icons/ai'
 import PosPrintKomponent from './PosPrintCok'
 import moment from 'moment'
@@ -45,24 +45,10 @@ import { useVoidInvoice } from './voidInvoice'
 import { Transaction } from '../../types/Transaction'
 import { useUnvoidInvoice } from './unvoidInvoice'
 import SingleDate from '../SingleDate'
-
-import {
-  EyeOutlined,
-  FileSearchOutlined,
-  RetweetOutlined,
-  RollbackOutlined,
-  RotateLeftOutlined,
-  EditOutlined,
-  CloseCircleOutlined,
-  UndoOutlined,
-  PrinterOutlined,
-  CarOutlined,
-} from '@ant-design/icons'
-
 const { Title, Text } = Typography
 const { Option } = Select
 
-const DetailKledo: React.FC = () => {
+const KumpulanAksi: React.FC = () => {
   const [showButtons, setShowButtons] = useState(false)
   const currentDate = dayjs()
   const [startDate, setStartDate] = useState<Dayjs>(currentDate)
@@ -353,56 +339,6 @@ const DetailKledo: React.FC = () => {
     const [day, month, year] = dateString.split('-')
     return `${year}-${month}-${day}`
   }
-
-  const navigate = useNavigate()
-
-  const menu = (
-    <Menu>
-      <Menu.Item key="lihatAudit" icon={<FileSearchOutlined />}>
-        Lihat Audit
-      </Menu.Item>
-      {getPosDetail?.reason_id !== 'void' && (
-        <Menu.Item
-          key="unvoid"
-          icon={<UndoOutlined />}
-          onClick={() => {
-            unvoidInvoice()
-            handleUnVoid(null)
-          }}
-          disabled={voidLoading}
-        >
-          {voidLoading ? 'Proses UnVoid...' : 'UnVoid'}
-        </Menu.Item>
-      )}
-      {getPosDetail?.reason_id !== 'unvoid' && (
-        <Menu.Item
-          key="void"
-          icon={<CloseCircleOutlined />}
-          onClick={() => {
-            voidInvoice()
-            handleVoid(null)
-          }}
-          disabled={voidLoading}
-        >
-          {voidLoading ? 'Proses Void...' : 'Void'}
-        </Menu.Item>
-      )}
-
-      <Menu.Item
-        key="retur"
-        icon={<RollbackOutlined />}
-        onClick={() => {
-          navigate(`/returninvoice/${ref_number}`)
-        }}
-      >
-        Retur
-      </Menu.Item>
-
-      <Menu.Item key="edit" icon={<EditOutlined />}>
-        Edit
-      </Menu.Item>
-    </Menu>
-  )
   const columns = [
     {
       title: 'No',
@@ -416,12 +352,12 @@ const DetailKledo: React.FC = () => {
       title: 'Barang',
       dataIndex: 'name',
       key: 'name',
-      align: 'center',
+      align: 'center', // Header tetap rata tengah
       render: (name: string) => (
         <div style={{ textAlign: 'left' }}>
           {name !== undefined ? name : ''}
         </div>
-      ),
+      ), // Konten rata kiri
     },
 
     {
@@ -482,31 +418,54 @@ const DetailKledo: React.FC = () => {
                 <Title level={5}>Detail Tagihan</Title>
               )}
             </Col>
+            <a href={`/returninvoice/${ref_number}`}>Retur</a>
 
-            <Dropdown
-              overlay={menu}
-              trigger={['click']}
-              placement="bottomRight"
-            >
-              <a
-                className="ant-dropdown-link"
-                onClick={(e) => e.preventDefault()}
+            <div>
+              <input
+                type="text"
+                value={invoiceId as any}
+                onChange={(e) => setRefNumber(e.target.value)}
+                placeholder="Masukkan nomor referensi invoice"
+              />
+              <button
+                onClick={() => {
+                  voidInvoice()
+                  handleVoid(null) // Memanggil dengan parameter kosong
+                }}
+                disabled={voidLoading}
               >
-                <svg
-                  viewBox="64 64 896 896"
-                  focusable="false"
-                  data-icon="more"
-                  width="1em"
-                  height="1em"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M456 231a56 56 0 10112 0 56 56 0 10-112 0zm0 280a56 56 0 10112 0 56 56 0 10-112 0zm0 280a56 56 0 10112 0 56 56 0 10-112 0z" />
-                </svg>
-              </a>
-            </Dropdown>
+                {voidLoading ? 'Proses Void...' : 'Void Invoice'}
+              </button>
+
+              {voidError && <p style={{ color: 'red' }}>{voidError}</p>}
+              {voidSuccess && (
+                <p style={{ color: 'green' }}>Void invoice berhasil!</p>
+              )}
+            </div>
+            <div>
+              <input
+                type="text"
+                value={invoiceId as any}
+                onChange={(e) => setRefNumber(e.target.value)}
+                placeholder="Masukkan nomor referensi invoice"
+              />
+              <button
+                onClick={() => {
+                  unvoidInvoice()
+                  handleUnVoid(null)
+                }}
+                disabled={voidLoading}
+              >
+                {voidLoading ? 'Proses UnVoid...' : 'UnVoid Invoice'}
+              </button>
+
+              {voidError && <p style={{ color: 'red' }}>{voidError}</p>}
+              {voidSuccess && (
+                <p style={{ color: 'green' }}>UnVoid invoice berhasil!</p>
+              )}
+            </div>
             <Col>
-              {showButtons && (
+              {showButtons && ( // Conditionally render the buttons after 2 seconds
                 <>
                   <div>
                     <button onClick={printNotaHandler}>Print Nota</button>
@@ -526,27 +485,6 @@ const DetailKledo: React.FC = () => {
                 </>
               )}
             </Col>
-            {/* <Col>
-              {showButtons && (
-                <>
-                  <div>
-                    <button onClick={printNotaHandler}>Print Nota</button>
-                    <div style={{ display: 'none' }}>
-                      <Receipt ref={printNota} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <button onClick={printSuratJalanHandler}>
-                      Print Surat Jalan
-                    </button>
-                    <div style={{ display: 'none' }}>
-                      <ReceiptJalan ref={printSuratJalan} />
-                    </div>
-                  </div>
-                </>
-              )}
-            </Col> */}
           </Row>
         }
         bordered
@@ -781,4 +719,4 @@ const DetailKledo: React.FC = () => {
   )
 }
 
-export default DetailKledo
+export default KumpulanAksi

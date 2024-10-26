@@ -49,7 +49,6 @@ const StockSelectorTable = () => {
   const navigate = useNavigate()
 
   const { dataStokBarang, fetchStokBarang } = useStokBarang()
-  console.log({ dataStokBarang })
 
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
@@ -155,11 +154,12 @@ const StockSelectorTable = () => {
   const addPosMutation = useAddTransactionMutation()
 
   const [productQuantities, setProductQuantities] = useState<{
-    [key: string]: number
+    [key: string]: any
   }>({})
+  console.log({ productQuantities })
 
   const [selectedFinanceAccountIds, setSelectedFinanceAccountIds] = useState<
-    string[]
+    any[]
   >([])
 
   useEffect(() => {
@@ -168,7 +168,6 @@ const StockSelectorTable = () => {
     }
   }, [user])
   const [dataSource, setDataSource] = useState<any[]>([])
-
   useEffect(() => {
     if (selectedFinanceAccountIds.length > 0 && selectedWarehouseId !== null) {
       selectedFinanceAccountIds.forEach((productId: any) => {
@@ -176,26 +175,35 @@ const StockSelectorTable = () => {
       })
     }
   }, [selectedFinanceAccountIds, selectedWarehouseId])
-  console.log({ selectedFinanceAccountIds })
-  console.log({ selectedWarehouseId })
+
+  const [selectedProductStocks, setSelectedProductStocks] = useState<any[]>([])
+  console.log({ selectedProductStocks })
   useEffect(() => {
-    if (warehouseStock) {
-      setProductQuantities((prevQuantities) => {
-        const newQuantities = { ...prevQuantities }
-
-        warehouseStock.forEach((stockItem: any) => {
-          newQuantities[stockItem.productId] = stockItem.qty
-        })
-
-        return newQuantities
+    if (warehouseStock && selectedFinanceAccountIds.length > 0) {
+      const newQuantities: Record<number, number> = {}
+      const newSelectedStocks: number[] = []
+      warehouseStock.forEach((stockItem: any) => {
+        const productId = stockItem.id
+        const qty = stockItem.stock
+        if (
+          productId !== undefined &&
+          qty !== undefined &&
+          selectedFinanceAccountIds.includes(productId)
+        ) {
+          newQuantities[productId] = qty
+          newSelectedStocks.push(qty)
+        }
       })
+      setProductQuantities(newQuantities)
+      setSelectedProductStocks(newSelectedStocks)
     }
-  }, [warehouseStock])
+  }, [warehouseStock, selectedFinanceAccountIds, selectedWarehouseId])
 
   const customDisplayRender = (value: any) => {
     return ''
   }
-  const handleProductChange = (values: string[]) => {
+
+  const handleProductChange = (values: any[]) => {
     setSelectedFinanceAccountIds(values)
   }
   const [searchValue, setSearchValue] = useState('')
@@ -348,16 +356,21 @@ const StockSelectorTable = () => {
       handleWarehouseChange(selectedWarehouseId)
     }
   }, [selectedWarehouseId])
+  useEffect(() => {
+    if (selectedWarehouseId && Array.isArray(tagDb) && tagDb.length > 0) {
+      handleWarehouseChange(selectedWarehouseId)
+    }
+  }, [selectedWarehouseId, tagDb])
   const handleWarehouseChange = (value: number | string) => {
     setSelectedWarehouseId(value)
 
-    // setSelectedContact(null)
+    if (value && forTag) {
+      const matchingTag = Array.isArray(tagDb)
+        ? tagDb.filter((tag) => tag.name === forTag)
+        : []
 
-    const matchingTag = Array.isArray(tagDb)
-      ? tagDb.find((tag) => tag.name === forTag)
-      : undefined
-
-    setSelectag(matchingTag ? [matchingTag.id] : [])
+      setSelectag(matchingTag.map((tag) => tag.id))
+    }
     const bangke = gudangdb
       ? gudangdb.reduce((map: any, warehouse: any) => {
           map[warehouse.id] = warehouse.name
@@ -427,7 +440,7 @@ const StockSelectorTable = () => {
       return [...prev, ...newItems]
     })
 
-    setSelectedFinanceAccountIds(selectedFinanceAccountIds.map(String))
+    setSelectedFinanceAccountIds(selectedFinanceAccountIds.map(Number))
   }
 
   const handleQtyChange = (value: number, record: any) => {
@@ -486,6 +499,7 @@ const StockSelectorTable = () => {
   const handleTag = (value: any[]) => {
     setSelectag(value)
   }
+
   const [selectedContact, setSelectedContact] = useState<number | null>(null)
 
   const handleContactChange = (value: number) => {
@@ -570,15 +584,35 @@ const StockSelectorTable = () => {
     const [day, month, year] = dateString.split('-')
     return `${year}-${month}-${day}`
   }
-  const generateShortInvoiceId = (): string => {
+  const generateShortInvoiceId = (idOutlet: string): string => {
     const uuid = uuidv4()
     const last4OfUUID = uuid.substr(uuid.length - 4)
     const shortNumber = parseInt(last4OfUUID, 16) % 10000
-    return `INV${String(shortNumber).padStart(4, '0')}`
+    return `IBO-${idOutlet}-${String(shortNumber).padStart(5, '0')}`
   }
-  const [currentIdPos, setcurrentIdPos] = useState(generateShortInvoiceId())
-  const stringInv = currentIdPos as any
 
+  const [refNumber, setRefNumber] = useState<string>('')
+
+  useEffect(() => {
+    if (user) {
+      setSelectedWarehouseId(user.id_outlet)
+
+      const newRefNumber = generateShortInvoiceId(user.id_outlet)
+      setRefNumber(newRefNumber)
+    }
+  }, [user])
+  const generateUnique = () => {
+    const uuid = uuidv4()
+    const last5OfUUID = uuid.substr(uuid.length - 5)
+    const shortNumber = parseInt(last5OfUUID, 16) % 100000
+    return shortNumber
+  }
+  const [uniqueNumber, setUniqueNumber] = useState('')
+  console.log({ uniqueNumber })
+  useEffect(() => {
+    const generatedNumber = generateUnique()
+    setUniqueNumber(generatedNumber as any)
+  }, []) // Empty dependency array means it runs only once
   const [catatan, setCatatan] = useState('')
   const [yangMana, setYangMana] = useState()
 
@@ -622,8 +656,11 @@ const StockSelectorTable = () => {
     const simpanGudang = saveNamaGudang[selectedWarehouseId as any]
 
     const invoiceData = {
-      ref_number: currentIdPos,
+      jalur: 'penjualan',
+      ref_number: refNumber,
+      ref_transaksi: 0,
       status_id: status,
+      unique_id: uniqueNumber,
       trans_date: formatDate(selectedDates[0]),
       due_date: formatDate(selectedDates[1]),
       contact_id: selectedContact,
@@ -635,19 +672,28 @@ const StockSelectorTable = () => {
       amount_after_tax: 0,
       warehouse_id: selectedWarehouseId,
       attachment: [],
-      items: dataSource.map((item) => ({
-        amount: item.subtotal,
-        discount_amount: item.gapPriceTotal || item.gapPrice,
-        finance_account_id: item.finance_account_id,
-        discount_percent: item.selectedDiscountValue || 0,
-        name: item.finance_account_name,
-        tax_id: null,
-        desc: '',
-        qty: item.qty,
-        price: item.price,
-        unit_id: item.unit_id,
-        satuan: item.name,
-      })),
+      reason_id: 'void',
+      items: dataSource.map((item) => {
+        const matchingStock = productQuantities[item.finance_account_id]
+        const latest_stock = matchingStock - item.qty
+        return {
+          amount: item.subtotal,
+          discount_amount: item.gapPriceTotal || item.gapPrice,
+          finance_account_id: item.finance_account_id,
+          discount_percent: item.selectedDiscountValue || 0,
+          name: item.finance_account_name,
+          tax_id: null,
+          desc: '',
+          qty: item.qty,
+
+          qty_update: latest_stock || 0,
+
+          price: item.price,
+          unit_id: item.unit_id,
+          satuan: item.name,
+        }
+      }),
+
       witholdings: [
         {
           witholding_account_id: accountId || bankAccountId,
@@ -685,6 +731,7 @@ const StockSelectorTable = () => {
       witholding_amount: 0,
       witholding_percent: 0,
       column_name: '',
+      externalId: 0,
     }
 
     saveInvoiceData(invoiceData)
@@ -921,6 +968,7 @@ const StockSelectorTable = () => {
                 }
                 value={selectedWarehouseId}
                 onChange={handleWarehouseChange}
+                disabled
               >
                 {idWarehouse?.map((warehouse) => (
                   <Select.Option
@@ -981,7 +1029,7 @@ const StockSelectorTable = () => {
             <Col span={12}>
               <span style={labelStyle}>No Invoice</span>
               <span style={labelColonStyle}>:</span>
-              <Input style={{ width: '70%' }} value={currentIdPos} readOnly />
+              <Input style={{ width: '70%' }} value={refNumber} readOnly />
             </Col>
             <Col span={12}>
               <span style={labelStyle}>Nama Tag</span>
@@ -1111,17 +1159,13 @@ const StockSelectorTable = () => {
                           {product.name}
                         </span>
                         <span style={{ flex: 1, textAlign: 'center' }}>
-                          {Number(stockQuantity).toLocaleString('id-ID')}{' '}
+                          {Number(stockQuantity).toLocaleString('id-ID')}
                         </span>
                         <span style={{ flex: 1, textAlign: 'center' }}>
                           {Number(product.price).toLocaleString('id-ID', {
                             minimumFractionDigits: 0,
-                          })}{' '}
+                          })}
                         </span>
-                        {/* 
-                      <span style={{ flex: 1, textAlign: 'center' }}>
-                        {product.unit?.name}
-                      </span> */}
 
                         {discountRates.map((rate) => {
                           const discountedPrice = (
@@ -1150,7 +1194,7 @@ const StockSelectorTable = () => {
                                 cursor: 'pointer',
                               }}
                             >
-                              {formattedPrice}{' '}
+                              {formattedPrice}
                             </span>
                           )
                         })}

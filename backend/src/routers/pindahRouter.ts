@@ -10,12 +10,12 @@ warehouseTransferRouter.post(
     try {
       const transferData = req.body
 
-      const updatedTransfer = await WarehouseTransferModel.findOneAndUpdate(
+      const addTransfer = await WarehouseTransferModel.findOneAndUpdate(
         { ref_number: transferData.ref_number },
         transferData,
         { new: true, upsert: true }
       )
-      res.status(200).json(updatedTransfer)
+      res.status(200).json(addTransfer)
     } catch (error) {
       console.error('Error saat membuat transfer:', error)
       res.status(500).json({ message: 'Terjadi kesalahan pada server' })
