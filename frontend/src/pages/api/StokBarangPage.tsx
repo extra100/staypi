@@ -672,7 +672,7 @@ const StockSelectorTable = () => {
       amount_after_tax: 0,
       warehouse_id: selectedWarehouseId,
       attachment: [],
-      reason_id: 'void',
+      reason_id: 'unvoid',
       items: dataSource.map((item) => {
         const matchingStock = productQuantities[item.finance_account_id]
         const latest_stock = matchingStock - item.qty

@@ -361,7 +361,7 @@ const DetailKledo: React.FC = () => {
       <Menu.Item key="lihatAudit" icon={<FileSearchOutlined />}>
         Lihat Audit
       </Menu.Item>
-      {getPosDetail?.reason_id !== 'void' && (
+      {getPosDetail?.reason_id === 'void' && (
         <Menu.Item
           key="unvoid"
           icon={<UndoOutlined />}
@@ -374,7 +374,7 @@ const DetailKledo: React.FC = () => {
           {voidLoading ? 'Proses UnVoid...' : 'UnVoid'}
         </Menu.Item>
       )}
-      {getPosDetail?.reason_id !== 'unvoid' && (
+      {getPosDetail?.reason_id === 'unvoid' && (
         <Menu.Item
           key="void"
           icon={<CloseCircleOutlined />}
