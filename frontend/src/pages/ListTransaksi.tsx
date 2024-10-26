@@ -107,7 +107,7 @@ const TransactionList: React.FC = () => {
         dataSource={tableData} // Gunakan tableData sebagai sumber data tabel
         columns={columns}
         rowKey="_id" // Pastikan ini sesuai dengan key unik transaksi
-        pagination={true}
+        pagination={false}
       />
     </div>
   )
