@@ -40,77 +40,38 @@ transactionRouter.get(
     }
   })
 )
-
+// PUT endpoint to update transaction by ref_number
 transactionRouter.put(
-  '/:eid',
-  asyncHandler(async (req: Request, res: Response) => {
-    let onlyHereSpos = await TransactionModel.findOne({
-      id_kerja_sama: req.params.eid,
+  '/:ref_number',
+  asyncHandler(async (req: any, res: any) => {
+    // Cari transaksi berdasarkan ref_number yang diberikan dalam URL
+    let transaction = await TransactionModel.findOne({
+      ref_number: req.params.ref_number,
     })
 
-    if (!onlyHereSpos) {
-      onlyHereSpos = await TransactionModel.findById(req.params.eid)
+    // Jika transaksi tidak ditemukan, kirimkan respons 404
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction not found' })
     }
 
-    if (onlyHereSpos) {
-      const {
-        // _id,
-        trans_date,
-        due_date,
-        contact_id,
-        contact_shipping_address_id,
-        sales_id,
-        reason_id,
-        status_id,
-        include_tax,
-        term_id,
-        ref_number,
-        memo,
-        attachment,
-        items,
-        witholdings,
-        warehouse_id,
-
-        message,
-
-        witholding_percent,
-        witholding_amount,
-        witholding_account_id,
-      } = req.body
-
-      // onlyHereSpos._id = _id || onlyHereSpos._id
-      onlyHereSpos.trans_date = trans_date || onlyHereSpos.trans_date
-      onlyHereSpos.due_date = due_date || onlyHereSpos.due_date
-      onlyHereSpos.reason_id = reason_id || onlyHereSpos.reason_id
-      onlyHereSpos.contact_id = contact_id || onlyHereSpos.contact_id
-
-      onlyHereSpos.sales_id = sales_id || onlyHereSpos.sales_id
-      onlyHereSpos.status_id = status_id || onlyHereSpos.status_id
-      onlyHereSpos.include_tax = include_tax || onlyHereSpos.include_tax
-      onlyHereSpos.term_id = term_id || onlyHereSpos.term_id
-      onlyHereSpos.ref_number = ref_number || onlyHereSpos.ref_number
-      onlyHereSpos.memo = memo || onlyHereSpos.memo
-      onlyHereSpos.attachment = attachment || onlyHereSpos.attachment
-      onlyHereSpos.items = items || onlyHereSpos.items
-      onlyHereSpos.witholdings = witholdings || onlyHereSpos.witholdings
-      onlyHereSpos.warehouse_id = warehouse_id || onlyHereSpos.warehouse_id
-
-      onlyHereSpos.message = message || onlyHereSpos.message
-      // onlyHereSpos.tags = tags || onlyHereSpos.tags
-
-      onlyHereSpos.witholding_percent =
-        witholding_percent || onlyHereSpos.witholding_percent
-      onlyHereSpos.witholding_amount =
-        witholding_amount || onlyHereSpos.witholding_amount
-      onlyHereSpos.witholding_account_id =
-        witholding_account_id || onlyHereSpos.witholding_account_id
-
-      const updatedPos = await onlyHereSpos.save()
-
-      res.json(updatedPos)
-    } else {
-      res.status(404).json({ message: 'Transaction not found' })
+    // Periksa apakah field `witholdings` ada dalam request body dan update jika ada
+    if (req.body.witholdings && Array.isArray(req.body.witholdings)) {
+      // Update field `witholdings` pada transaksi yang ditemukan
+      transaction.witholdings = req.body.witholdings
     }
+
+    // Lakukan update pada field lain (misalnya `reason_id` atau lainnya)
+    if (req.body.reason_id) {
+      transaction.reason_id = req.body.reason_id
+    }
+
+    // Tambahkan pembaruan untuk field lain yang diperlukan sesuai dengan model transaksi
+
+    // Simpan transaksi yang diperbarui ke database
+    const updatedTransaction = await transaction.save()
+
+    // Kirimkan respons dengan data transaksi yang diperbarui
+    res.json(updatedTransaction)
   })
 )
 

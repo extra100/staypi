@@ -1,9 +1,10 @@
-import React, { useContext } from 'react'
-import { Table } from 'antd'
+import React, { useContext, useState } from 'react'
+import { Button, Table } from 'antd'
 import { useGetWarehouseTransfersQuery } from '../../hooks/pindahHooks'
 import { useIdWarehouse } from './namaWarehouse'
 import { useNavigate } from 'react-router-dom'
 import UserContext from '../../contexts/UserContext'
+import ButtonGroup from 'antd/es/button/button-group'
 
 const WarehouseTransferTable: React.FC = () => {
   const userContext = useContext(UserContext)
@@ -71,17 +72,76 @@ const WarehouseTransferTable: React.FC = () => {
       key: 'trans_date',
     },
   ]
+  const [activeButton, setActiveButton] = useState('')
+
+  const handleButtonClick = (value: any) => {
+    setActiveButton(value)
+
+    if (value === '1') {
+      navigate('/listsiapvalidasi')
+    } else if (value === '2') {
+      navigate('/listpindah')
+    } else if (value === '3') {
+      navigate('/listsudahdivalidasikeluar')
+    } else if (value === '4') {
+      navigate('/ListSudahValidasiMasuk')
+    }
+  }
 
   return (
-    <Table
-      columns={columns}
-      dataSource={dataSource}
-      rowKey="ref_number"
-      pagination={{ pageSize: 10 }}
-      onRow={(record) => ({
-        onClick: () => handleRowClick(record),
-      })}
-    />
+    <>
+      <div id="btn-filter-status-container" style={{ display: 'inline-flex' }}>
+        <Button
+          id="btn-filter-2"
+          value="2"
+          type="default"
+          className={activeButton === '2' ? 'btn-default-selected' : ''}
+          style={{ borderRadius: '0px' }}
+          onClick={() => handleButtonClick('2')}
+        >
+          <span>List Permintaan</span>
+        </Button>
+      </div>
+      <Button
+        id="btn-filter-1"
+        value="1"
+        type="default"
+        className={activeButton === '1' ? 'btn-default-selected' : ''}
+        style={{ borderRadius: '0px' }}
+        onClick={() => handleButtonClick('1')}
+      >
+        <span>Validasi Permintaan</span>
+      </Button>
+      <Button
+        id="btn-filter-1"
+        value="1"
+        type="default"
+        className={activeButton === '3' ? 'btn-default-selected' : ''}
+        style={{ borderRadius: '0px' }}
+        onClick={() => handleButtonClick('3')}
+      >
+        <span>Sudah Divalidasi Keluar</span>
+      </Button>
+      <Button
+        id="btn-filter-1"
+        value="1"
+        type="default"
+        className={activeButton === '4' ? 'btn-default-selected' : ''}
+        style={{ borderRadius: '0px' }}
+        onClick={() => handleButtonClick('4')}
+      >
+        <span>Sudah Divalidasi Masuk</span>
+      </Button>
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        rowKey="ref_number"
+        pagination={{ pageSize: 10 }}
+        onRow={(record) => ({
+          onClick: () => handleRowClick(record),
+        })}
+      />
+    </>
   )
 }
 

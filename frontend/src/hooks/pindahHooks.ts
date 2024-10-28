@@ -29,10 +29,9 @@ export const useGetWarehouseTransferByRefQuery = (ref_number: string) => {
       const response = await apiClient.get<WarehouseTransfer>(
         `/api/pindah/${ref_number}`
       )
+      console.log('API Response:', response.data)
+
       return response.data
-    },
-    {
-      enabled: !!ref_number,
     }
   )
 }
@@ -45,6 +44,8 @@ export const useUpdateWarehouseTransferMutation = () => {
     { ref_number: string; updatedData: Partial<WarehouseTransfer> }
   >(
     async ({ ref_number, updatedData }) => {
+      console.log('Sending updatedData:', updatedData) // Tambahkan log di sini
+
       const response = await apiClient.put<WarehouseTransfer>(
         `/api/pindah/${ref_number}`,
         updatedData

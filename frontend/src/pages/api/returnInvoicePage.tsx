@@ -48,6 +48,7 @@ import { SaveReturnInvoice } from './returInvoice'
 import { v4 as uuidv4 } from 'uuid'
 import { useAddReturnMutation } from '../../hooks/returnHooks'
 import SingleDate from '../SingleDate'
+// ;/api/1v / finance / bankTrans / creditMemoPayment
 
 const { Title, Text } = Typography
 const { Option } = Select
@@ -200,7 +201,7 @@ const Aneh: React.FC = () => {
       if (existingInvoice) {
         const updatedWithholdings = [
           ...existingInvoice.witholdings,
-          ...invoiceData.withholdings,
+          // ...invoiceData.withholdings,
         ]
 
         const updatedInvoice = {
@@ -222,7 +223,7 @@ const Aneh: React.FC = () => {
     }
 
     const payload = {
-      trans_date: formatDate(selectedDates),
+      trans_date: selectedDates,
       contact_id: contactId,
       status_id: status_id,
       include_tax: 0,
@@ -247,13 +248,13 @@ const Aneh: React.FC = () => {
         })) || [],
     }
 
-    saveReturn(payload)
-      .then((response: any) => {
-        console.log('Payment saved successfully:', response)
-      })
-      .catch((error: any) => {
-        console.error('Error saving payment:', error)
-      })
+    // saveReturn(payload)
+    //   .then((response: any) => {
+    //     console.log('Payment saved successfully:', response)
+    //   })
+    //   .catch((error: any) => {
+    //     console.error('Error saving payment:', error)
+    //   })
   }
   const printNota = useRef<HTMLDivElement>(null)
 
@@ -344,6 +345,7 @@ const Aneh: React.FC = () => {
   //bisayok
 
   const [transferQty, setTransferQty] = useState<number[]>([])
+  console.log({ transferQty })
   const [amounts, setAmounts] = useState<number[]>([])
   const [aaadiskon, setAaaDiskon] = useState<number[]>([])
 
@@ -357,7 +359,7 @@ const Aneh: React.FC = () => {
     const total = amounts.reduce((acc, curr) => acc + (curr || 0), 0)
     const totalDiskons = aaadiskon.reduce((acc, curr) => acc + (curr || 0), 0)
 
-    const bingung = totalDownPayment - total
+    const bingung = total - totalDownPayment
 
     setConfue(bingung)
     setSubTotal(total)

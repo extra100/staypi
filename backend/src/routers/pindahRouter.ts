@@ -81,6 +81,7 @@ warehouseTransferRouter.put(
           items,
           attachment,
           trans_date,
+          code, // Ambil code dari req.body
         } = req.body
 
         warehouseTransfer.from_warehouse_id =
@@ -99,6 +100,9 @@ warehouseTransferRouter.put(
           attachment || warehouseTransfer.attachment
         warehouseTransfer.trans_date =
           trans_date || warehouseTransfer.trans_date
+
+        // Update code
+        warehouseTransfer.code = code || warehouseTransfer.code
 
         const updatedTransfer = await warehouseTransfer.save()
 

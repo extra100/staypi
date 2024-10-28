@@ -21,6 +21,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useIdProduct } from './SingleProduct'
 import { useGetProductsQuery } from '../../hooks/productHooks'
 import { saveMutation } from './apiMutasi'
+import SingleDate from '../SingleDate'
 
 const { Option } = Select
 
@@ -308,10 +309,6 @@ const ProductStocksPage: React.FC = () => {
   ]
 
   const onFinish = async (values: any) => {
-    const tanggal = values.tanggal
-      ? values.tanggal.format('DD-MM-YYYY')
-      : moment().format('DD-MM-YYYY')
-
     const fromWarehouseName = getWarehouseNameById(warehouseDariId)
     const toWarehouseName = getWarehouseNameById(warehouseTujuanId)
     const namaBarang = getProductName(productIdInput)
@@ -321,7 +318,8 @@ const ProductStocksPage: React.FC = () => {
       // from_warehouse_name: fromWarehouseName,
       // to_warehouse_name: toWarehouseName,
 
-      trans_date: '2024-10-17',
+      trans_date: selectedDates,
+
       ref_number: refNumber,
       code: 1,
       memo: null,
@@ -334,11 +332,12 @@ const ProductStocksPage: React.FC = () => {
         before_qty_dari: qtyDari,
         before_qty_tujuan: qtyTujuan,
         unit_name: unitName,
+        code: 1,
       })),
     }
-    saveInvoiceMutasi(transferData)
-    addWarehouseTransfer(transferData as any)
-    navigate('/listpindah')
+    // saveInvoiceMutasi(transferData)
+    // addWarehouseTransfer(transferData as any)
+    // navigate('/listpindah')
     try {
       await addWarehouseTransfer(transferData as any)
       message.success('Data transfer berhasil disimpan!')
@@ -348,7 +347,15 @@ const ProductStocksPage: React.FC = () => {
       console.error('Error:', error)
     }
   }
+  const [selectedDates, setSelectedDates] = useState<string>()
 
+  const handleDateRangeSave = (startDate: string) => {
+    setSelectedDates(startDate)
+  }
+  const formatDate = (dateString: any) => {
+    const [day, month, year] = dateString.split('-')
+    return `${year}-${month}-${day}`
+  }
   return (
     <div style={{ maxWidth: '100%', margin: '20px auto' }}>
       <Card
@@ -420,20 +427,15 @@ const ProductStocksPage: React.FC = () => {
           </div>
           <div className="row">
             <div className="col-md-6">
-              <Form
-                initialValues={{
-                  tanggal: moment(),
-                }}
-              >
-                <div className="col-md-6">
-                  <Form.Item
-                    name="tanggal"
-                    label="Tanggal"
-                    rules={[{ required: true }]}
-                  >
-                    <DatePicker style={{ width: '100%' }} />
-                  </Form.Item>
-                </div>
+              <Form>
+                <Form.Item>
+                  <SingleDate
+                    onChange={(dates) => {
+                      setSelectedDates(dates)
+                    }}
+                    onSave={handleDateRangeSave}
+                  />
+                </Form.Item>
               </Form>
             </div>
             <div className="col-md-6">

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import {
   useAddWarehouseTransferMutation,
@@ -21,10 +21,14 @@ import { useReactToPrint } from 'react-to-print'
 import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
 import { useProductStocks } from './Po'
 import { saveMutation } from './apiMutasi'
+import UserContext from '../../contexts/UserContext'
 
 const { Title, Text } = Typography
 
 const WarehouseTransferDetail: React.FC = () => {
+  const userContext = useContext(UserContext)
+  const { user } = userContext || {}
+  const idOutletLoggedIn = user ? String(user.id_outlet) : '0'
   const { error, success, saveInvoiceMutasi } = saveMutation()
 
   const { idaDataBarang } = useIdNamaBarang()
@@ -140,6 +144,7 @@ const WarehouseTransferDetail: React.FC = () => {
         product_name: item.product_name,
         qty_minta: item.qty_minta,
         unit_name: item.unit_name,
+        code: item.code,
         transferQty: 0,
       }))
       setDataSource(initialDataSource)
@@ -155,13 +160,15 @@ const WarehouseTransferDetail: React.FC = () => {
 
     const transferData = {
       from_warehouse_id: fromWarehouseId,
+
       to_warehouse_id: toWarehouseId,
-      trans_date: '2024-10-26',
+      trans_date: '2024-10-27',
       ref_number: validRefNumber,
       memo: '',
       code: 2,
       items: dataSource.map((row, index) => ({
         qty_minta: row.qty_minta,
+        code: row.code,
         product_id: row.product_id,
         finance_account_id: row.id,
 
@@ -223,54 +230,34 @@ const WarehouseTransferDetail: React.FC = () => {
       dataIndex: 'qty_minta',
       key: 'qty_minta',
     },
-    // {
-    //   title: 'Qty Gudang',
-    //   dataIndex: 'qty_warehouse',
-    //   key: 'qty_warehouse',
-    //   className: 'hide-print',
-
-    //   render: (_: any, record: any) => {
-    //     const stockForProduct = stocks?.find(
-    //       (stock: any) => Number(stock.id) === record.product_id
-    //     )
-    //     if (!stockForProduct || !stockForProduct.stocks) {
-    //       return 'Stok kosong'
-    //     }
-    //     const fromWarehouseStock = stockForProduct.stocks[fromWarehouseId]
-    //     const toWarehouseStock = stockForProduct.stocks[toWarehouseId]
-    //     const fromQty = fromWarehouseStock ? fromWarehouseStock.qty : 0
-    //     const toQty = toWarehouseStock ? toWarehouseStock.qty : 0
-
-    //     return <span>{`From: ${fromQty} | To: ${toQty}`}</span>
-    //   },
-    // },
 
     {
       title: 'Satuan',
       dataIndex: 'unit_name',
       key: 'unit_name',
     },
-    {
-      title: 'Jumlah TF',
-      dataIndex: 'transferQty',
-      key: 'transferQty',
-      render: (text: string, record: any, index: number) => (
-        <Input
-          type="number"
-          value={transferQty[index] || 0}
-          onChange={(e) =>
-            handleTransferQtyChange(Number(e.target.value), index)
-          }
-        />
-      ),
-    },
-  ]
+    idOutletLoggedIn === fromWarehouseName
+      ? {
+          title: 'Jumlah TF',
+          dataIndex: 'transferQty',
+          key: 'transferQty',
+          render: (text: string, record: any, index: number) => (
+            <Input
+              type="number"
+              value={transferQty[index] || 0}
+              onChange={(e) =>
+                handleTransferQtyChange(Number(e.target.value), index)
+              }
+            />
+          ),
+        }
+      : null,
+  ].filter(Boolean)
 
   const componentRef = useRef<HTMLDivElement>(null)
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
   })
-
   return (
     <div style={{ padding: '24px', fontFamily: 'Arial, sans-serif' }}>
       <div ref={componentRef} className="print-container">
@@ -278,7 +265,7 @@ const WarehouseTransferDetail: React.FC = () => {
           <span style={{ color: '#AF8700', fontSize: '20px' }}>{title}</span>
         </Title>
 
-        {transferArray.length > 0 ? (
+        {transferArray.length > 0 && (
           <>
             <Row
               style={{
@@ -341,72 +328,73 @@ const WarehouseTransferDetail: React.FC = () => {
 
             <Table
               dataSource={items}
-              columns={columns}
+              columns={columns as any}
               rowKey="_id"
               pagination={false}
               style={{ marginBottom: '0px' }}
             />
 
-            <Row
-              style={{
-                marginTop: '0px',
-                paddingTop: '1px',
-              }}
-            >
-              <Col span={24}>
-                <Text>
-                  Pesan: Barang sudah sesuai dengan jumlah fisik yang diterima.
-                </Text>
-              </Col>
-            </Row>
+            {idOutletLoggedIn === fromWarehouseName && (
+              <>
+                <Row
+                  style={{
+                    marginTop: '0px',
+                    paddingTop: '1px',
+                  }}
+                >
+                  <Col span={24}>
+                    <Text>
+                      Pesan: Barang sudah sesuai dengan jumlah fisik yang
+                      diterima.
+                    </Text>
+                  </Col>
+                </Row>
 
-            <Row
-              justify="space-between"
-              style={{ marginTop: '32px', textAlign: 'center' }}
-            >
-              <Col span={8}>
-                <Text>Diperiksa Oleh</Text>
-                <br />
-                <br />
-                <Text>(...................................)</Text>
-              </Col>
-              <Col span={8}>
-                <Text>Diterima Oleh</Text>
-                <br />
-                <br />
-                <Text>(...................................)</Text>
-              </Col>
-              <Col span={8}>
-                <Text>Pengirim</Text>
-                <br />
-                <br />
-                <Text>(...................................)</Text>
-              </Col>
-            </Row>
+                <Row
+                  justify="space-between"
+                  style={{ marginTop: '32px', textAlign: 'center' }}
+                >
+                  <Col span={8}>
+                    <Text>Diperiksa Oleh</Text>
+                    <br />
+                    <br />
+                    <Text>(...................................)</Text>
+                  </Col>
+                  <Col span={8}>
+                    <Text>Diterima Oleh</Text>
+                    <br />
+                    <br />
+                    <Text>(...................................)</Text>
+                  </Col>
+                  <Col span={8}>
+                    <Text>Pengirim</Text>
+                    <br />
+                    <br />
+                    <Text>(...................................)</Text>
+                  </Col>
+                </Row>
+
+                <div style={{ textAlign: 'right' }}>
+                  <Button
+                    type="dashed"
+                    // onClick={handleSaveTransfer}
+                    style={{
+                      marginBottom: '16px',
+                      backgroundColor: '#AF8700',
+                      borderColor: '#AF8700',
+                      color: '#ffffff',
+                      width: '300px',
+                    }}
+                  >
+                    + Print
+                  </Button>
+                </div>
+              </>
+            )}
           </>
-        ) : (
-          <Text>No data found</Text>
         )}
-      </div>
-      <br />
-
-      <div style={{ textAlign: 'right' }}>
-        <Button
-          type="dashed"
-          onClick={handleSaveTransfer}
-          style={{
-            marginBottom: '16px',
-            backgroundColor: '#AF8700',
-            borderColor: '#AF8700',
-            color: '#ffffff',
-            width: '300px',
-          }}
-        >
-          + Print
-        </Button>
       </div>
     </div>
   )
 }
-
 export default WarehouseTransferDetail

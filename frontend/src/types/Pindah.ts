@@ -4,6 +4,7 @@ export type WarehouseTransfer = {
   from_warehouse_id: number
   to_warehouse_id: number
   code: number
+
   from_warehouse_name: string
   to_warehouse_name: string
   ref_number: string
@@ -18,6 +19,7 @@ export type TransferItem = {
   product_name: number
   qty: number
   qty_minta: number
+
   unit_name: string
 }
 // export const WarehouseTransferModel = getModelForClass(WarehouseTransfer)

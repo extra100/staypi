@@ -51,6 +51,7 @@ export const useUpdateTransactionMutation = () => {
 
   return useMutation(
     (murahnye: Transaction) => {
+      // Pastikan endpoint URL sesuai dengan backend route yang sudah Anda definisikan
       return apiClient
         .put<Transaction>(`/api/transactions/${murahnye.ref_number}`, murahnye)
         .then((response) => {
@@ -59,6 +60,7 @@ export const useUpdateTransactionMutation = () => {
     },
     {
       onSuccess: () => {
+        // Invalidate cache agar data diperbarui otomatis
         queryClient.invalidateQueries(['transactions'])
       },
       onError: (error: any) => {

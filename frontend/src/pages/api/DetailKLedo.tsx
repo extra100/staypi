@@ -89,6 +89,7 @@ const DetailKledo: React.FC = () => {
   const { data: akunBanks } = useGetAkunBanksQueryDb()
 
   const { getIdAtInvoice } = useIdInvoice(ref_number || '')
+  console.log({ getIdAtInvoice })
 
   const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
   console.log({ invoiceId })
@@ -160,12 +161,15 @@ const DetailKledo: React.FC = () => {
       const existingInvoice = allTransactions?.find(
         (transaction) => transaction.ref_number === refNumber
       )
+
       if (existingInvoice) {
+        // Buat objek transaksi yang diperbarui dengan `reason_id` diubah menjadi "void"
         const updatedInvoice: Transaction = {
           ...existingInvoice,
-          reason_id: 'void',
+          reason_id: 'void', // Pastikan ada di tipe Transaction
         }
 
+        // Panggil mutasi untuk memperbarui transaksi
         updatePosMutation.mutate(updatedInvoice)
       } else {
         console.error('Invoice with ref_number not found:', refNumber)
@@ -174,6 +178,7 @@ const DetailKledo: React.FC = () => {
       console.error('No valid ref_number found.')
     }
   }
+
   const handleUnVoid = (values: any) => {
     if (refNumber) {
       const existingInvoice = allTransactions?.find(
@@ -195,16 +200,19 @@ const DetailKledo: React.FC = () => {
   }
 
   const handleFormSubmit = (values: any) => {
+    // Membuat map untuk menghubungkan nama bank dengan ID-nya
     const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
       map[warehouse.name] = warehouse.id
       return map
     }, {})
 
+    // Mengambil ID akun yang sesuai dari map
     const accountId = accountMap[selectedBank as any]
 
     if (refNumber) {
+      // Membuat data `witholdings` baru
       const invoiceData = {
-        withholdings: [
+        witholdings: [
           {
             witholding_account_id: accountId || bankAccountId,
             name: selectedBank || bankAccountName,
@@ -215,21 +223,25 @@ const DetailKledo: React.FC = () => {
         ],
       }
 
+      // Mencari invoice yang sesuai berdasarkan `ref_number`
       const existingInvoice = allTransactions?.find(
         (transaction) => transaction.ref_number === refNumber
       )
 
       if (existingInvoice) {
+        // Menggabungkan `witholdings` yang sudah ada dengan data baru
         const updatedWithholdings = [
           ...existingInvoice.witholdings,
-          ...invoiceData.withholdings,
+          ...invoiceData.witholdings,
         ]
 
+        // Membuat objek invoice yang diperbarui
         const updatedInvoice = {
           ...existingInvoice,
           witholdings: updatedWithholdings,
         }
 
+        // Mutate untuk mengirim pembaruan ke server
         updatePosMutation.mutate(updatedInvoice)
       } else {
         console.error('Invoice with ref_number not found:', refNumber)
@@ -238,6 +250,7 @@ const DetailKledo: React.FC = () => {
       console.error('No valid ref_number found.')
     }
 
+    // Membuat payload untuk pembayaran baru
     const payload = {
       amount: amountPaid,
       attachment: [],
@@ -245,13 +258,13 @@ const DetailKledo: React.FC = () => {
       business_tran_id: invoiceId,
       witholding_amount: amountPaid,
       memo: values.catatan || null,
-      // trans_date: values.tanggalBayar.format('YYYY-MM-DD'),
-      trans_date: '2024-10-26',
-      witholdings: [],
+      trans_date: selectedDates,
+      witholdings: [], // Kosongkan dengan sengaja atau tambahkan data lain jika diperlukan
     }
 
     console.log('Payload:', payload)
 
+    // Simpan pembayaran baru ke server (implementasi saveNextPayment diharapkan sudah tersedia)
     saveNextPayment(payload)
       .then((response: any) => {
         console.log('Payment saved successfully:', response)
@@ -260,6 +273,7 @@ const DetailKledo: React.FC = () => {
         console.error('Error saving payment:', error)
       })
   }
+
   const printNota = useRef<HTMLDivElement>(null)
 
   const printNotaHandler = useReactToPrint({

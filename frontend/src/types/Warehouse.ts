@@ -4,4 +4,5 @@ export type Warehouse = {
   code: string
   photo: string
   contact: string
+  createdAt: string
 }
