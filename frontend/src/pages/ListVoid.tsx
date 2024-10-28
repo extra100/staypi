@@ -7,7 +7,7 @@ import UserContext from '../contexts/UserContext'
 import { useGetContactsQuery } from '../hooks/contactHooks'
 import { useNavigate } from 'react-router-dom'
 
-const ListTransaksi: React.FC = () => {
+const ListVoid: React.FC = () => {
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
@@ -40,8 +40,7 @@ const ListTransaksi: React.FC = () => {
     ?.filter(
       (transaction) =>
         transaction.warehouse_id === Number(user?.id_outlet) &&
-        transaction.jalur === 'penjualan' &&
-        transaction.reason_id === 'unvoid'
+        transaction.reason_id === 'void'
     )
     ?.sort(
       (a, b) =>
@@ -49,6 +48,7 @@ const ListTransaksi: React.FC = () => {
     )
   const [activeButton, setActiveButton] = useState('')
   const navigate = useNavigate()
+
   const handleButtonClick = (value: any) => {
     setActiveButton(value)
 
@@ -174,4 +174,4 @@ const ListTransaksi: React.FC = () => {
   )
 }
 
-export default ListTransaksi
+export default ListVoid

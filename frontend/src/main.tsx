@@ -76,6 +76,14 @@ import TransactionList from './pages/ListTransaksi'
 import PerhitunganComponent from './pages/api/perhitungan'
 import SoldKomponen from './pages/api/barangSold'
 import BarangSold from './pages/api/barangSold'
+import ListSiapDiValidasi from './pages/api/ListSiapDivalidasi'
+import ValidatePindah from './pages/api/ValidatePindah'
+import ListSudahDivalidasi from './pages/api/ListSudahDiValidasi'
+import SudahDivalidasi from './pages/api/SudahDivalidasi'
+import ListSudahValidasiMasuk from './pages/api/ListSudahValidasiMasuk'
+import ListVoid from './pages/ListVoid'
+import ListReturn from './pages/ListReturn'
+// import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -114,11 +122,13 @@ const router = createBrowserRouter(
       />
       <Route path="/fiac" element={<FinanceAccountDisplay />} />
       <Route path="/listkledo" element={<ListTransaksi />} />
+      <Route path="/listvoid" element={<ListVoid />} />
+      <Route path="/listreturn" element={<ListReturn />} />
       <Route path="/detailkledo/:ref_number" element={<DetailKledo />} />
       <Route path="/returninvoice/:ref_number" element={<Aneh />} />
       <Route path="/printnota/:ref_number" element={<Receipt />} />
+      {/* <Route path="/printmutasi/:ref_number" element={<MutasiSuratJalan />} /> */}
       <Route path="/printsuratjalan/:ref_number" element={<ReceiptJalan />} />
-      <Route path="/listpindah" element={<ListPindah />} />
       <Route path="/single" element={<ProductLookup />} />
       <Route path="/tabelbarang" element={<ProductTable />} />
       <Route path="/barangdb" element={<BarangList />} />
@@ -127,12 +137,26 @@ const router = createBrowserRouter(
       <Route path="/bismillah" element={<TransactionList />} />
       <Route path="/perhitungannya" element={<PerhitunganComponent />} />
       <Route path="/hitunglah" element={<BarangSold />} />
-
       <Route path="/printnota" element={<Receipt />} />
+      <Route path="/listpindah" element={<ListPindah />} />
+
       <Route
         path="/transfer-detail/:ref_number"
         element={<WarehouseTransferDetail />}
       />
+
+      <Route path="/listsiapvalidasi" element={<ListSiapDiValidasi />} />
+      <Route
+        path="/listsudahdivalidasikeluar"
+        element={<ListSudahDivalidasi />}
+      />
+      <Route
+        path="/ListSudahValidasiMasuk"
+        element={<ListSudahValidasiMasuk />}
+      />
+
+      <Route path="/validasi-pindah/:ref_number" element={<ValidatePindah />} />
+      <Route path="/sudah-validasi/:ref_number" element={<SudahDivalidasi />} />
     </Route>
   )
 )

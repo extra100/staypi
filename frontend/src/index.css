@@ -16,6 +16,13 @@
     margin: 0; /* Optional: Remove default margin */
   }
 
+  @media print {
+    .printable-component {
+      padding: 30px !important;
+      font-family: Arial, sans-serif !important;
+    }
+  }
+
   /* Optionally control margins or other styles during print */
   body {
     margin: 0; /* Remove any body margin */

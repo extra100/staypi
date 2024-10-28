@@ -18,7 +18,7 @@ const SingleDate: React.FC<SingleDateProps> = (props) => {
 
   useEffect(() => {
     if (props.onChange) {
-      props.onChange(startDate.format('DD-MM-YYYY'))
+      props.onChange(startDate.format('YYYY-MM-DD'))
     }
   }, [startDate, props])
 
@@ -49,7 +49,7 @@ const SingleDate: React.FC<SingleDateProps> = (props) => {
           style={{ width: '65%' }} // Adjust this width to fit the remaining Col width
           value={startDate}
           onChange={handleStartDateChange}
-          format="DD-MM-YYYY"
+          format="YYYY-MM-DD"
         />
       </Col>
     </div>
