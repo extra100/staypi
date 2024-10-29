@@ -24,31 +24,30 @@ const EditWitholdingPercentPage: React.FC = () => {
   const updateWitholdingPercentMutation = useUpdateWitholdingPercentMutation()
 
   const handleVoid = (witholdingId: string, currentPercent: number) => {
-    setLoadingIds((prev) => ({ ...prev, [witholdingId]: true })) // Set loading untuk witholding yang diklik
+    setLoadingIds((prev) => ({ ...prev, [witholdingId]: true }))
 
-    const newPercent = currentPercent === 0 ? 1 : 0 // Mengubah persen menjadi 1 jika 0, sebaliknya menjadi 0
+    const newPercent = currentPercent === 0 ? 1 : 0
 
     updateWitholdingPercentMutation.mutate(
       {
         ref_number: ref_number as string,
         witholdingId,
-        newPercent, // Gunakan newPercent yang sudah ditentukan
+        newPercent,
       },
       {
         onSuccess: () => {
-          // Set timeout untuk loading 3 detik
           setTimeout(() => {
             setLoadingIds((prev) => ({ ...prev, [witholdingId]: false }))
             message.success(
               currentPercent === 0
                 ? 'Withholding percent updated to 1 (DIBATALKAN)!'
                 : 'Withholding percent updated to 0 (BELUM DIBATALKAN)!'
-            ) // Tampilkan pesan sukses
+            )
           }, 3000)
         },
         onError: () => {
           setLoadingIds((prev) => ({ ...prev, [witholdingId]: false }))
-          message.error('Failed to update withholding percent!') // Tampilkan pesan error
+          message.error('Failed to update withholding percent!')
         },
       }
     )
@@ -91,8 +90,8 @@ const EditWitholdingPercentPage: React.FC = () => {
       render: (_: any, record: any) => (
         <Button
           type="primary"
-          onClick={() => handleVoid(record._id, record.status)} // Pass current percent
-          loading={loadingIds[record._id]} // Spinner loading hanya pada baris yang diklik
+          onClick={() => handleVoid(record._id, record.status)}
+          loading={loadingIds[record._id]}
         >
           {loadingIds[record._id] ? (
             <Spin size="small" />
@@ -110,8 +109,8 @@ const EditWitholdingPercentPage: React.FC = () => {
     <Table
       dataSource={witholdings}
       columns={columns}
-      rowKey="_id" // Gunakan _id sebagai kunci baris
-      pagination={false} // Nonaktifkan pagination jika tidak diperlukan
+      rowKey="_id"
+      pagination={false}
     />
   )
 }

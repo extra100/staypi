@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Button, Table, Tag } from 'antd'
 
-import { useGetTransaksisQuery } from '../hooks/transactionHooks'
-import { useIdInvoice } from './api/takeSingleInvoice'
-import UserContext from '../contexts/UserContext'
-import { useGetContactsQuery } from '../hooks/contactHooks'
+import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
+import { useIdInvoice } from './takeSingleInvoice'
+import UserContext from '../../contexts/UserContext'
+import { useGetContactsQuery } from '../../hooks/contactHooks'
 import { useNavigate } from 'react-router-dom'
 
 const ListTransaksi: React.FC = () => {
@@ -121,10 +121,9 @@ const ListTransaksi: React.FC = () => {
       dataIndex: 'witholdings',
       key: 'witholdings',
       render: (witholdings: any[]) => {
-        const totalDownPayment = witholdings.reduce(
-          (sum, witholding) => sum + (witholding.down_payment || 0),
-          0
-        )
+        const totalDownPayment = witholdings
+          .filter((witholding) => witholding.status === 0)
+          .reduce((sum, witholding) => sum + (witholding.down_payment || 0), 0)
 
         return <div style={{ textAlign: 'right' }}>{totalDownPayment}</div>
       },
@@ -133,11 +132,13 @@ const ListTransaksi: React.FC = () => {
       title: 'Sisa Tagihan',
       key: 'due',
       render: (record: any) => {
-        const totalDownPayment = record.witholdings.reduce(
-          (sum: number, witholding: any) =>
-            sum + (witholding.down_payment || 0),
-          0
-        )
+        const totalDownPayment = record.witholdings
+          .filter((witholding: any) => witholding.status === 0)
+          .reduce(
+            (sum: number, witholding: any) =>
+              sum + (witholding.down_payment || 0),
+            0
+          )
 
         const due = record.amount - totalDownPayment
 

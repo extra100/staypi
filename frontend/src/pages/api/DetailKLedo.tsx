@@ -100,7 +100,7 @@ const DetailKledo: React.FC = () => {
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
-  // const contactName = getPosDetail?.contacts?.[0]?.name
+
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
   const langka = getPosDetail?.unique_id
@@ -110,12 +110,11 @@ const DetailKledo: React.FC = () => {
   const amount = getPosDetail?.amount ?? 0
   const witholdings = getPosDetail?.witholdings || []
   const items = getPosDetail?.items || []
-  const totalDownPayment = witholdings.reduce(
-    (sum: number, witholding: any) => {
+  const totalDownPayment = witholdings
+    .filter((witholding: any) => witholding.status === 0)
+    .reduce((sum: number, witholding: any) => {
       return sum + (witholding.down_payment || 0)
-    },
-    0
-  )
+    }, 0)
 
   const due = amount - totalDownPayment
   const totalDiscount = items.reduce((total: number, item: any) => {
@@ -168,18 +167,17 @@ const DetailKledo: React.FC = () => {
       if (existingInvoice) {
         const updatedInvoice: Transaction = {
           ...existingInvoice,
-          reason_id: 'void', // Mengubah reason_id menjadi "void"
+          reason_id: 'void',
         }
 
         updatePosMutation.mutate(updatedInvoice, {
           onSuccess: () => {
-            message.success('Transaksi berhasil dibatalkan!') // Menampilkan pesan sukses
-            setLoadingSpinner(true) // Menyalakan spinner
+            message.success('Transaksi berhasil dibatalkan!')
+            setLoadingSpinner(true)
 
-            // Menambahkan timer 3 detik sebelum mengarahkan
             setTimeout(() => {
-              setLoadingSpinner(false) // Mematikan spinner
-              navigate('/listvoid') // Mengarahkan ke ListVoid
+              setLoadingSpinner(false)
+              navigate('/listvoid')
             }, 3000)
           },
           onError: (error) => {
@@ -205,17 +203,17 @@ const DetailKledo: React.FC = () => {
       if (existingInvoice) {
         const updatedInvoice: Transaction = {
           ...existingInvoice,
-          reason_id: 'unvoid', // Mengubah reason_id menjadi "unvoid"
+          reason_id: 'unvoid',
         }
 
         updatePosMutation.mutate(updatedInvoice, {
           onSuccess: () => {
-            message.success('Transaksi berhasil diunvoid!') // Menampilkan pesan sukses
-            setLoadingSpinner(true) // Menyalakan spinner
+            message.success('Transaksi berhasil diunvoid!')
+            setLoadingSpinner(true)
 
             setTimeout(() => {
-              setLoadingSpinner(false) // Mematikan spinner
-              navigate('/listvoid') // Mengarahkan ke ListVoid
+              setLoadingSpinner(false)
+              navigate('/listvoid')
             }, 3000)
           },
           onError: (error) => {
@@ -231,17 +229,14 @@ const DetailKledo: React.FC = () => {
   }
 
   const handleFormSubmit = (values: any) => {
-    // Membuat map untuk menghubungkan nama bank dengan ID-nya
     const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
       map[warehouse.name] = warehouse.id
       return map
     }, {})
 
-    // Mengambil ID akun yang sesuai dari map
     const accountId = accountMap[selectedBank as any]
 
     if (refNumber) {
-      // Membuat data `witholdings` baru
       const invoiceData = {
         witholdings: [
           {
@@ -713,18 +708,22 @@ const DetailKledo: React.FC = () => {
             <Divider style={{ margin: '16px 0' }} />
 
             <>
-              {witholdings.map((witholding: any, index: number) => (
-                <Row key={index} style={{ marginTop: '8px' }}>
-                  <Col span={12} style={{ textAlign: 'left' }}>
-                    <a href={`/voidwitholdingpersen/${ref_number}`}>
-                      <Text strong>{witholding.name}</Text>
-                    </a>
-                  </Col>
-                  <Col span={12} style={{ textAlign: 'right' }}>
-                    <Text strong>{formatNumber(witholding.down_payment)}</Text>
-                  </Col>
-                </Row>
-              ))}
+              {witholdings
+                .filter((witholding: any) => witholding.status === 0)
+                .map((witholding: any, index: number) => (
+                  <Row key={index} style={{ marginTop: '8px' }}>
+                    <Col span={12} style={{ textAlign: 'left' }}>
+                      <a href={`/voidwitholdingpersen/${ref_number}`}>
+                        <Text strong>{witholding.name}</Text>
+                      </a>
+                    </Col>
+                    <Col span={12} style={{ textAlign: 'right' }}>
+                      <Text strong>
+                        {formatNumber(witholding.down_payment)}
+                      </Text>
+                    </Col>
+                  </Row>
+                ))}
             </>
 
             <Row style={{ marginTop: '8px' }}>

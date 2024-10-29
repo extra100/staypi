@@ -45,11 +45,11 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
     (gedung: any) => gedung.name === gudangName
   )
   const totalDownPayment = witholdings
-    .filter((witholding: any) => witholding.status === 0) // Filter where status is 0
+    .filter((witholding: any) => witholding.status === 0)
     .reduce((total: number, witholding: any) => {
       return total + (witholding.down_payment || 0)
     }, 0)
-
+  console.log({ totalDownPayment })
   const sisaTagohan = totalSemua - totalDownPayment
   const namaGudang = getGudangDetail?.name ?? 0
   const codeGudang = getGudangDetail?.code ?? 0
@@ -261,14 +261,18 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
               Jml Bayar:
             </Text>
             <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
-              {witholdings.map((witholding: any, index: number) => (
-                <Row key={index}>
-                  <Col span={12} style={{ textAlign: 'left' }}></Col>
-                  <Col span={12} style={{ textAlign: 'right' }}>
-                    <Text strong>{formatNumber(witholding.down_payment)}</Text>
-                  </Col>
-                </Row>
-              ))}
+              {witholdings
+                .filter((witholding: any) => witholding.status === 0)
+                .map((witholding: any, index) => (
+                  <Row key={index}>
+                    <Col span={12} style={{ textAlign: 'left' }}></Col>
+                    <Col span={12} style={{ textAlign: 'right' }}>
+                      <Text strong>
+                        {formatNumber(witholding.down_payment)}
+                      </Text>
+                    </Col>
+                  </Row>
+                ))}
             </Text>
           </div>
           <div

@@ -49,7 +49,7 @@ import NestedObjectooo from './pages/api/NestedObject'
 import Hafalan from './pages/api/Hafal'
 import TransferMasukGudang from './pages/api/TransferGudang'
 
-import ListTransaksi from './pages/KledoList'
+import ListTransaksi from './pages/api/KledoList'
 import ProductStocksTable from './pages/api/uiPO'
 import ListPindah from './pages/api/listPindah'
 import WarehouseTransferDetail from './pages/api/detailPindah'
@@ -62,7 +62,7 @@ import BatchProcessWarehouses from './pages/saveWarehouse'
 import BatchProcessTags from './pages/api/SaveTags'
 import BatchProcessContacts from './pages/api/SaveContact'
 import BarangList from './pages/api/barangPage'
-import TransactionTable from './pages/api/ListTransaksi'
+
 import Receipt from './pages/api/printNota'
 import ListStok from './pages/api/semuaStok'
 import ReceiptJalan from './pages/api/ReceiptJalan'
@@ -135,7 +135,7 @@ const router = createBrowserRouter(
       <Route path="/single" element={<ProductLookup />} />
       <Route path="/tabelbarang" element={<ProductTable />} />
       <Route path="/barangdb" element={<BarangList />} />
-      <Route path="/transaksi" element={<TransactionTable />} />
+
       <Route path="/polosan" element={<Polosan />} />
       <Route path="/bismillah" element={<TransactionList />} />
       <Route path="/perhitungannya" element={<PerhitunganComponent />} />
