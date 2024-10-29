@@ -5,7 +5,7 @@ export type Transaction = {
   unique_id: number
   due_date: string
   contact_id: number
-
+  id: number
   sales_id: number | null
   status_id: number
   createdAt: string
@@ -49,8 +49,10 @@ export type Transaction = {
   witholdings: {
     witholding_account_id: number
     name: string
+    trans_date: string
     witholding_amount: number
     witholding_percent: number
+    status: number
   }[]
   warehouse_id: number
   additional_discount_percent: number

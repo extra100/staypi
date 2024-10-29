@@ -80,6 +80,8 @@ const DetailKledo: React.FC = () => {
     return () => clearTimeout(timer)
   }, [])
   const { ref_number } = useParams<{ ref_number?: string }>()
+  console.log({ ref_number })
+
   const updatePosMutation = useUpdateTransactionMutation()
   //
   const { data: allTransactions } = useGetTransactionByIdQuery(
@@ -101,7 +103,8 @@ const DetailKledo: React.FC = () => {
   // const contactName = getPosDetail?.contacts?.[0]?.name
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
-
+  const langka = getPosDetail?.unique_id
+  console.log({ langka })
   const tagName = getPosDetail?.tages?.map((tag: any) => tag.name) || []
 
   const amount = getPosDetail?.amount ?? 0
@@ -163,39 +166,67 @@ const DetailKledo: React.FC = () => {
       )
 
       if (existingInvoice) {
-        // Buat objek transaksi yang diperbarui dengan `reason_id` diubah menjadi "void"
         const updatedInvoice: Transaction = {
           ...existingInvoice,
-          reason_id: 'void', // Pastikan ada di tipe Transaction
+          reason_id: 'void', // Mengubah reason_id menjadi "void"
         }
 
-        // Panggil mutasi untuk memperbarui transaksi
-        updatePosMutation.mutate(updatedInvoice)
+        updatePosMutation.mutate(updatedInvoice, {
+          onSuccess: () => {
+            message.success('Transaksi berhasil dibatalkan!') // Menampilkan pesan sukses
+            setLoadingSpinner(true) // Menyalakan spinner
+
+            // Menambahkan timer 3 detik sebelum mengarahkan
+            setTimeout(() => {
+              setLoadingSpinner(false) // Mematikan spinner
+              navigate('/listvoid') // Mengarahkan ke ListVoid
+            }, 3000)
+          },
+          onError: (error) => {
+            message.error(`Terjadi kesalahan: ${error.message}`)
+          },
+        })
       } else {
-        console.error('Invoice with ref_number not found:', refNumber)
+        message.error('Melebihi batas pembatalan:')
       }
     } else {
-      console.error('No valid ref_number found.')
+      message.error('Menyebabkan double data')
     }
   }
+
+  const [loadingSpinner, setLoadingSpinner] = useState(false) // State untuk mengontrol spinner
 
   const handleUnVoid = (values: any) => {
     if (refNumber) {
       const existingInvoice = allTransactions?.find(
         (transaction) => transaction.ref_number === refNumber
       )
+
       if (existingInvoice) {
         const updatedInvoice: Transaction = {
           ...existingInvoice,
-          reason_id: 'unvoid',
+          reason_id: 'unvoid', // Mengubah reason_id menjadi "unvoid"
         }
 
-        updatePosMutation.mutate(updatedInvoice)
+        updatePosMutation.mutate(updatedInvoice, {
+          onSuccess: () => {
+            message.success('Transaksi berhasil diunvoid!') // Menampilkan pesan sukses
+            setLoadingSpinner(true) // Menyalakan spinner
+
+            setTimeout(() => {
+              setLoadingSpinner(false) // Mematikan spinner
+              navigate('/listvoid') // Mengarahkan ke ListVoid
+            }, 3000)
+          },
+          onError: (error) => {
+            message.error(`Terjadi kesalahan: ${error.message}`)
+          },
+        })
       } else {
-        console.error('Invoice with ref_number not found:', refNumber)
+        message.error('Invoice dengan ref_number tidak ditemukan.')
       }
     } else {
-      console.error('No valid ref_number found.')
+      message.error('Tidak ada ref_number yang valid ditemukan.')
     }
   }
 
@@ -219,6 +250,8 @@ const DetailKledo: React.FC = () => {
             down_payment: amountPaid || 0,
             witholding_percent: 0,
             witholding_amount: amountPaid || 0,
+            status: 0,
+            trans_date: selectedDates,
           },
         ],
       }
@@ -242,7 +275,7 @@ const DetailKledo: React.FC = () => {
         }
 
         // Mutate untuk mengirim pembaruan ke server
-        updatePosMutation.mutate(updatedInvoice)
+        updatePosMutation.mutate(updatedInvoice as any)
       } else {
         console.error('Invoice with ref_number not found:', refNumber)
       }
@@ -479,7 +512,14 @@ const DetailKledo: React.FC = () => {
       ),
     },
   ]
+  const [loading, setLoading] = useState(true)
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false)
+    }, 2000)
+    return () => clearTimeout(timer)
+  }, [])
   return (
     <div style={{ padding: '20px' }}>
       <Card
@@ -507,19 +547,24 @@ const DetailKledo: React.FC = () => {
                 className="ant-dropdown-link"
                 onClick={(e) => e.preventDefault()}
               >
-                <svg
-                  viewBox="64 64 896 896"
-                  focusable="false"
-                  data-icon="more"
-                  width="1em"
-                  height="1em"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M456 231a56 56 0 10112 0 56 56 0 10-112 0zm0 280a56 56 0 10112 0 56 56 0 10-112 0zm0 280a56 56 0 10112 0 56 56 0 10-112 0z" />
-                </svg>
+                {loading ? (
+                  <Spin size="small" /> // Menampilkan spinner saat loading
+                ) : (
+                  <svg
+                    viewBox="64 64 896 896"
+                    focusable="false"
+                    data-icon="more"
+                    width="2em" // Lebar ikon
+                    height="2em" // Tinggi ikon
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M456 231a56 56 0 10112 0 56 56 0 10-112 0zm0 280a56 56 0 10112 0 56 56 0 10-112 0zm0 280a56 56 0 10112 0 56 56 0 10-112 0z" />
+                  </svg>
+                )}
               </a>
             </Dropdown>
+
             <Col>
               {showButtons && (
                 <>
@@ -666,11 +711,14 @@ const DetailKledo: React.FC = () => {
               </Col>
             </Row>
             <Divider style={{ margin: '16px 0' }} />
+
             <>
               {witholdings.map((witholding: any, index: number) => (
                 <Row key={index} style={{ marginTop: '8px' }}>
                   <Col span={12} style={{ textAlign: 'left' }}>
-                    <Text strong>{witholding.name}</Text>
+                    <a href={`/voidwitholdingpersen/${ref_number}`}>
+                      <Text strong>{witholding.name}</Text>
+                    </a>
                   </Col>
                   <Col span={12} style={{ textAlign: 'right' }}>
                     <Text strong>{formatNumber(witholding.down_payment)}</Text>

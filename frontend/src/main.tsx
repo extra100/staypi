@@ -83,6 +83,9 @@ import SudahDivalidasi from './pages/api/SudahDivalidasi'
 import ListSudahValidasiMasuk from './pages/api/ListSudahValidasiMasuk'
 import ListVoid from './pages/ListVoid'
 import ListReturn from './pages/ListReturn'
+import DeleteWitholdingPage from './pages/api/hapusArrayAtWitholding'
+import VoidWithlodingArray from './pages/api/voidArrayWitholdings'
+
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
 const router = createBrowserRouter(
@@ -139,7 +142,14 @@ const router = createBrowserRouter(
       <Route path="/hitunglah" element={<BarangSold />} />
       <Route path="/printnota" element={<Receipt />} />
       <Route path="/listpindah" element={<ListPindah />} />
-
+      <Route
+        path="/hapusarray/:ref_number"
+        element={<DeleteWitholdingPage />}
+      />
+      <Route
+        path="/voidwitholdingpersen/:ref_number"
+        element={<VoidWithlodingArray />}
+      />
       <Route
         path="/transfer-detail/:ref_number"
         element={<WarehouseTransferDetail />}

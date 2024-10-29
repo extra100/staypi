@@ -74,7 +74,6 @@ const ListTransaksi: React.FC = () => {
         </a>
       ),
     },
-
     {
       title: 'Pelanggan',
       dataIndex: ['contacts', 0, 'id'],
@@ -83,47 +82,67 @@ const ListTransaksi: React.FC = () => {
     },
     {
       title: 'Status',
-      dataIndex: 'status_id',
-      key: 'status_id',
-      render: (status_id: number) => {
+      key: 'status',
+      render: (record: any) => {
+        const totalDownPayment = record.witholdings.reduce(
+          (sum: number, witholding: any) =>
+            sum + (witholding.down_payment || 0),
+          0
+        )
+
+        const due = record.amount - totalDownPayment
         let color = ''
         let text = ''
 
-        switch (status_id) {
-          case 1:
-            color = 'red'
-            text = 'Belum Dibayar'
-            break
-          case 2:
-            color = 'orange'
-            text = 'Dibayar Sebagian'
-            break
-          case 3:
-            color = 'green'
-            text = 'Lunas'
-            break
-          default:
-            color = 'gray'
-            text = 'Unknown Status'
+        if (due === 0) {
+          color = 'green'
+          text = 'Lunas'
+        } else if (totalDownPayment > 0 && due > 0) {
+          color = 'orange'
+          text = 'Dibayar Sebagian'
+        } else {
+          color = 'red'
+          text = 'Belum Dibayar'
         }
 
         return <Tag color={color}>{text}</Tag>
       },
     },
     {
-      title: 'Terbayar',
-      dataIndex: 'down_payment',
-      key: 'down_payment',
-    },
-    {
-      title: 'Sisa Tagihan',
-      dataIndex: 'due',
-      key: 'due',
-    },
-    {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
+      render: (amount: number) => (
+        <div style={{ textAlign: 'right' }}>{amount}</div>
+      ),
+    },
+    {
+      title: 'Terbayar',
+      dataIndex: 'witholdings',
+      key: 'witholdings',
+      render: (witholdings: any[]) => {
+        const totalDownPayment = witholdings.reduce(
+          (sum, witholding) => sum + (witholding.down_payment || 0),
+          0
+        )
+
+        return <div style={{ textAlign: 'right' }}>{totalDownPayment}</div>
+      },
+    },
+    {
+      title: 'Sisa Tagihan',
+      key: 'due',
+      render: (record: any) => {
+        const totalDownPayment = record.witholdings.reduce(
+          (sum: number, witholding: any) =>
+            sum + (witholding.down_payment || 0),
+          0
+        )
+
+        const due = record.amount - totalDownPayment
+
+        return <div style={{ textAlign: 'right' }}>{due}</div>
+      },
     },
   ]
 

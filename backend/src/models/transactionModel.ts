@@ -3,6 +3,8 @@ import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
 @modelOptions({ schemaOptions: { timestamps: true } })
 export class Transaction {
   @prop({ required: true })
+  public id?: number
+  @prop({ required: true })
   public trans_date?: string
   @prop({ required: true })
   public jalur?: string
@@ -108,7 +110,11 @@ class Witholding {
   @prop({ required: true })
   public down_payment!: number
   @prop({ required: true })
+  public status!: number
+  @prop({ required: true })
   public name!: string
+  @prop({ required: true })
+  public trans_date!: string
   @prop()
   public witholding_amount!: number
 

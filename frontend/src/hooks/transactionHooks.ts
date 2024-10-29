@@ -108,17 +108,67 @@ export const useUpdateTransactionMutation = () => {
 //   )
 // }
 
-export const useDeleteTransactionMutation = () => {
+// export const useDeleteTransactionMutation = () => {
+//   const queryClient = useQueryClient()
+
+//   return useMutation(
+//     (mahelnye: string) => {
+//       const result = apiClient.delete(`/api/transactions/${mahelnye}`)
+//       result.catch((error) => {
+//         console.error('Error saat menghapus:', error.response.data)
+//       })
+
+//       return result
+//     },
+//     {
+//       onSuccess: () => {
+//         queryClient.invalidateQueries(['transactions'])
+//       },
+//     }
+//   )
+// }
+
+export const useDeleteWitholdingMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation(
-    (mahelnye: string) => {
-      const result = apiClient.delete(`/api/transactions/${mahelnye}`)
-      result.catch((error) => {
-        console.error('Error saat menghapus:', error.response.data)
-      })
+    async ({
+      ref_number,
+      witholdingId,
+    }: {
+      ref_number: string
+      witholdingId: string
+    }) => {
+      return apiClient.delete(
+        `/api/transactions/${ref_number}/witholdings/${witholdingId}`
+      )
+    },
+    {
+      onSuccess: (_, { ref_number }) => {
+        queryClient.invalidateQueries(['transactions', ref_number])
+      },
+    }
+  )
+}
 
-      return result
+export const useUpdateWitholdingPercentMutation = () => {
+  const queryClient = useQueryClient()
+  return useMutation(
+    async ({
+      ref_number,
+      witholdingId,
+      newPercent,
+    }: {
+      ref_number: string
+      witholdingId: string
+      newPercent: number
+    }) => {
+      await apiClient.patch(
+        `/api/transactions/${ref_number}/witholding/${witholdingId}`,
+        {
+          status: newPercent,
+        }
+      )
     },
     {
       onSuccess: () => {

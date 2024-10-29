@@ -10,7 +10,7 @@ export interface Invoice {
 export function useIdInvoice(ref_number: string) {
   const [loading, setLoading] = useState(true)
   const [getIdAtInvoice, setgetIdAtInvoice] = useState<Invoice | null>(null)
-  console.log({ getIdAtInvoice })
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -22,8 +22,6 @@ export function useIdInvoice(ref_number: string) {
           const matchedInvoice = parsedData.find(
             (invoice) => invoice.ref_number === ref_number
           )
-          console.log({ matchedInvoice })
-
           if (matchedInvoice) {
             setgetIdAtInvoice(matchedInvoice)
             setLoading(false)

@@ -10,6 +10,7 @@ import {
   Col,
   Typography,
   DatePicker,
+  message,
 } from 'antd'
 import { useStokBarang } from './StokBarang'
 import { useIdWarehouse } from './namaWarehouse'
@@ -45,6 +46,8 @@ const { Option } = Select
 const { Title, Text } = Typography
 
 const StockSelectorTable = () => {
+  const [loadingSpinner, setLoadingSpinner] = useState(false) // State untuk spinner
+
   const { Panel } = Collapse
   const navigate = useNavigate()
 
@@ -656,6 +659,7 @@ const StockSelectorTable = () => {
     const simpanGudang = saveNamaGudang[selectedWarehouseId as any]
 
     const invoiceData = {
+      id: uniqueNumber,
       jalur: 'penjualan',
       ref_number: refNumber,
       ref_transaksi: 0,
@@ -701,6 +705,8 @@ const StockSelectorTable = () => {
           down_payment: amountPaid || 0,
           witholding_percent: 0,
           witholding_amount: 0,
+          status: 0,
+          trans_date: formatDate(selectedDates[0]),
         },
       ],
       contacts: [
@@ -734,9 +740,27 @@ const StockSelectorTable = () => {
       externalId: 0,
     }
 
+    setLoadingSpinner(true)
+
+    // Simpan invoice data
     saveInvoiceData(invoiceData)
-    addPosMutation.mutate(invoiceData as any)
-    navigate('/listkledo')
+
+    // Panggil mutasi untuk menambahkan transaksi
+    addPosMutation.mutate(invoiceData as any, {
+      onSuccess: () => {
+        message.success('Transaksi berhasil disimpan!') // Tampilkan pesan sukses
+
+        // Tambahkan timer 3 detik sebelum mengarahkan
+        setTimeout(() => {
+          setLoadingSpinner(false) // Matikan spinner
+          navigate('/listkledo') // Arahkan ke ListKledo
+        }, 3000)
+      },
+      onError: (error: any) => {
+        message.error(`Terjadi kesalahan: ${error.message}`) // Tampilkan pesan error
+        setLoadingSpinner(false) // Matikan spinner jika terjadi error
+      },
+    })
   }
 
   const columns = [

@@ -75,15 +75,66 @@ transactionRouter.put(
   })
 )
 
+// transactionRouter.delete(
+//   '/:idol',
+//   asyncHandler(async (req, res) => {
+//     const teneDwang = await TransactionModel.findByIdAndDelete(req.params.idol)
+//     if (teneDwang) {
+//       res.json({ message: 'Pos deleted successfully' })
+//     } else {
+//       res.status(404).json({ message: 'Pos Not Found' })
+//     }
+//   })
+// )
+
 transactionRouter.delete(
-  '/:idol',
-  asyncHandler(async (req, res) => {
-    const teneDwang = await TransactionModel.findByIdAndDelete(req.params.idol)
-    if (teneDwang) {
-      res.json({ message: 'Pos deleted successfully' })
+  '/:ref_number/witholdings/:witholdingId',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { ref_number, witholdingId } = req.params
+
+    const transaction = await TransactionModel.findOne({ ref_number })
+
+    if (transaction) {
+      transaction.witholdings = transaction.witholdings.filter(
+        (witholding: any) => witholding._id.toString() !== witholdingId
+      )
+
+      await transaction.save()
+      res.json({ message: 'Witholding removed successfully' })
     } else {
-      res.status(404).json({ message: 'Pos Not Found' })
+      res.status(404).json({ message: 'Transaction not found' })
     }
+  })
+)
+transactionRouter.patch(
+  '/:ref_number/witholding/:witholdingId',
+  asyncHandler(async (req: any, res: any) => {
+    const { ref_number, witholdingId } = req.params
+    const { status } = req.body
+
+    const transaction = await TransactionModel.findOne({
+      ref_number,
+      'witholdings._id': witholdingId,
+    })
+
+    if (!transaction) {
+      return res
+        .status(404)
+        .json({ message: 'Transaction or witholding not found' })
+    }
+
+    const withholding = transaction.witholdings.find(
+      (witholding: any) => witholding._id.toString() === witholdingId
+    )
+
+    if (!withholding) {
+      return res.status(404).json({ message: 'Withholding not found' })
+    }
+
+    withholding.status = status // Update the percent
+
+    await transaction.save()
+    res.status(200).json({ message: 'Withholding updated successfully' })
   })
 )
 

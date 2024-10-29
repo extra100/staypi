@@ -216,7 +216,7 @@ const KumpulanAksi: React.FC = () => {
           witholdings: updatedWithholdings,
         }
 
-        updatePosMutation.mutate(updatedInvoice)
+        updatePosMutation.mutate(updatedInvoice as any)
       } else {
         console.error('Invoice with ref_number not found:', refNumber)
       }
