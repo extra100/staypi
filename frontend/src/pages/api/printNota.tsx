@@ -25,6 +25,8 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
+
+  const witholdings = getPosDetail?.witholdings || []
   const barangName = getPosDetail?.items?.[0]?.name
 
   // const contactName = getPosDetail?.contacts?.[0]?.name
@@ -42,7 +44,13 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const getGudangDetail = gudang?.find(
     (gedung: any) => gedung.name === gudangName
   )
+  const totalDownPayment = witholdings
+    .filter((witholding: any) => witholding.status === 0) // Filter where status is 0
+    .reduce((total: number, witholding: any) => {
+      return total + (witholding.down_payment || 0)
+    }, 0)
 
+  const sisaTagohan = totalSemua - totalDownPayment
   const namaGudang = getGudangDetail?.name ?? 0
   const codeGudang = getGudangDetail?.code ?? 0
   const photoGudang = getGudangDetail?.photo ?? 0
@@ -72,7 +80,9 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
       }
     }
   }, [allTransactions, contacts])
-
+  const formatNumber = (num: number) => {
+    return num.toLocaleString('en-US')
+  }
   const columns = [
     {
       title: 'No',
@@ -248,11 +258,42 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             }}
           >
             <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
-              Cash:
+              Jml Bayar:
             </Text>
             <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
-              {jumlahBayar?.toLocaleString('id-ID')}
+              {witholdings.map((witholding: any, index: number) => (
+                <Row key={index}>
+                  <Col span={12} style={{ textAlign: 'left' }}></Col>
+                  <Col span={12} style={{ textAlign: 'right' }}>
+                    <Text strong>{formatNumber(witholding.down_payment)}</Text>
+                  </Col>
+                </Row>
+              ))}
             </Text>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-start',
+              gap: '3px',
+            }}
+          >
+            <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
+              Total Bayar:
+            </Text>
+            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
+              {totalDownPayment?.toLocaleString('id-ID')}
+            </Text>
+            {/* <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
+              {witholdings.map((witholding: any, index: number) => (
+                <Row key={index}>
+                  <Col span={12} style={{ textAlign: 'left' }}></Col>
+                  <Col span={12} style={{ textAlign: 'right' }}>
+                    <Text strong>{formatNumber(totalDownPayment)}</Text>
+                  </Col>
+                </Row>
+              ))}
+            </Text> */}
           </div>
 
           <div
@@ -266,7 +307,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
               Sisa Tagihan:
             </Text>
             <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
-              {piutang?.toLocaleString('id-ID')}
+              {sisaTagohan?.toLocaleString('id-ID')}
             </Text>
           </div>
         </Col>
