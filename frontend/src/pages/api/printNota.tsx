@@ -29,7 +29,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
 
   // const contactName = getPosDetail?.contacts?.[0]?.name
   const gudangName = getPosDetail?.warehouses?.[0]?.name
-  // console.log({ gudangName })
+  const qtyUpdated = getPosDetail?.items?.[0]?.qty_update
 
   const tglTransaksi = getPosDetail?.trans_date ?? 0
   const refNumber = getPosDetail?.ref_number ?? 0
@@ -38,11 +38,10 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const piutang = getPosDetail?.due ?? 0
   //
   const { data: gudang } = useGetWarehousesQuery()
-  // console.log({ gudang })
+
   const getGudangDetail = gudang?.find(
     (gedung: any) => gedung.name === gudangName
   )
-  // console.log({ getGudangDetail })
 
   const namaGudang = getGudangDetail?.name ?? 0
   const codeGudang = getGudangDetail?.code ?? 0
@@ -74,21 +73,18 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
     }
   }, [allTransactions, contacts])
 
-  const [fromQtyState, setFromQtyState] = useState<{ [key: number]: number }>(
-    {}
-  )
-  const generateSerialNumber = (productId: number): string => {
-    const fromQty = fromQtyState[productId] || 0
-    return `IBO${fromQty}**gor37`
-  }
   const columns = [
     {
-      title: 'Nomor',
-      dataIndex: 'serial_number',
-      key: 'serial_number',
-      render: (_: any, record: any) => {
-        const serialNumber = generateSerialNumber(record.product_id)
-        return serialNumber
+      title: 'No',
+      key: 'qty_update',
+      render: (text: any, record: any) => {
+        const inv = allTransactions?.find(
+          (transaction: any) => transaction.ref_number === ref_number
+        )
+        const item = inv?.items.find(
+          (item: any) => item.finance_account_id === record.finance_account_id
+        )
+        return inv && item ? `inv-${item.qty_update}` : 'inv -'
       },
     },
     {
