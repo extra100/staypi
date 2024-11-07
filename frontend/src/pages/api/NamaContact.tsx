@@ -24,7 +24,7 @@ export function useIdContact() {
 
         while (hasMoreData) {
           const contactResponse = await fetch(
-            `${HOST}/finance/contacts?per_page=400&page=${page}&group_id=13`,
+            `${HOST}/finance/contacts?per_page=400&page=${page}&group_id=9`,
             {
               headers: {
                 Authorization: `Bearer ${TOKEN}`,

@@ -18,7 +18,7 @@ export function TakeInvoicesFromKledoBasedOnPelanggan() {
     const fetchData = async (page: number) => {
       try {
         const responGudang = await fetch(
-          `${HOST}/finance/invoices?per_page=400&page=${page}&contact_groups=12,13,1,9`,
+          `${HOST}/finance/invoices?per_page=400&page=${page}&contact_groups=9`,
 
           {
             headers: {
@@ -36,10 +36,7 @@ export function TakeInvoicesFromKledoBasedOnPelanggan() {
         const newInvoices = dataGudang.data.data
 
         const filteredInvoices = newInvoices.filter(
-          (invoice: TransaksiPolosan) => invoice.contact?.group_id === 12,
-          13,
-          1,
-          9
+          (invoice: TransaksiPolosan) => invoice.contact?.group_id === 9
         )
 
         setInvoiceBasedOnPelanggan((prev) => [...prev, ...filteredInvoices])

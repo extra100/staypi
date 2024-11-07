@@ -35,13 +35,13 @@ const FilteredContact: React.FC = () => {
 
   const columns = [
     {
-      title: 'Id pelanggan',
-      dataIndex: 'id',
-      key: 'id',
+      title: 'Nama Pelanggan',
+      dataIndex: 'name',
+      key: 'name',
     },
 
     {
-      title: 'Nama Pelanggan',
+      title: 'Grup Pelanggan',
       dataIndex: 'group_name', // Accesses nested group_id inside contact
       key: 'group_name',
       render: (group_name: string) => (
@@ -61,7 +61,7 @@ const FilteredContact: React.FC = () => {
       key: 'receivable',
       render: (receivable: number) => (
         <div style={{ textAlign: 'right' }}>
-          {`Rp ${receivable.toLocaleString()}`}
+          {`Rp ${receivable.toLocaleString('id-ID')}`}
         </div>
       ),
     },
