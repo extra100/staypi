@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express'
 import asyncHandler from 'express-async-handler'
-
-import { PpModel } from '../models/ppModel'
+import { PpModel } from '../models/Ppmodel'
 
 export const ppRouter = express.Router()
 ppRouter.post(
