@@ -248,7 +248,7 @@ const SudahDivalidasi: React.FC = () => {
                   </Col>
 
                   <Col span={6} style={{ textAlign: 'center' }}>
-                    <Text strong>{fromWarehouseName}</Text>
+                    <Text strong>{toWarehouseName}</Text>
                   </Col>
                 </Row>
                 <Row>
@@ -283,7 +283,7 @@ const SudahDivalidasi: React.FC = () => {
                     <Text>: -</Text>
                   </Col>
                   <Col span={6} style={{ textAlign: 'center' }}>
-                    <Text strong>{toWarehouseName}</Text>
+                    <Text strong>{fromWarehouseName}</Text>
                   </Col>
                 </Row>
               </Col>

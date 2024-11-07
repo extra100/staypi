@@ -36,7 +36,10 @@ const StockSelectorTable = () => {
   //   { id: string; name: string; qty: number }[]
   // >([])
   const [dataSource, setDataSource] = useState<any[]>([])
-  const { idContact } = useIdContact()
+  const [selectedContactGroup, setSelectedContactGroup] = useState<any | null>(
+    null
+  )
+  const { loading, idContact } = useIdContact(selectedContactGroup)
 
   const [selectedContact, setSelectedContact] = useState<number | null>(null)
   //kontak

@@ -890,7 +890,7 @@ const DetailKledo: React.FC = () => {
           <Row justify="end">
             <Col>
               <Button type="primary" htmlType="submit">
-                Transaksi Berhail...klik submit
+                Tambah Pembayaran
               </Button>
             </Col>
           </Row>

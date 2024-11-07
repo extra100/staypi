@@ -77,7 +77,10 @@ const Pp = () => {
 
   const { idWarehouse } = useIdWarehouse()
 
-  const { idContact } = useIdContact()
+  const [selectedContactGroup, setSelectedContactGroup] = useState<any | null>(
+    null
+  )
+  const { loading, idContact } = useIdContact(selectedContactGroup)
   const { data: contacts } = useGetContactsQuery()
 
   const { saveInvoiceData } = SaveApiPemesananPenjualan()

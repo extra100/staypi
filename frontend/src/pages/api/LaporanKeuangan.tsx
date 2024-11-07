@@ -1,18 +1,27 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useContext } from 'react'
 import { Select, Col, Table, Input } from 'antd'
 import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
 import SingleDate from '../SingleDate'
 import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
 import { useNavigate } from 'react-router-dom'
+import UserContext from '../../contexts/UserContext'
 
 const LaporanKeuangan = () => {
   const { data: gudangdb } = useGetWarehousesQuery()
   const { data: transaksiData } = useGetTransaksisQuery()
   const navigate = useNavigate()
+  const userContext = useContext(UserContext)
+  const { user } = userContext || {}
+  const idOutletLoggedIn = user ? Number(user.id_outlet) : 0
 
-  const [selectedWarehouseId, setSelectedWarehouseId] = useState<number | null>(
-    null
-  )
+  const [selectedWarehouseId, setSelectedWarehouseId] =
+    useState<number>(idOutletLoggedIn)
+
+  useEffect(() => {
+    if (idOutletLoggedIn !== 0) {
+      setSelectedWarehouseId(idOutletLoggedIn)
+    }
+  }, [idOutletLoggedIn])
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [clearedWarehouseStock, setClearedWarehouseStock] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState<string>('')
@@ -149,7 +158,7 @@ const LaporanKeuangan = () => {
           }
           value={selectedWarehouseId}
           onChange={handleWarehouseChange}
-          disabled={!gudangdb}
+          disabled={!user?.isAdmin}
         >
           {gudangdb?.map((warehouse) => (
             <Select.Option

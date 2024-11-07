@@ -9,7 +9,7 @@ export class Barang {
   public name!: string
   @prop({ required: true, unique: true })
   public price!: number
-  @prop({ required: true, unique: true })
+  @prop()
   public unit_id!: number
   @prop({ required: true, unique: true })
   public unit?: {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useContext } from 'react'
 import { Select, Col, Table, Input } from 'antd'
 import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
 import { useWarehouseStock } from './fetchSemuaStok'
@@ -11,14 +11,25 @@ import {
   useAmbilDetailBarangGoretsQuery,
 } from '../../hooks/ambilDetailBarangDariGoretHooks'
 import { useGetReturnssQuery } from '../../hooks/returnHooks'
+import { Warehouse } from '../../types/Warehouse'
+import UserContext from '../../contexts/UserContext'
 
 const LaporanStock = () => {
+  const userContext = useContext(UserContext)
+  const { user } = userContext || {}
   const { data: gudangdb } = useGetWarehousesQuery()
+  const idOutletLoggedIn = user ? Number(user.id_outlet) : 0
+  console.log({ idOutletLoggedIn })
 
-  const [selectedWarehouseId, setSelectedWarehouseId] = useState<number | null>(
-    null
-  )
-  console.log({ selectedWarehouseId })
+  const [selectedWarehouseId, setSelectedWarehouseId] =
+    useState<number>(idOutletLoggedIn)
+
+  useEffect(() => {
+    if (idOutletLoggedIn !== 0) {
+      setSelectedWarehouseId(idOutletLoggedIn)
+    }
+  }, [idOutletLoggedIn])
+
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [clearedWarehouseStock, setClearedWarehouseStock] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState<string>('')
@@ -207,12 +218,12 @@ const LaporanStock = () => {
       render: (text: any, record: any) => totalQtyTerjual[record.id] || 0,
     },
     {
-      title: 'Mutasi Keluar',
+      title: 'Mutasi Masuk',
       key: 'totalMutasiKeluar',
       render: (text: any, record: any) => totalMutasiKeluar[record.id] || 0,
     },
     {
-      title: 'Mutasi Masuk',
+      title: 'Mutasi Keluar',
       key: 'totalMutasiMasuk',
       render: (text: any, record: any) => totalMutasiMasuk[record.id] || 0,
     },
@@ -249,7 +260,7 @@ const LaporanStock = () => {
         const po = poValues[record.id] || 0
 
         const stokTerupdate =
-          stock + returning + mutasiMasuk - penjualan - mutasiKeluar - po
+          stock + returning + mutasiKeluar - penjualan - mutasiMasuk - po
         return stokTerupdate
       },
     },
@@ -268,33 +279,29 @@ const LaporanStock = () => {
 
   return (
     <div>
-      <Col span={12}>
-        <Select
-          placeholder="Warehouse"
-          showSearch
-          style={{ width: '70%' }}
-          optionFilterProp="label"
-          filterOption={(input: any, option: any) =>
-            option?.label
-              ?.toString()
-              .toLowerCase()
-              .includes(input.toLowerCase())
-          }
-          value={selectedWarehouseId}
-          onChange={handleWarehouseChange}
-          disabled={!gudangdb}
-        >
-          {gudangdb?.map((warehouse) => (
-            <Select.Option
-              key={warehouse.id}
-              value={warehouse.id}
-              label={warehouse.name}
-            >
-              {warehouse.name}
-            </Select.Option>
-          ))}
-        </Select>
-      </Col>
+      <Col span={12}></Col>
+      <Select
+        showSearch
+        optionFilterProp="children"
+        filterOption={(input, option) =>
+          option?.children
+            ? option.children
+                .toString()
+                .toLowerCase()
+                .includes(input.toLowerCase())
+            : false
+        }
+        style={{ marginRight: '10px', width: '320px' }}
+        value={selectedWarehouseId}
+        onChange={handleWarehouseChange}
+        disabled={!user?.isAdmin}
+      >
+        {gudangdb?.map((warehouse: Warehouse) => (
+          <Select.Option key={warehouse.id} value={warehouse.id}>
+            {warehouse.name}
+          </Select.Option>
+        ))}
+      </Select>
 
       <Col span={12}>
         <SingleDate value={selectedDate as any} onChange={handleDateChange} />

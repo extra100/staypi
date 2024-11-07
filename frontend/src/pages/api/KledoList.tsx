@@ -40,15 +40,15 @@ const ListTransaksi: React.FC = () => {
   const filteredData = data
     ?.filter(
       (transaction) =>
-        (transaction.warehouse_id === Number(user?.id_outlet) &&
-          transaction.jalur === 'penjualan') ||
-        (transaction.jalur === 'pemesanan' &&
-          transaction.reason_id === 'unvoid')
+        transaction.warehouse_id === Number(user?.id_outlet) &&
+        transaction.jalur === 'penjualan' &&
+        transaction.reason_id !== 'void' // Filter untuk mengecualikan transaksi dengan reason_id "void"
     )
     ?.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
+
   const [activeButton, setActiveButton] = useState('')
   const navigate = useNavigate()
   const handleButtonClick = (value: any) => {

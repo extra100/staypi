@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react'
 import { Select, Row, Col, Table, Input } from 'antd'
 import { useIdContact } from './NamaContact'
 import { useNavigate } from 'react-router-dom'
+import { useGetContactsQuery } from '../../hooks/contactHooks'
 
 const { Option } = Select
 
 const FilteredContact: React.FC = () => {
   const navigate = useNavigate()
-  const { idContact } = useIdContact()
-  const [selectedContactGroup, setSelectedContactGroup] = useState<
-    string | null
-  >(null)
+  const { data: contacts } = useGetContactsQuery()
+  const [selectedContactGroup, setSelectedContactGroup] = useState<any | null>(
+    null
+  )
+  const { idContact } = useIdContact(selectedContactGroup)
   const [filteredContacts, setFilteredContacts] = useState<any[]>([])
   const [searchName, setSearchName] = useState<string>('')
 
@@ -19,47 +21,51 @@ const FilteredContact: React.FC = () => {
   }
 
   useEffect(() => {
-    let contacts = idContact
+    let contactsToDisplay = idContact || []
+
     if (selectedContactGroup) {
-      contacts = contacts.filter(
+      contactsToDisplay = contactsToDisplay.filter(
         (contact: any) =>
-          contact.group_name === selectedContactGroup &&
+          contact.group_id === selectedContactGroup &&
           parseFloat(contact.receivable) !== 0
       )
     }
 
     if (searchName) {
-      contacts = contacts.filter((contact: any) =>
+      contactsToDisplay = contactsToDisplay.filter((contact: any) =>
         contact.name.toLowerCase().includes(searchName.toLowerCase())
       )
     }
 
-    setFilteredContacts(contacts)
+    setFilteredContacts(contactsToDisplay)
   }, [selectedContactGroup, idContact, searchName])
 
   const columns = [
+    {
+      title: 'Group Id Pelanggan',
+      dataIndex: 'group_name',
+      key: 'group_name',
+    },
     {
       title: 'Nama Pelanggan',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Grup Pelanggan',
-      dataIndex: 'group_name',
-      key: 'group_name',
-      render: (group_name: string) => (
+      title: 'Id Pelanggan',
+      dataIndex: 'id',
+      key: 'id',
+      render: (id: string) => (
         <span
           style={{ color: 'blue', cursor: 'pointer' }}
-          onClick={() =>
-            navigate(`/detailpiutangperkontak?group_name=${group_name}`)
-          }
+          onClick={() => navigate(`/detailpiutangperkontak?id=${id}`)}
         >
-          {group_name}
+          {id}
         </span>
       ),
     },
     {
-      title: 'Piutang',
+      title: 'Piutang/Pelanggan',
       dataIndex: 'receivable',
       key: 'receivable',
       render: (receivable: number) => (
@@ -90,18 +96,18 @@ const FilteredContact: React.FC = () => {
             value={selectedContactGroup}
             onChange={handleContactChange}
           >
-            {Array.isArray(idContact) &&
+            {Array.isArray(contacts) &&
               [
                 ...new Map(
-                  idContact.map((item) => [item.group_name, item])
+                  contacts.map((item) => [item.group_id, item])
                 ).values(),
               ].map((item) => (
                 <Option
-                  key={item.group_name}
-                  value={item.group_name}
-                  label={item.group_name}
+                  key={item.group_id}
+                  value={item.group_id}
+                  label={item.group_id}
                 >
-                  {item.group_name}
+                  {item.group?.name ?? 'Unknown Group'}{' '}
                 </Option>
               ))}
           </Select>

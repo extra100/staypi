@@ -90,11 +90,6 @@ const AmbilDetailBarangDariKledo = () => {
       dataIndex: 'code',
       key: 'code',
     },
-    {
-      title: 'code',
-      dataIndex: 'warehouse_id',
-      key: 'warehouse_id',
-    },
   ]
 
   return (
@@ -144,7 +139,7 @@ const AmbilDetailBarangDariKledo = () => {
         dataSource={filteredStock}
         columns={columns}
         rowKey="id"
-        pagination={false}
+        pagination={{ pageSize: 50 }}
       />
       <Button type="primary" onClick={handleSave} style={{ margin: '16px 0' }}>
         Save Filtered Stock

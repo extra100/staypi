@@ -76,7 +76,9 @@ const StockSelectorTable = () => {
 
   const { idWarehouse } = useIdWarehouse()
 
-  const { idContact } = useIdContact()
+  // const { idContact } = useIdContact()
+  const { idContact } = useIdContact('')
+
   const { data: contacts } = useGetContactsQuery()
 
   const { saveInvoiceData } = SaveApi()

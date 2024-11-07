@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { CLIENT_ID, CLIENT_SECRET, HOST } from '../../config'
+import { HOST } from '../../config'
 import TOKEN from '../../token'
 
 export interface Contact {
@@ -10,11 +10,14 @@ export interface Contact {
   receivable: number
 }
 
-export function useIdContact() {
+export function useIdContact(groupId: string | null) {
   const [loading, setLoading] = useState(true)
   const [idContact, setIdContact] = useState<Contact[]>([])
 
   useEffect(() => {
+    // Avoid fetching if groupId is not set
+    if (!groupId) return
+
     const fetchData = async () => {
       setLoading(true)
       try {
@@ -23,8 +26,8 @@ export function useIdContact() {
         let hasMoreData = true
 
         while (hasMoreData) {
-          const contactResponse = await fetch(
-            `${HOST}/finance/contacts?per_page=400&page=${page}&group_id=9`,
+          const response = await fetch(
+            `${HOST}/finance/contacts?per_page=400&page=${page}&group_id=${groupId}`,
             {
               headers: {
                 Authorization: `Bearer ${TOKEN}`,
@@ -32,30 +35,23 @@ export function useIdContact() {
             }
           )
 
-          if (!contactResponse.ok) {
+          if (!response.ok) {
             throw new Error('Failed to fetch contacts')
           }
 
-          const dataContact = await contactResponse.json()
+          const data = await response.json()
 
-          const formattedData: Contact[] = dataContact.data.data.map(
-            (item: any) => {
-              const groupId = item.group?.id ?? 'unknown'
-              const groupName = item.group?.name ?? 'unknown'
-
-              return {
-                id: item.id,
-                name: item.name,
-                group_id: groupId,
-                group_name: groupName,
-                receivable: item.receivable,
-              }
-            }
-          )
+          const formattedData: Contact[] = data.data.data.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            group_id: item.group?.id ?? 'unknown',
+            group_name: item.group?.name ?? 'unknown',
+            receivable: item.receivable,
+          }))
 
           allContacts = [...allContacts, ...formattedData]
 
-          if (dataContact.data.data.length < 200) {
+          if (data.data.data.length < 400) {
             hasMoreData = false
           } else {
             page++
@@ -71,7 +67,7 @@ export function useIdContact() {
     }
 
     fetchData()
-  }, [])
+  }, [groupId])
 
   const memoizedData = useMemo(() => idContact, [idContact])
 

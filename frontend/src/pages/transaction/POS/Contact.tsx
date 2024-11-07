@@ -6,7 +6,7 @@ import UserContext from '../../../contexts/UserContext'
 
 const Contact = () => {
   const addPosMutation = useAddTransactionMutation()
-  const { idContact } = useIdContact()
+  const { idContact } = useIdContact('')
   const [selectedContact, setSelectedContact] = useState<number | null>(null)
   const handleContactChange = (value: number) => {
     setSelectedContact(value)

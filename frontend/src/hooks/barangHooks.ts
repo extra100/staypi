@@ -17,3 +17,16 @@ export const useGetBarangByIdQuery = (name: any) =>
     ['contacts', name],
     async () => (await apiClient.get<Barang[]>(`/api/contacts/${name}`)).data
   )
+export const useAddBarangMutation = () => {
+  const queryClient = useQueryClient()
+  return useMutation(
+    (regak: Barang) => {
+      return apiClient.post<Barang>(`/api/barangs`, regak)
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['barangs'])
+      },
+    }
+  )
+}

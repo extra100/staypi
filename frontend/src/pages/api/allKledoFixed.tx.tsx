@@ -39,8 +39,11 @@ const StockSelectorTable = () => {
   const { data: barangs } = useGetBarangsQuery()
 
   const { idWarehouse } = useIdWarehouse()
+  const [selectedContactGroup, setSelectedContactGroup] = useState<any | null>(
+    null
+  )
+  const { loading, idContact } = useIdContact(selectedContactGroup || null)
 
-  const { idContact } = useIdContact()
   const { data: contacts } = useGetContactsQuery()
 
   const { saveInvoiceData } = SaveApi()

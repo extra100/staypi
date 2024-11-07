@@ -25,6 +25,11 @@ import { saveMutation } from './apiMutasi'
 import UserContext from '../../contexts/UserContext'
 import { AnyNsRecord } from 'dns'
 import SingleDate from '../SingleDate'
+import {
+  useAmbilDetailBarangGoretsQuery,
+  useSimpanDetailBarangDariGoretMutation,
+} from '../../hooks/ambilDetailBarangDariGoretHooks'
+import { useAddBarangMutation } from '../../hooks/barangHooks'
 // import MutasiSuratJalan from './MutasiSuratJalan'
 
 const { Title, Text } = Typography
@@ -65,7 +70,7 @@ const ValidatePindah: React.FC = () => {
 
   const fromWarehouseId =
     warehouseMap[transfer.from_warehouse_id] || transfer.from_warehouse_name
-
+  console.log({ fromWarehouseId })
   const toWarehouseId =
     warehouseMap[transfer.to_warehouse_id] || transfer.to_warehouse_name
 
@@ -138,12 +143,46 @@ const ValidatePindah: React.FC = () => {
   }, [transferData])
   const navigate = useNavigate()
 
+  const { data: existingBarangList } = useAmbilDetailBarangGoretsQuery()
+  const { mutate: saveBarang } = useSimpanDetailBarangDariGoretMutation()
+
+  const simpanBarangBaru = async (): Promise<boolean[]> => {
+    return Promise.all(
+      dataSource.map((row, index) => {
+        // Periksa apakah barang sudah ada berdasarkan `id` dan `warehouse_id`
+        const barangSudahAda = existingBarangList?.some(
+          (barang) => barang.id === row.product_id
+        )
+
+        if (barangSudahAda) {
+          return Promise.resolve(false) // Barang sudah ada, tidak perlu simpan ulang
+        }
+
+        const barangBaru = {
+          warehouse_id: toWarehouseId,
+          trans_date: selectedDates,
+          start_date: selectedDates,
+          code: 2,
+          id: row.product_id,
+          name: row.product_name,
+          stock: transferQty[index] || 0,
+        }
+
+        // Simpan barang baru jika tidak ada duplikat
+        return new Promise<boolean>((resolve) => {
+          saveBarang(barangBaru as any, {
+            onSuccess: () => resolve(true),
+            onError: () => resolve(false),
+          })
+        })
+      })
+    )
+  }
+
   const handleSaveTransfer = async () => {
     const validRefNumber = ref_number || ''
 
     const transferData = {
-      // from_warehouse_id: fromWarehouseId,
-      // to_warehouse_id: toWarehouseId,
       from_warehouse_id: toWarehouseId,
       to_warehouse_id: fromWarehouseId,
       trans_date: selectedDates,
@@ -156,7 +195,6 @@ const ValidatePindah: React.FC = () => {
         code: row.code,
         product_id: row.product_id,
         finance_account_id: row.id,
-
         product_name: row.product_name,
         qty: transferQty[index] || 0,
         unit_name: row.unit_name,
@@ -164,10 +202,17 @@ const ValidatePindah: React.FC = () => {
         before_qty_tujuan: toQtyState[row.product_id] || 0,
       })),
     }
-    // handlePrint()
     saveInvoiceMutasi(transferData)
 
     try {
+      const simpanBarangResults = await simpanBarangBaru()
+
+      if (simpanBarangResults.every((result) => result)) {
+        message.success('Semua barang baru berhasil disimpan.')
+      } else {
+        message.info('Beberapa barang sudah ada dan tidak disimpan ulang.')
+      }
+
       message.success('Data transfer berhasil disimpan!')
       navigate(`/sudah-validasi/${ref_number}`)
 
@@ -175,13 +220,19 @@ const ValidatePindah: React.FC = () => {
         { ref_number: validRefNumber, updatedData: transferData },
         {
           onError: (error) => {
-            message.error('Terjadi kesalahan saat mengupdate data transfer')
+            const errorMessage =
+              error?.message ||
+              'Terjadi kesalahan saat mengupdate data transfer'
+            message.error(errorMessage)
             console.error('Error:', error)
           },
         }
       )
     } catch (error) {
-      message.error('Terjadi kesalahan saat menyimpan data transfer')
+      const errorMessage =
+        (error as Error)?.message ||
+        'Terjadi kesalahan saat menyimpan data transfer'
+      message.error(errorMessage)
       console.error('Error:', error)
     }
   }

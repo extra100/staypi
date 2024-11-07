@@ -27,6 +27,7 @@ import transaksiPolosanRouter from './src/routers/transaksiPolosanRouter'
 import { userRouter } from './src/routers/userRouter'
 import warehouseRouter from './src/routers/warehousesRouter'
 import AmbilDetailBarangDariGoretRouter from './src/routers/AmbilDetailBarangDariGoretRouter'
+import barangTetukRouter from './src/routers/barangTetukRouter'
 
 dotenv.config()
 const MONGODB_URI =
@@ -55,6 +56,7 @@ app.use(express.urlencoded({ extended: true, limit: '200mb' })) // Set payload l
 app.use('/api/products', productRouter)
 app.use('/api/warehouses', warehouseRouter)
 app.use('/api/tags', tagRouter)
+app.use('/api/barangs', barangTetukRouter)
 app.use('/api/akunbanks', akunBankRouter)
 app.use('/api/contacts', contactRouter)
 app.use('/api/barangs', barangRouter)

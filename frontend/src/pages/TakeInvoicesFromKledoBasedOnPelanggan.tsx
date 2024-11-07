@@ -1,72 +1,92 @@
 import { useState, useEffect, useMemo } from 'react'
 import { HOST } from '../config'
 import TOKEN from '../token'
-import { TransaksiPolosan } from '../types/TransaksiPolosan'
-export interface Contactee {
-  contact_groups: number
+
+export interface Contact {
+  id: string
+  ref_number: string
+  contact_id: string
+  warehouse_id: string
+  name: string
+  due: number
+  amount: number
+  trans_date: string
 }
 
-export function TakeInvoicesFromKledoBasedOnPelanggan() {
+export function TakeInvoicesFromKledoBasedOnPelanggan(
+  contactId: string | null
+) {
   const [loading, setLoading] = useState(true)
-  const [invoiceBasedOnPelanggan, setInvoiceBasedOnPelanggan] = useState<
-    TransaksiPolosan[]
-  >([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [lastPage, setLastPage] = useState<number | null>(null)
+  const [
+    takeInvoicesFromKledoBasedOnPelanggan,
+    settakeInvoicesFromKledoBasedOnPelanggan,
+  ] = useState<Contact[]>([])
 
   useEffect(() => {
-    const fetchData = async (page: number) => {
+    // Avoid fetching if contactId is not set
+    if (!contactId) return
+
+    const fetchData = async () => {
+      setLoading(true)
       try {
-        const responGudang = await fetch(
-          `${HOST}/finance/invoices?per_page=400&page=${page}&contact_groups=9`,
+        let allContacts: Contact[] = []
+        let page = 1
+        let hasMoreData = true
 
-          {
-            headers: {
-              Authorization: `Bearer ${TOKEN}`,
-            },
+        while (hasMoreData) {
+          const response = await fetch(
+            `${HOST}/finance/invoices?per_page=100000000&page=${page}&contact_id=${contactId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${TOKEN}`,
+              },
+            }
+          )
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch contacts')
           }
-        )
 
-        if (!responGudang.ok) {
-          throw new Error('Failed to fetch data from API')
+          const data = await response.json()
+
+          const formattedData: Contact[] = data.data.data
+            .filter((item: any) => item.due > 0)
+            .map((item: any) => ({
+              id: item.id,
+              ref_number: item.ref_number,
+              contact_id: item.contact_id,
+              warehouse_id: item.warehouse_id,
+              name: item.contact.name,
+
+              due: item.due,
+              amount: item.amount,
+
+              trans_date: item.trans_date,
+            }))
+          allContacts = [...allContacts, ...formattedData]
+
+          if (data.data.data.length < 100000000) {
+            hasMoreData = false
+          } else {
+            page++
+          }
         }
 
-        const dataGudang = await responGudang.json()
-
-        const newInvoices = dataGudang.data.data
-
-        const filteredInvoices = newInvoices.filter(
-          (invoice: TransaksiPolosan) => invoice.contact?.group_id === 9
-        )
-
-        setInvoiceBasedOnPelanggan((prev) => [...prev, ...filteredInvoices])
-
-        if (!lastPage) {
-          setLastPage(dataGudang.data.last_page)
-        }
-
-        setLoading(false)
+        settakeInvoicesFromKledoBasedOnPelanggan(allContacts)
       } catch (error) {
+        console.error('Error fetching data:', error)
+      } finally {
         setLoading(false)
-        console.error('Error fetching invoices:', error)
       }
     }
 
-    if (currentPage <= (lastPage || 1)) {
-      fetchData(currentPage)
-    }
-  }, [currentPage, lastPage])
-
-  useEffect(() => {
-    if (currentPage < (lastPage || 1) && !loading) {
-      setCurrentPage((prev) => prev + 1)
-    }
-  }, [invoiceBasedOnPelanggan, loading, lastPage])
+    fetchData()
+  }, [contactId])
 
   const memoizedData = useMemo(
-    () => invoiceBasedOnPelanggan,
-    [invoiceBasedOnPelanggan]
+    () => takeInvoicesFromKledoBasedOnPelanggan,
+    [takeInvoicesFromKledoBasedOnPelanggan]
   )
 
-  return { loading, invoiceBasedOnPelanggan: memoizedData }
+  return { loading, takeInvoicesFromKledoBasedOnPelanggan: memoizedData }
 }
