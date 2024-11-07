@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Select, Row, Col, Table } from 'antd'
+import { Select, Row, Col, Table, Input } from 'antd'
 import { useIdContact } from './NamaContact'
 import { useNavigate } from 'react-router-dom'
 
@@ -7,31 +7,35 @@ const { Option } = Select
 
 const FilteredContact: React.FC = () => {
   const navigate = useNavigate()
-
   const { idContact } = useIdContact()
-  console.log({ idContact })
   const [selectedContactGroup, setSelectedContactGroup] = useState<
     string | null
   >(null)
   const [filteredContacts, setFilteredContacts] = useState<any[]>([])
+  const [searchName, setSearchName] = useState<string>('')
 
   const handleContactChange = (value: string) => {
     setSelectedContactGroup(value)
   }
 
   useEffect(() => {
+    let contacts = idContact
     if (selectedContactGroup) {
-      const contacts = idContact.filter(
+      contacts = contacts.filter(
         (contact: any) =>
           contact.group_name === selectedContactGroup &&
           parseFloat(contact.receivable) !== 0
       )
-
-      setFilteredContacts(contacts)
-    } else {
-      setFilteredContacts([])
     }
-  }, [selectedContactGroup, idContact])
+
+    if (searchName) {
+      contacts = contacts.filter((contact: any) =>
+        contact.name.toLowerCase().includes(searchName.toLowerCase())
+      )
+    }
+
+    setFilteredContacts(contacts)
+  }, [selectedContactGroup, idContact, searchName])
 
   const columns = [
     {
@@ -39,10 +43,9 @@ const FilteredContact: React.FC = () => {
       dataIndex: 'name',
       key: 'name',
     },
-
     {
       title: 'Grup Pelanggan',
-      dataIndex: 'group_name', // Accesses nested group_id inside contact
+      dataIndex: 'group_name',
       key: 'group_name',
       render: (group_name: string) => (
         <span
@@ -61,7 +64,9 @@ const FilteredContact: React.FC = () => {
       key: 'receivable',
       render: (receivable: number) => (
         <div style={{ textAlign: 'right' }}>
-          {`Rp ${receivable.toLocaleString('id-ID')}`}
+          {`Rp ${Math.round(receivable)
+            .toString()
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`}
         </div>
       ),
     },
@@ -100,6 +105,14 @@ const FilteredContact: React.FC = () => {
                 </Option>
               ))}
           </Select>
+        </Col>
+        <Col span={12}>
+          <Input
+            placeholder="Cari Nama Pelanggan"
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+            style={{ width: '100%' }}
+          />
         </Col>
       </Row>
 
