@@ -317,7 +317,7 @@ const LaporanStock = () => {
         }
         columns={columns}
         rowKey="id"
-        pagination={true}
+        pagination={false}
         rowClassName={(record) => {
           const stock = record.stock || 0
 

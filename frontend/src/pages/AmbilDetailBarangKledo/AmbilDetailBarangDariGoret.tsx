@@ -142,7 +142,7 @@ const AmbilDetailBarangDariGoret = () => {
         dataSource={filteredStock}
         columns={columns}
         rowKey="id"
-        pagination={true}
+        pagination={false}
       />
       <Button type="primary" onClick={handleSave} style={{ margin: '16px 0' }}>
         Save Filtered Stock
