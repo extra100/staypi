@@ -1,20 +1,28 @@
 import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose'
+import mongoose from 'mongoose'
 
 @modelOptions({ schemaOptions: { timestamps: true } })
-export class Return {
+export class Pp {
+  // @prop({ type: mongoose.Schema.Types.ObjectId })
+  // public _id!: mongoose.Types.ObjectId // Pastikan _id menggunakan tipe
+  @prop({ required: true })
+  public ref_number!: string
+  @prop({ required: true })
+  public id?: string
   @prop({ required: true })
   public trans_date?: string
   @prop({ required: true })
   public jalur?: string
   @prop({ required: true })
   public due_date?: string
-
+  @prop({ required: true })
+  public unique_id!: number
   @prop({ required: true })
   public contact_id!: number
   @prop({ required: true })
   public amount!: number
   @prop({ required: true })
-  public id!: number
+  public ref_transaksi!: string
   @prop({ required: true })
   public down_payment!: number
   @prop({ required: true })
@@ -34,12 +42,8 @@ export class Return {
   public term_id!: number
 
   @prop({ required: true })
-  public ref_number!: string
-  @prop({ required: true })
-  public ref_transaksi!: string
-  @prop({ required: true })
   public externalId!: number
-  @prop()
+  @prop({ required: true })
   public memo?: string
 
   @prop({ type: () => [String], required: true })
@@ -109,7 +113,11 @@ class Witholding {
   @prop({ required: true })
   public down_payment!: number
   @prop({ required: true })
+  public status!: number
+  @prop({ required: true })
   public name!: string
+  @prop({ required: true })
+  public trans_date!: string
   @prop()
   public witholding_amount!: number
 
@@ -138,4 +146,4 @@ class Tages {
   public name!: string
 }
 
-export const ReturnModel = getModelForClass(Return)
+export const PpModel = getModelForClass(Pp)

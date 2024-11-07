@@ -227,9 +227,21 @@ function App() {
                   </Link>
                   <Link
                     className="nav-link header-link p-1 px-3"
+                    to={`/pemesananpenjualan`}
+                  >
+                    Pemesanan Penjualan
+                  </Link>
+                  <Link
+                    className="nav-link header-link p-1 px-3"
                     to={`/listkledo`}
                   >
                     List Penjualan
+                  </Link>
+                  <Link
+                    className="nav-link header-link p-1 px-3"
+                    to={`/listpp`}
+                  >
+                    List Pemesanan Penjualan
                   </Link>
                   {/* <Link className="nav-link header-link p-1 px-3" to={`/ibo`}>
                     POS
@@ -399,17 +411,43 @@ function App() {
                 </Button>
               </div>
             </ListGroup.Item>
-
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineBgColors size={20} style={iconStyle} />
-              <LinkContainer to="/product" onClick={handleDataSupplierClick}>
-                <NavDropdown.Item>Data Product</NavDropdown.Item>
+              <LinkContainer
+                to="/ambildetailbarangdarikledo"
+                onClick={handleDataSupplierClick}
+              >
+                <NavDropdown.Item>
+                  simpan detail barang dari kledo
+                </NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineBgColors size={20} style={iconStyle} />
-              <LinkContainer to="/multi" onClick={handleDataSupplierClick}>
-                <NavDropdown.Item>Multi Harga</NavDropdown.Item>
+              <LinkContainer
+                to="/filteriddangroupidcontact"
+                onClick={handleDataSupplierClick}
+              >
+                <NavDropdown.Item>Detail Piutang</NavDropdown.Item>
+              </LinkContainer>
+            </ListGroup.Item>
+
+            <ListGroup.Item style={listItemStyle}>
+              <AiOutlineBgColors size={20} style={iconStyle} />
+              <LinkContainer
+                to="/laporanstok"
+                onClick={handleDataSupplierClick}
+              >
+                <NavDropdown.Item>Laporan Stock</NavDropdown.Item>
+              </LinkContainer>
+            </ListGroup.Item>
+            <ListGroup.Item style={listItemStyle}>
+              <AiOutlineBgColors size={20} style={iconStyle} />
+              <LinkContainer
+                to="/laporankeuangan"
+                onClick={handleDataSupplierClick}
+              >
+                <NavDropdown.Item>Laporan Keuangan</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
@@ -418,7 +456,6 @@ function App() {
                 <NavDropdown.Item>Data Mutasi</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
-
             {/* Data Supplier */}
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineBgColors size={20} style={iconStyle} />
@@ -426,63 +463,54 @@ function App() {
                 <NavDropdown.Item>Data Supplier</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
-
             <ListGroup.Item style={listItemStyle}>
               <AiFillApi size={20} style={iconStyle} />
               <LinkContainer to="/kind" onClick={handleDataKategoriClick}>
                 <NavDropdown.Item>Kategori</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
-
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineReddit size={20} style={iconStyle} />
               <LinkContainer to="/pelanggan" onClick={handleDataKategoriClick}>
                 <NavDropdown.Item>Pelanggan</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
-
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineDollar size={20} style={iconStyle} />
               <LinkContainer to="/harga" onClick={handleDataHargaClick}>
                 <NavDropdown.Item>Harga</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
-
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineSave size={20} style={iconStyle} />
               <LinkContainer to="/outlet" onClick={handleDataOutletClick}>
                 <NavDropdown.Item>Data Telolet</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
-
             <ListGroup.Item style={listItemStyle}>
               <AiFillAndroid size={20} style={iconStyle} />
               <LinkContainer to="/usaha" onClick={handleDataUsahaClick}>
                 <NavDropdown.Item>Data Usaha</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
-
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineHtml5 size={20} style={iconStyle} />
               <LinkContainer to="/sekean" onClick={handleDataSatuanClick}>
                 <NavDropdown.Item>Data Satuan</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
-
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineSketch size={20} style={iconStyle} />
               <LinkContainer to="/stok" onClick={handleDataStokClick}>
                 <NavDropdown.Item>Data Stok</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
-
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineShop size={20} style={iconStyle} />
               <LinkContainer to="/listkledo" onClick={handleDataTransaksiClick}>
                 <NavDropdown.Item>List Transaksi</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
-
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineShop size={20} style={iconStyle} />
               <LinkContainer to="/ibo" onClick={handleDataTransaksiClick}>

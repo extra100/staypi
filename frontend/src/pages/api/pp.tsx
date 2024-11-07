@@ -17,14 +17,13 @@ import { useIdWarehouse } from './namaWarehouse'
 import { useIdNamaBarang } from './NamaBarang'
 import Input from 'antd/es/input/Input'
 import DateRange from '../DateRange'
-import TextArea from 'antd/es/input/TextArea'
 
 import { useIdNamaTag } from './NamaTag'
 import { useIdContact } from './NamaContact'
 import { useFiac } from './Fiac'
 import { SaveApi } from './SaveApi'
 import { v4 as uuidv4 } from 'uuid'
-import { useAddTransactionMutation } from '../../hooks/transactionHooks'
+
 import { Navigate } from 'react-router-dom'
 import { useGetBarangsQuery } from '../../hooks/barangHooks'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
@@ -41,11 +40,13 @@ import { useGetTagsQueryDb } from '../../hooks/tagHooks'
 import { AnyRecord } from 'dns'
 import { useGetAkunBanksQueryDb } from '../../hooks/akunBankHooks'
 import { DeleteOutlined } from '@ant-design/icons'
+import { SaveApiPemesananPenjualan } from './SaveApiPemesanan'
+import { useAddPpMutation } from '../../hooks/ppHooks'
 
 const { Option } = Select
 const { Title, Text } = Typography
 
-const StockSelectorTable = () => {
+const Pp = () => {
   const [loadingSpinner, setLoadingSpinner] = useState(false) // State untuk spinner
 
   const { Panel } = Collapse
@@ -79,7 +80,9 @@ const StockSelectorTable = () => {
   const { idContact } = useIdContact()
   const { data: contacts } = useGetContactsQuery()
 
-  const { saveInvoiceData } = SaveApi()
+  const { saveInvoiceData } = SaveApiPemesananPenjualan()
+  // const { saveInvoiceData } = SaveApi()
+
   //
 
   const [warehouseName, setWarehouseName] = useState<string | null>(null)
@@ -154,7 +157,7 @@ const StockSelectorTable = () => {
     const id = getBankAccountId()
     setBankAccountId(id as any)
   }, [warehouseName, akunBanks])
-  const addPosMutation = useAddTransactionMutation()
+  const addPosMutation = useAddPpMutation()
 
   const [productQuantities, setProductQuantities] = useState<{
     [key: string]: any
@@ -486,19 +489,13 @@ const StockSelectorTable = () => {
   const [selectedDates, setSelectedDates] = useState<[string, string]>(['', ''])
 
   const [selectedDifference, setSelectedDifference] = useState<number>(0)
-  const [termIdSimpan, setTermIdSimpan] = useState<number>(0)
   const handleDateRangeSave = (
     startDate: string,
     endDate: string,
-    difference: number,
-    termId: number // Add termId parameter
+    difference: number
   ) => {
     setSelectedDates([startDate, endDate])
     setSelectedDifference(difference)
-    setTermIdSimpan(termId)
-
-    // Anda bisa menyimpan atau menggunakan termId sesuai kebutuhan
-    console.log('Saved Term ID:', termId) // Contoh penggunaan termId
   }
 
   const [paymentForm] = Form.useForm()
@@ -597,7 +594,7 @@ const StockSelectorTable = () => {
     const uuid = uuidv4()
     const last4OfUUID = uuid.substr(uuid.length - 4)
     const shortNumber = parseInt(last4OfUUID, 16) % 10000
-    return `IBO-${idOutlet}-${String(shortNumber).padStart(5, '0')}`
+    return `RO-${idOutlet}-${String(shortNumber).padStart(5, '0')}`
   }
 
   const [refNumber, setRefNumber] = useState<string>('')
@@ -666,7 +663,7 @@ const StockSelectorTable = () => {
 
     const invoiceData = {
       id: uniqueNumber,
-      jalur: 'penjualan',
+      jalur: 'pemesanan',
       ref_number: refNumber,
       ref_transaksi: 0,
       status_id: status,
@@ -676,8 +673,8 @@ const StockSelectorTable = () => {
       contact_id: selectedContact,
       sales_id: null,
       include_tax: 0,
-      term_id: termIdSimpan || 2,
-      memo: '',
+      term_id: 1,
+      memo: refNumber,
       amount: totalSubtotal,
       amount_after_tax: 0,
       warehouse_id: selectedWarehouseId,
@@ -759,7 +756,7 @@ const StockSelectorTable = () => {
         // Tambahkan timer 3 detik sebelum mengarahkan
         setTimeout(() => {
           setLoadingSpinner(false) // Matikan spinner
-          navigate(`/simpanidunikdarikledopenjualan/${refNumber}`)
+          navigate(`/detailpemesananpenjualan/${refNumber}`)
         }, 3000)
       },
       onError: (error: any) => {
@@ -937,9 +934,10 @@ const StockSelectorTable = () => {
           borderRadius: '10px 10px 0px 0px',
           fontSize: '30px',
           borderBottom: '1px',
+          color: 'blue',
         }}
       >
-        Tambah Tagihan
+        Pemesanan Penjualan
       </div>
       <div
         style={{
@@ -1406,7 +1404,7 @@ const StockSelectorTable = () => {
                 // disabled={limitizeTrans}
                 disabled={isSaveDisabled} // Tombol dinonaktifkan jika salah satu masih kosong
               >
-                Simpan
+                Simpan nya
               </Button>
             </Row>
           </Form>
@@ -1416,4 +1414,4 @@ const StockSelectorTable = () => {
   )
 }
 
-export default StockSelectorTable
+export default Pp

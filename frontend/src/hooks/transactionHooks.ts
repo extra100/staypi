@@ -46,6 +46,26 @@ export const useAddTransactionMutation = () => {
   )
 }
 
+type UpdatePpIdInput = { ref_number: string; id: number }
+
+export const updateDenganIdUnikDariKledo = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    ({ ref_number, id }: UpdatePpIdInput) => {
+      return apiClient.put(`/api/transactions/by-id/${ref_number}`, { id })
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['transactions'])
+      },
+      onError: (error: any) => {
+        console.error('Error updating id:', error)
+      },
+    }
+  )
+}
+
 export const useUpdateTransactionMutation = () => {
   const queryClient = useQueryClient()
 
@@ -53,7 +73,11 @@ export const useUpdateTransactionMutation = () => {
     (murahnye: Transaction) => {
       // Pastikan endpoint URL sesuai dengan backend route yang sudah Anda definisikan
       return apiClient
-        .put<Transaction>(`/api/transactions/${murahnye.ref_number}`, murahnye)
+        .put<Transaction>(
+          `/api/transactions/full-update/${murahnye.ref_number}`,
+          murahnye
+        )
+
         .then((response) => {
           return response.data
         })

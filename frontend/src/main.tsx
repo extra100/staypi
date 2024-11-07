@@ -85,6 +85,21 @@ import ListVoid from './pages/ListVoid'
 import ListReturn from './pages/ListReturn'
 import DeleteWitholdingPage from './pages/api/hapusArrayAtWitholding'
 import VoidWithlodingArray from './pages/api/voidArrayWitholdings'
+import PP from './pages/api/pp'
+import ListPp from './pages/api/ListPp'
+import DetailPemesananPenjualan from './pages/api/DetailPemesananPenjualan'
+import OkPemesanan from './pages/api/OkPemesanan'
+// import PembayaranKledo from './pages/api/PembayaranKledo'
+import LaporanStock from './pages/api/LaporanStock'
+import ProductHistory from './pages/api/ProductHistory'
+import AmbilDetailBarangDariKledo from './pages/AmbilDetailBarangKledo/AmbilDetailBarangDariKledo'
+import AmbilDetailBarangDariGoret from './pages/AmbilDetailBarangKledo/AmbilDetailBarangDariGoret'
+import IdUnikDariKledo from './pages/api/SimpanIdUnikDariKledo'
+import SimpanIdUnikDariKledoPenjualan from './pages/api/simpanIdUnikDariKledoPenjualan'
+import LaporanKeuangan from './pages/api/LaporanKeuangan'
+import LaporanKeListTransaksi from './pages/api/LaporanKeListTransaksi'
+import FilterContactBasedIdAndGroupid from './pages/api/PageFilteredContactBasedIdAndGroupId'
+import DetailPiutangKontak from './pages/api/DetailPiutangPerKontak'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -103,6 +118,7 @@ const router = createBrowserRouter(
         <Route path="/outlet" element={<OutletPage />} />
       </Route>
       <Route path="/ibo" element={<StokBarangPage />} />
+      <Route path="/pemesananpenjualan" element={<PP />} />
       <Route path="/save" element={<SaveInvoiceComponent />} />
       <Route path="/saveMutasi" element={<SimpanMutasi />} />
       <Route path="/gerah" element={<StokWarehouseComponent />} />
@@ -118,6 +134,7 @@ const router = createBrowserRouter(
       <Route path="/savecontact" element={<BatchProcessContacts />} />
       <Route path="/po" element={<ProductStocksTable />} />
       <Route path="/langsungstok" element={<ListStok />} />
+      {/* <Route path="/simpanlangsung" element={<SaveApi />} /> */}
       <Route path="/terjual" element={<BatchProcessBarangTerjuals />} />
       <Route
         path="/FinanceAccountIDSameTable"
@@ -125,9 +142,41 @@ const router = createBrowserRouter(
       />
       <Route path="/fiac" element={<FinanceAccountDisplay />} />
       <Route path="/listkledo" element={<ListTransaksi />} />
+      <Route
+        path="/laporankelisttransaksi"
+        element={<LaporanKeListTransaksi />}
+      />
+      <Route
+        path="/filteriddangroupidcontact"
+        element={<FilterContactBasedIdAndGroupid />}
+      />
+      <Route path="/detailpiutangperkontak" element={<DetailPiutangKontak />} />
+      <Route path="/laporanstok" element={<LaporanStock />} />
+      <Route path="/laporankeuangan" element={<LaporanKeuangan />} />
+      <Route path="/product-history/:id" element={<ProductHistory />} />
+
+      <Route path="/listpp" element={<ListPp />} />
       <Route path="/listvoid" element={<ListVoid />} />
+      <Route path="/laporanstok" element={<ListVoid />} />
       <Route path="/listreturn" element={<ListReturn />} />
       <Route path="/detailkledo/:ref_number" element={<DetailKledo />} />
+      <Route
+        path="/detailpemesananpenjualan/:ref_number"
+        element={<DetailPemesananPenjualan />}
+      />
+      <Route
+        path="/simpanidunikdarikledo/:ref_number"
+        element={<IdUnikDariKledo />}
+      />
+      <Route
+        path="/simpanidunikdarikledopenjualan/:ref_number"
+        element={<SimpanIdUnikDariKledoPenjualan />}
+      />
+      {/* <Route
+        path="/pembayarankledo/:ref_number"
+        element={<PembayaranKledo />}
+      /> */}
+      <Route path="/okepemesanan/:ref_number" element={<OkPemesanan />} />
       <Route path="/returninvoice/:ref_number" element={<Aneh />} />
       <Route path="/printnota/:ref_number" element={<Receipt />} />
       {/* <Route path="/printmutasi/:ref_number" element={<MutasiSuratJalan />} /> */}
@@ -135,7 +184,6 @@ const router = createBrowserRouter(
       <Route path="/single" element={<ProductLookup />} />
       <Route path="/tabelbarang" element={<ProductTable />} />
       <Route path="/barangdb" element={<BarangList />} />
-
       <Route path="/polosan" element={<Polosan />} />
       <Route path="/bismillah" element={<TransactionList />} />
       <Route path="/perhitungannya" element={<PerhitunganComponent />} />
@@ -154,7 +202,6 @@ const router = createBrowserRouter(
         path="/transfer-detail/:ref_number"
         element={<WarehouseTransferDetail />}
       />
-
       <Route path="/listsiapvalidasi" element={<ListSiapDiValidasi />} />
       <Route
         path="/listsudahdivalidasikeluar"
@@ -164,9 +211,16 @@ const router = createBrowserRouter(
         path="/ListSudahValidasiMasuk"
         element={<ListSudahValidasiMasuk />}
       />
-
       <Route path="/validasi-pindah/:ref_number" element={<ValidatePindah />} />
       <Route path="/sudah-validasi/:ref_number" element={<SudahDivalidasi />} />
+      <Route
+        path="/ambildetailbarangdarikledo"
+        element={<AmbilDetailBarangDariKledo />}
+      />
+      <Route
+        path="/ambildetailbarangdariGoret"
+        element={<AmbilDetailBarangDariGoret />}
+      />
     </Route>
   )
 )

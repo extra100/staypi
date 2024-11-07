@@ -1,27 +1,28 @@
+import { message } from 'antd'
 import { useState } from 'react'
 import { HOST } from '../../config'
 import TOKEN from '../../token'
 import { useIdInvoice } from './takeSingleInvoice'
 
-export function useUnvoidInvoice(ref_number: string) {
-  const { getIdAtInvoice } = useIdInvoice(ref_number)
-  const [unvoidLoading, setUnvoidLoading] = useState(false)
-  const [unvoidError, setUnvoidError] = useState<string | null>(null)
-  const [unvoidSuccess, setUnvoidSuccess] = useState(false)
+export function useUnvoidInvoice() {
+  const [voidLoading, setVoidLoading] = useState(false)
+  const [voidError, setVoidError] = useState<string | null>(null)
+  const [voidSuccess, setVoidSuccess] = useState(false)
 
-  const unvoidInvoice = async () => {
-    if (!getIdAtInvoice || !getIdAtInvoice.id) {
-      setUnvoidError('Invoice ID tidak ditemukan')
+  const unvoidInvoice = async (invoiceId: string) => {
+    // Menerima invoiceId sebagai parameter
+    if (!invoiceId) {
+      setVoidError('Invoice ID tidak ditemukan')
       return
     }
 
-    setUnvoidLoading(true)
-    setUnvoidError(null)
-    setUnvoidSuccess(false)
+    setVoidLoading(true)
+    setVoidError(null)
+    setVoidSuccess(false)
 
     try {
       const response = await fetch(
-        `${HOST}/finance/invoices/${getIdAtInvoice.id}/unvoid`,
+        `${HOST}/finance/invoices/${invoiceId}/unvoid`,
         {
           method: 'POST', // Bisa jadi method lain, tergantung dokumentasi API
           headers: {
@@ -36,14 +37,17 @@ export function useUnvoidInvoice(ref_number: string) {
       }
 
       const responseData = await response.json()
-      setUnvoidSuccess(true)
-      console.log('unvoid invoice berhasil:', responseData)
+      setVoidSuccess(true)
+      message.success('Transaksi berhasil dibatalkan!')
+      console.log('Void invoice berhasil:', responseData)
     } catch (error: any) {
-      setUnvoidError(error.message || 'Terjadi kesalahan saat unvoid invoice')
+      const errorMessage =
+        error.message || 'Terjadi kesalahan saat void invoice'
+      setVoidError(errorMessage)
+      message.error(errorMessage)
     } finally {
-      setUnvoidLoading(false)
+      setVoidLoading(false)
     }
   }
-
-  return { unvoidInvoice, unvoidLoading, unvoidError, unvoidSuccess }
+  return { unvoidInvoice, voidLoading, voidError, voidSuccess }
 }

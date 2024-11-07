@@ -7,14 +7,14 @@ export interface Invoice {
   ref_number: string
 }
 
-export function useIdInvoice(ref_number: string) {
+export function useIdPemesanan(ref_number: string) {
   const [loading, setLoading] = useState(true)
-  const [getIdAtInvoice, setgetIdAtInvoice] = useState<Invoice | null>(null)
+  const [getIdPemesanan, setgetIdPemesanan] = useState<Invoice | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const storedData = sessionStorage.getItem('getIdAtInvoice')
+        const storedData = sessionStorage.getItem('getIdPemesanan')
         if (storedData) {
           const parsedData: Invoice[] = JSON.parse(storedData)
 
@@ -22,7 +22,7 @@ export function useIdInvoice(ref_number: string) {
             (invoice) => invoice.ref_number === ref_number
           )
           if (matchedInvoice) {
-            setgetIdAtInvoice(matchedInvoice)
+            setgetIdPemesanan(matchedInvoice)
             setLoading(false)
             return
           }
@@ -30,12 +30,12 @@ export function useIdInvoice(ref_number: string) {
 
         let allInvoices: Invoice[] = []
         let page = 1
-        const perPage = 10
+        const perPage = 50
         let hasMoreData = true
 
-        while (allInvoices.length < 10 && hasMoreData && !getIdAtInvoice) {
+        while (allInvoices.length < 500 && hasMoreData && !getIdPemesanan) {
           const responGudang = await fetch(
-            `${HOST}/finance/invoices?ref_number=${ref_number}&page=${page}&perPage=${perPage}`,
+            `${HOST}/finance/orders?ref_number=${ref_number}&page=${page}&perPage=${perPage}`,
             {
               headers: {
                 Authorization: `Bearer ${TOKEN}`,
@@ -56,11 +56,11 @@ export function useIdInvoice(ref_number: string) {
             )
 
             if (matchedInvoice) {
-              setgetIdAtInvoice(matchedInvoice)
+              setgetIdPemesanan(matchedInvoice)
               setLoading(false)
 
               sessionStorage.setItem(
-                'getIdAtInvoice',
+                'getIdPemesanan',
                 JSON.stringify(allInvoices)
               )
               return
@@ -84,7 +84,7 @@ export function useIdInvoice(ref_number: string) {
   }, [ref_number]) // Fetching only when ref_number changes
 
   // Memoize the fetched invoice data
-  const memoizedData = useMemo(() => getIdAtInvoice, [getIdAtInvoice])
+  const memoizedData = useMemo(() => getIdPemesanan, [getIdPemesanan])
 
-  return { loading, getIdAtInvoice }
+  return { loading, getIdPemesanan }
 }

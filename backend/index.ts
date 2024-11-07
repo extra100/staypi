@@ -3,6 +3,8 @@ import dotenv from 'dotenv'
 import express, { Request, Response } from 'express'
 import mongoose from 'mongoose'
 import path from 'path'
+import AmbilDetailBarangDariKledoRouter from './src/routers/AmbilDetailBarangDariKledoRouter'
+
 import akunBankRouter from './src/routers/akunBankRouter'
 import { barangRouter } from './src/routers/barangRouter'
 import barangTerjualRouter from './src/routers/barangTerjualRouter'
@@ -15,6 +17,7 @@ import { orderRouter } from './src/routers/orderRouter'
 import outletRouter from './src/routers/outletRouter'
 import perhitunganRouter from './src/routers/perthitunganRouter'
 import warehouseTransferRouter from './src/routers/pindahRouter'
+import ppRouter from './src/routers/PpRouter'
 import productRouter from './src/routers/productRouter'
 import { returnRouter } from './src/routers/returnRouter'
 import soldBarangRouter from './src/routers/soldBarangRouter'
@@ -23,6 +26,7 @@ import transactionRouter from './src/routers/transactionRouter'
 import transaksiPolosanRouter from './src/routers/transaksiPolosanRouter'
 import { userRouter } from './src/routers/userRouter'
 import warehouseRouter from './src/routers/warehousesRouter'
+import AmbilDetailBarangDariGoretRouter from './src/routers/AmbilDetailBarangDariGoretRouter'
 
 dotenv.config()
 const MONGODB_URI =
@@ -55,6 +59,7 @@ app.use('/api/akunbanks', akunBankRouter)
 app.use('/api/contacts', contactRouter)
 app.use('/api/barangs', barangRouter)
 app.use('/api/transactions', transactionRouter)
+app.use('/api/pps', ppRouter)
 app.use('/api/returns', returnRouter)
 app.use('/api/pindah', warehouseTransferRouter)
 
@@ -70,6 +75,8 @@ app.use('/api/keys', keyRouter)
 // app.use('/api/pindah', warehouseTransferRouter)
 app.use('/api/barters', barangTerjualRouter)
 app.use('/api/perhitungans', perhitunganRouter)
+app.use('/api/ambidetailbarangdarikledos', AmbilDetailBarangDariKledoRouter)
+app.use('/api/ambidetailbarangdarigorets', AmbilDetailBarangDariGoretRouter)
 
 console.log(path.join(__dirname, 'frontend/dist'))
 

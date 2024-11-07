@@ -1,80 +1,95 @@
+import { message } from 'antd'
 import React from 'react'
+import { setTimeout } from 'timers'
+import { useAddTransactionMutation } from '../../hooks/transactionHooks'
+import { saveToApiNextPayment } from './NextPayment'
 import { SaveApi } from './SaveApi'
+import { SaveApiPemesananPenjualan } from './SaveApiPemesanan'
 
 const SaveInvoiceComponent = () => {
-  const { loading, error, success, saveInvoiceData } = SaveApi()
+  const saveInvoiceData = useAddTransactionMutation()
 
   const handleSave = () => {
     const invoiceData = {
-      // business_tran_id: 176596,
-      amount: 156499,
-      amount_after_tax: 0,
-      attachment: [],
-      column_name: '',
-      sales_id: 193769,
-      user_id: 193769,
-
-      contact_id: 3850,
-      contacts: [
-        {
-          id: 3850,
-          name: 'UD GLORY TRUSS',
-        },
-      ],
-      down_payment: 145,
-      down_payment_bank_account_id: 1471,
-      due: 156354,
-      due_date: '2024-11-10',
+      id: '199472',
+      trans_date: '2024-11-02',
+      jalur: 'pemesanan',
+      due_date: '2024-11-02',
+      unique_id: 85415,
+      contact_id: 3771,
+      amount: 5293,
+      ref_transaksi: '0',
+      down_payment: 0,
+      reason_id: 'void',
+      sales_id: null,
+      status_id: 6,
+      due: 5293,
       include_tax: 0,
+      term_id: 1,
+      ref_number: 'RO-7-03254',
+      externalId: 0,
+      memo: '',
+      attachment: [],
       items: [
         {
-          amount: 156499,
-          discount_amount: 41601,
-          finance_account_id: 203,
-          discount_percent: 21,
-          desc: '',
-          price: 78249.5,
+          finance_account_id: 12,
+          name: 'AMPLAS LEMBAR TAIYO #360',
           qty: 1,
-          tax_id: null,
+          qty_update: 45,
+          price: 5293,
+          amount: 5293,
+          discount_percent: 21,
+          discount_amount: 1407,
         },
       ],
-      memo: '',
-      message: '',
-      ref_number: 'INV/GR/398477',
-
-      status_id: 3,
-      tags: [18],
-      term_id: 1,
-      trans_date: '2024-10-11',
-      warehouse_id: 18,
-      warehouses: [
-        {
-          warehouse_id: 18,
-          name: 'GRAHA STEEL',
-        },
-      ],
-      witholding_account_id: 1471,
-      witholding_amount: 145,
-      witholding_percent: 0,
       witholdings: [
         {
           witholding_account_id: 1471,
-          name: 'KAS PENJUALAN_GRAHA STEEL',
-          down_payment: 145,
+          down_payment: 0,
+          status: 0,
+          name: 'KAS PENJUALAN_DUNIA GALVALUME',
+          trans_date: '2024-11-02',
+          witholding_amount: 0,
+          witholding_percent: 0,
         },
       ],
+      contacts: [
+        {
+          id: 3771,
+          name: 'BAJA RINJANI',
+        },
+      ],
+      warehouses: [
+        {
+          warehouse_id: 7,
+          name: 'DUNIA GALVALUME',
+        },
+      ],
+      warehouse_id: 7,
+      message: '',
+      tages: [
+        {
+          id: 6,
+          name: 'DUNIA GALVALUME',
+        },
+      ],
+      witholding_percent: 0,
+      witholding_amount: 0,
+      witholding_account_id: 1471,
     }
-    saveInvoiceData(invoiceData)
+    saveInvoiceData.mutate(invoiceData as any, {
+      onSuccess: () => {
+        message.success('Transaksi berhasil disimpan!') // Tampilkan pesan sukses
+      },
+      onError: (error: any) => {
+        message.error(`Terjadi kesalahan: ${error.message}`) // Tampilkan pesan error
+      },
+    })
   }
 
   return (
     <div>
-      <button onClick={handleSave} disabled={loading}>
-        Save Invoice
-      </button>
-      {loading && <p>Loading...</p>}
-      {error && <p>Error: {error}</p>}
-      {success && <p>Invoice saved successfully!</p>}
+      <button onClick={handleSave}>Save Invoice</button>
     </div>
   )
 }

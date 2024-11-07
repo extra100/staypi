@@ -1,10 +1,11 @@
-export type Return = {
+export type Pp = {
   trans_date: string
-  id: number
-  due_date: string
   jalur: string
+  // _id: string
+  unique_id: number
+  due_date: string
   contact_id: number
-
+  id: any
   sales_id: number | null
   status_id: number
   createdAt: string
@@ -12,7 +13,6 @@ export type Return = {
   term_id: number
   due: number
   ref_number: string
-  ref_transaksi: string
   memo: string
   amount: number
   amount_after_tax: number
@@ -49,8 +49,10 @@ export type Return = {
   witholdings: {
     witholding_account_id: number
     name: string
+    trans_date: string
     witholding_amount: number
     witholding_percent: number
+    status: number
   }[]
   warehouse_id: number
   additional_discount_percent: number

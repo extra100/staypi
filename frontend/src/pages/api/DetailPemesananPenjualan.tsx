@@ -17,87 +17,96 @@ import {
   Divider,
   message,
   Spin,
+  Modal,
 } from 'antd'
-import {
-  useAddTransactionMutation,
-  useGetTransactionByIdQuery,
-  useUpdateTransactionMutation,
-} from '../../hooks/transactionHooks'
-import { Link, useParams } from 'react-router-dom'
+
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { AiOutlinePrinter } from 'react-icons/ai'
 import PosPrintKomponent from './PosPrintCok'
 import moment from 'moment'
 import dayjs from 'dayjs'
 import { useFiac } from './Fiac'
-import { saveToApiNextPayment } from './NextPayment'
+
 import { useReactToPrint } from 'react-to-print'
 import Receipt from './printNota'
 import ReceiptJalan from './ReceiptJalan'
-import { useIdInvoice } from './takeSingleInvoice'
+
 import { useIdWarehouse } from './namaWarehouse'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
 import { useGetAkunBanksQueryDb } from '../../hooks/akunBankHooks'
 import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
-import { NumericFormat } from 'react-number-format'
 
 import type { Dayjs } from 'dayjs'
-import { useVoidInvoice } from './voidInvoice'
-import { Transaction } from '../../types/Transaction'
-import { useUnvoidInvoice } from './unvoidInvoice'
-import SingleDate from '../SingleDate'
+
+import { useIdPemesanan } from './takeSingleIdPemesanan'
+import { useGetPpByIdQuery, useUpdatePpMutation } from '../../hooks/ppHooks'
+
 const { Title, Text } = Typography
 const { Option } = Select
 
-const KumpulanAksi: React.FC = () => {
+const DetailPemesananPenjualan: React.FC = () => {
   const [showButtons, setShowButtons] = useState(false)
   const currentDate = dayjs()
   const [startDate, setStartDate] = useState<Dayjs>(currentDate)
 
-  const handleStartDateChange = (date: Dayjs | null) => {
-    if (date) {
-      setStartDate(date)
-    }
-  }
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowButtons(true)
-    }, 2000)
+    }, 1000)
 
     return () => clearTimeout(timer)
   }, [])
   const { ref_number } = useParams<{ ref_number?: string }>()
-  const updatePosMutation = useUpdateTransactionMutation()
-  //
-  const { data: allTransactions } = useGetTransactionByIdQuery(
-    ref_number as string
-  )
+  console.log({ ref_number })
+  const updateHanyaId = useUpdatePpMutation()
+
+  const { getIdPemesanan } = useIdPemesanan(ref_number || '')
+  const justPutId = getIdPemesanan?.id ?? null
+  console.log('Invoice ID justPutId:', justPutId)
+  const updateInvoiceId = async () => {
+    if (!ref_number || !invoiceId) return
+
+    console.log('Values to be saved:', { ref_number, id: invoiceId })
+
+    try {
+      await updateHanyaId.mutateAsync({
+        ref_number,
+        id: invoiceId, // Pass `invoiceId` as `id`
+      })
+      console.log('Invoice ID updated successfully')
+    } catch (error) {
+      console.error('Failed to update Invoice ID:', error)
+    }
+  }
+
+  const { data: allTransactions } = useGetPpByIdQuery(ref_number as string)
   const { data: contacts } = useGetContactsQuery()
   const { data: akunBanks } = useGetAkunBanksQueryDb()
 
-  const { getIdAtInvoice } = useIdInvoice(ref_number || '')
+  const invoiceId = getIdPemesanan?.id ?? null
+  console.log('id dari kledo sebelum disimpan', invoiceId)
 
-  const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
-  console.log({ invoiceId })
-  const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
+  const refNumber = getIdPemesanan ? getIdPemesanan.ref_number : null
+  // console.log('ref_number dari database keldo', refNumber)
 
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
-  // const contactName = getPosDetail?.contacts?.[0]?.name
+
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
-
+  const id = getPosDetail?.id
+  // console.log('ref_number dari database sendiri', id)
   const tagName = getPosDetail?.tages?.map((tag: any) => tag.name) || []
 
   const amount = getPosDetail?.amount ?? 0
   const witholdings = getPosDetail?.witholdings || []
   const items = getPosDetail?.items || []
-  const totalDownPayment = witholdings.reduce(
-    (sum: number, witholding: any) => {
+  const totalDownPayment = witholdings
+    .filter((witholding: any) => witholding.status === 0)
+    .reduce((sum: number, witholding: any) => {
       return sum + (witholding.down_payment || 0)
-    },
-    0
-  )
+    }, 0)
 
   const due = amount - totalDownPayment
   const totalDiscount = items.reduce((total: number, item: any) => {
@@ -112,18 +121,6 @@ const KumpulanAksi: React.FC = () => {
     return num.toLocaleString('en-US')
   }
 
-  const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value)
-
-    if (!isNaN(value) && value <= due) {
-      setAmountPaid(value)
-    } else {
-      alert('Jumlah bayar tidak boleh melebihi total tagihan')
-    }
-  }
-  const handleSetAmountPaid = () => {
-    setAmountPaid(due)
-  }
   const [contactName, setContactName] = useState<string>('Unknown Contact')
 
   useEffect(() => {
@@ -140,111 +137,19 @@ const KumpulanAksi: React.FC = () => {
   const [selectedBank, setSelectedBank] = useState<any | null>(null)
 
   const today = dayjs().format('DD-MM-YYYY')
-  const { saveNextPayment } = saveToApiNextPayment()
-  const handleVoid = (values: any) => {
-    if (refNumber) {
-      const existingInvoice = allTransactions?.find(
-        (transaction) => transaction.ref_number === refNumber
-      )
-      if (existingInvoice) {
-        const updatedInvoice: Transaction = {
-          ...existingInvoice,
-          reason_id: 'void',
-        }
 
-        updatePosMutation.mutate(updatedInvoice)
-      } else {
-        console.error('Invoice with ref_number not found:', refNumber)
-      }
-    } else {
-      console.error('No valid ref_number found.')
-    }
-  }
-  const handleUnVoid = (values: any) => {
-    if (refNumber) {
-      const existingInvoice = allTransactions?.find(
-        (transaction) => transaction.ref_number === refNumber
-      )
-      if (existingInvoice) {
-        const updatedInvoice: Transaction = {
-          ...existingInvoice,
-          reason_id: 'unvoid',
-        }
+  const [loadingSpinner, setLoadingSpinner] = useState(false) //
+  // const [loading, setLoading] = useState(false) // State to manage loading
 
-        updatePosMutation.mutate(updatedInvoice)
-      } else {
-        console.error('Invoice with ref_number not found:', refNumber)
-      }
-    } else {
-      console.error('No valid ref_number found.')
-    }
+  const handleButtonClick = () => {
+    setLoading(true)
+    setTimeout(() => {
+      updateInvoiceId()
+
+      navigate(`/okepemesanan/${refNumber}`)
+    }, 100)
   }
 
-  const handleFormSubmit = (values: any) => {
-    const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
-      map[warehouse.name] = warehouse.id
-      return map
-    }, {})
-
-    const accountId = accountMap[selectedBank as any]
-
-    if (refNumber) {
-      const invoiceData = {
-        withholdings: [
-          {
-            witholding_account_id: accountId || bankAccountId,
-            name: selectedBank || bankAccountName,
-            down_payment: amountPaid || 0,
-            witholding_percent: 0,
-            witholding_amount: amountPaid || 0,
-          },
-        ],
-      }
-
-      const existingInvoice = allTransactions?.find(
-        (transaction) => transaction.ref_number === refNumber
-      )
-
-      if (existingInvoice) {
-        const updatedWithholdings = [
-          ...existingInvoice.witholdings,
-          ...invoiceData.withholdings,
-        ]
-
-        const updatedInvoice = {
-          ...existingInvoice,
-          witholdings: updatedWithholdings,
-        }
-
-        updatePosMutation.mutate(updatedInvoice as any)
-      } else {
-        console.error('Invoice with ref_number not found:', refNumber)
-      }
-    } else {
-      console.error('No valid ref_number found.')
-    }
-
-    const payload = {
-      amount: amountPaid,
-      attachment: [],
-      bank_account_id: accountId || bankAccountId,
-      business_tran_id: invoiceId,
-      witholding_amount: amountPaid,
-      memo: values.catatan || null,
-      trans_date: values.tanggalBayar.format('YYYY-MM-DD'),
-      witholdings: [],
-    }
-
-    console.log('Payload:', payload)
-
-    saveNextPayment(payload)
-      .then((response: any) => {
-        console.log('Payment saved successfully:', response)
-      })
-      .catch((error: any) => {
-        console.error('Error saving payment:', error)
-      })
-  }
   const printNota = useRef<HTMLDivElement>(null)
 
   const printNotaHandler = useReactToPrint({
@@ -325,11 +230,11 @@ const KumpulanAksi: React.FC = () => {
   }, [warehouseName, akunBanks])
 
   const [refNumbers, setRefNumber] = useState('')
-  const { voidInvoice, voidLoading, voidError, voidSuccess } = useVoidInvoice(
-    refNumber as any
-  )
-  const { unvoidInvoice, unvoidLoading, unvoidError, unvoidSuccess } =
-    useUnvoidInvoice(refNumber as any)
+  // const { voidInvoice, voidLoading, voidError, voidSuccess } = useVoidInvoice(
+  //   refNumber as any
+  // )
+  // const { unvoidInvoice, unvoidLoading, unvoidError, unvoidSuccess } =
+  //   useUnvoidInvoice(refNumber as any)
   const [selectedDates, setSelectedDates] = useState<string>()
 
   const handleDateRangeSave = (startDate: string) => {
@@ -339,6 +244,10 @@ const KumpulanAksi: React.FC = () => {
     const [day, month, year] = dateString.split('-')
     return `${year}-${month}-${day}`
   }
+
+  const navigate = useNavigate()
+  const [isModalVisible, setIsModalVisible] = useState(true) // Set to true by default
+
   const columns = [
     {
       title: 'No',
@@ -352,12 +261,12 @@ const KumpulanAksi: React.FC = () => {
       title: 'Barang',
       dataIndex: 'name',
       key: 'name',
-      align: 'center', // Header tetap rata tengah
+      align: 'center',
       render: (name: string) => (
         <div style={{ textAlign: 'left' }}>
           {name !== undefined ? name : ''}
         </div>
-      ), // Konten rata kiri
+      ),
     },
 
     {
@@ -400,6 +309,14 @@ const KumpulanAksi: React.FC = () => {
       ),
     },
   ]
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false)
+    }, 2000)
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
     <div style={{ padding: '20px' }}>
@@ -418,54 +335,9 @@ const KumpulanAksi: React.FC = () => {
                 <Title level={5}>Detail Tagihan</Title>
               )}
             </Col>
-            <a href={`/returninvoice/${ref_number}`}>Retur</a>
 
-            <div>
-              <input
-                type="text"
-                value={invoiceId as any}
-                onChange={(e) => setRefNumber(e.target.value)}
-                placeholder="Masukkan nomor referensi invoice"
-              />
-              <button
-                onClick={() => {
-                  voidInvoice()
-                  handleVoid(null) // Memanggil dengan parameter kosong
-                }}
-                disabled={voidLoading}
-              >
-                {voidLoading ? 'Proses Void...' : 'Void Invoice'}
-              </button>
-
-              {voidError && <p style={{ color: 'red' }}>{voidError}</p>}
-              {voidSuccess && (
-                <p style={{ color: 'green' }}>Void invoice berhasil!</p>
-              )}
-            </div>
-            <div>
-              <input
-                type="text"
-                value={invoiceId as any}
-                onChange={(e) => setRefNumber(e.target.value)}
-                placeholder="Masukkan nomor referensi invoice"
-              />
-              <button
-                onClick={() => {
-                  unvoidInvoice()
-                  handleUnVoid(null)
-                }}
-                disabled={voidLoading}
-              >
-                {voidLoading ? 'Proses UnVoid...' : 'UnVoid Invoice'}
-              </button>
-
-              {voidError && <p style={{ color: 'red' }}>{voidError}</p>}
-              {voidSuccess && (
-                <p style={{ color: 'green' }}>UnVoid invoice berhasil!</p>
-              )}
-            </div>
             <Col>
-              {showButtons && ( // Conditionally render the buttons after 2 seconds
+              {showButtons && (
                 <>
                   <div>
                     <button onClick={printNotaHandler}>Print Nota</button>
@@ -589,17 +461,24 @@ const KumpulanAksi: React.FC = () => {
               </Col>
             </Row>
             <Divider style={{ margin: '16px 0' }} />
+
             <>
-              {witholdings.map((witholding: any, index: number) => (
-                <Row key={index} style={{ marginTop: '8px' }}>
-                  <Col span={12} style={{ textAlign: 'left' }}>
-                    <Text strong>{witholding.name}</Text>
-                  </Col>
-                  <Col span={12} style={{ textAlign: 'right' }}>
-                    <Text strong>{formatNumber(witholding.down_payment)}</Text>
-                  </Col>
-                </Row>
-              ))}
+              {witholdings
+                .filter((witholding: any) => witholding.status === 0)
+                .map((witholding: any, index: number) => (
+                  <Row key={index} style={{ marginTop: '8px' }}>
+                    <Col span={12} style={{ textAlign: 'left' }}>
+                      <a href={`/voidwitholdingpersen/${ref_number}`}>
+                        <Text strong>{witholding.name}</Text>
+                      </a>
+                    </Col>
+                    <Col span={12} style={{ textAlign: 'right' }}>
+                      <Text strong>
+                        {formatNumber(witholding.down_payment)}
+                      </Text>
+                    </Col>
+                  </Row>
+                ))}
             </>
 
             <Row style={{ marginTop: '8px' }}>
@@ -619,104 +498,29 @@ const KumpulanAksi: React.FC = () => {
           </Col>
         </Row>
       </div>
-      <Card title="Pembayaran" style={{ marginTop: '20px' }}>
-        <Form layout="vertical" onFinish={handleFormSubmit}>
-          <Row gutter={16}>
-            <Col span={12}>
-              <span
-                style={{
-                  // ...labelStyle,
-                  fontSize: '16px',
-
-                  cursor: 'pointer',
-                }}
-                onClick={handleSetAmountPaid}
-              >
-                Jumlah Bayar
-              </span>
-              <span
-                style={{
-                  // ...labelColonStyle,
-                  fontSize: '16px',
-                }}
-              >
-                :
-              </span>
-
-              <NumericFormat
-                placeholder="Nilai Pembayaran"
-                value={amountPaid as any}
-                thousandSeparator="."
-                decimalSeparator=","
-                decimalScale={2}
-                allowNegative={false}
-                onValueChange={(values) => {
-                  const { floatValue } = values
-                  setAmountPaid(floatValue || 0)
-                }}
-                customInput={Input}
-                max={due}
-                style={{
-                  width: '100%',
-                  textAlign: 'right',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  color: '#007BFF',
-                }}
-              />
-            </Col>
-
-            <Col span={12}>
-              <Form.Item>
-                <SingleDate
-                  onChange={(dates) => {
-                    setSelectedDates(dates)
-                  }}
-                  onSave={handleDateRangeSave}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Select
-                showSearch // Menampilkan kolom pencarian
-                placeholder="Pilih bank"
-                value={selectedBank}
-                onChange={(value) => setSelectedBank(value)}
-                style={{ width: '100%' }}
-                optionFilterProp="children"
-                filterOption={(input: any, option: any) =>
-                  option?.children
-                    ?.toString()
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-              >
-                {akunBanks?.map((e) => (
-                  <Select.Option key={e.id} value={e.name}>
-                    {e.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="catatan">
-                <Input placeholder="Catatan" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row justify="end">
-            <Col>
-              <Button type="primary" htmlType="submit">
-                Simpan Pembayaran
-              </Button>
-            </Col>
-          </Row>
-        </Form>
-      </Card>
+      <Modal
+        title="Submit"
+        visible={isModalVisible}
+        // onCancel={handleCancel}
+        footer={null}
+        style={{ textAlign: 'center' }}
+        bodyStyle={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100px',
+        }}
+      >
+        {loading ? (
+          <Spin />
+        ) : (
+          <Button type="primary" onClick={handleButtonClick}>
+            Submit
+          </Button>
+        )}
+      </Modal>
     </div>
   )
 }
 
-export default KumpulanAksi
+export default DetailPemesananPenjualan

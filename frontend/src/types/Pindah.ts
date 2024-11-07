@@ -16,7 +16,7 @@ export type WarehouseTransfer = {
 export type TransferItem = {
   finance_account_id: number
   product_id: number
-  product_name: number
+  product_name: string
   qty: number
   qty_minta: number
 

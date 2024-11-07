@@ -8,7 +8,12 @@ interface DateRangeProps {
   difference?: number
   onChange?: (dates: [string, string]) => void
   onDifferenceChange?: (diff: number) => void
-  onSave?: (startDate: string, endDate: string, selisih: number) => void
+  onSave?: (
+    startDate: string,
+    endDate: string,
+    selisih: number,
+    termId: number
+  ) => void
   defaultValue?: string[] | undefined
 }
 
@@ -17,14 +22,13 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
   const [startDate, setStartDate] = useState<Dayjs>(
     props.value ? dayjs(props.value[0]) : currentDate
   )
-
   const [endDate, setEndDate] = useState<Dayjs>(
-    props.value ? dayjs(props.value[1]) : currentDate.add(0, 'days')
+    props.value ? dayjs(props.value[1]) : currentDate.add(1, 'day')
   )
-
   const [dateDifference, setDateDifference] = useState<number>(
-    props.difference !== undefined ? props.difference : 0
+    props.difference !== undefined ? props.difference : 1
   )
+  const [termId, setTermId] = useState<number>(2) // Default term_id for COD
 
   useEffect(() => {
     if (props.difference !== undefined && props.difference !== dateDifference) {
@@ -62,6 +66,26 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
     const newEndDate = startDate.add(value, 'days')
     setEndDate(newEndDate)
     setDateDifference(value)
+
+    // Set term_id based on selected days
+    let newTermId: number
+    if (value === 0) newTermId = 2 // COD
+    else if (value === 10) newTermId = 7 // 10 days
+    else if (value === 14) newTermId = 3 // 14 days
+    else if (value === 30) newTermId = 1 // 30 days
+    else newTermId = 2 // Default to COD if unmatched
+
+    setTermId(newTermId)
+
+    // Save values when the term changes
+    if (props.onSave) {
+      props.onSave(
+        startDate.format('DD-MM-YYYY'),
+        newEndDate.format('DD-MM-YYYY'),
+        dateDifference,
+        newTermId // Add termId here
+      )
+    }
 
     if (props.onDifferenceChange) {
       props.onDifferenceChange(value)
@@ -105,15 +129,6 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
             onChange={handleStartDateChange}
           />
         </Col>
-        {/* <Col span={12}>
-          <span style={labelStyle}>Tgl. Jatuh Tempo</span>
-          <span style={labelColonStyle}>:</span>
-          <DatePicker
-            style={{ width: '70%' }}
-            value={endDate as any}
-            onChange={(date) => setEndDate(date!)}
-          />
-        </Col> */}
         <Col span={12} style={{ display: 'flex', alignItems: 'center' }}>
           <span style={labelStyle}>Termin (Hari)</span>
           <span style={labelColonStyle}>: </span>
@@ -131,6 +146,8 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
           </div>
         </Col>
       </Row>
+      {/* Display term_id for debugging */}
+      <div>Term ID: {termId}</div>
     </div>
   )
 }

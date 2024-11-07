@@ -5,9 +5,12 @@ import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
 import { useIdInvoice } from './takeSingleInvoice'
 import UserContext from '../../contexts/UserContext'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const ListTransaksi: React.FC = () => {
+  const { data } = useGetTransaksisQuery()
+  const location = useLocation()
+
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
@@ -20,8 +23,6 @@ const ListTransaksi: React.FC = () => {
       setSelectedWarehouseId(user.id_outlet)
     }
   }, [user])
-
-  const { data } = useGetTransaksisQuery()
   const [selectedRefNumber, setSelectedRefNumber] = useState<string | null>(
     null
   )
@@ -39,9 +40,10 @@ const ListTransaksi: React.FC = () => {
   const filteredData = data
     ?.filter(
       (transaction) =>
-        transaction.warehouse_id === Number(user?.id_outlet) &&
-        transaction.jalur === 'penjualan' &&
-        transaction.reason_id === 'unvoid'
+        (transaction.warehouse_id === Number(user?.id_outlet) &&
+          transaction.jalur === 'penjualan') ||
+        (transaction.jalur === 'pemesanan' &&
+          transaction.reason_id === 'unvoid')
     )
     ?.sort(
       (a, b) =>

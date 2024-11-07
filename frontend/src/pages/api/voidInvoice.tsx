@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { HOST } from '../../config'
 import TOKEN from '../../token'
-import { useIdInvoice } from './takeSingleInvoice'
+import { message } from 'antd'
 
-export function useVoidInvoice(ref_number: string) {
-  const { getIdAtInvoice } = useIdInvoice(ref_number)
+export function useVoidInvoice() {
   const [voidLoading, setVoidLoading] = useState(false)
   const [voidError, setVoidError] = useState<string | null>(null)
   const [voidSuccess, setVoidSuccess] = useState(false)
 
-  const voidInvoice = async () => {
-    if (!getIdAtInvoice || !getIdAtInvoice.id) {
+  const voidInvoice = async (invoiceId: string) => {
+    // Menerima invoiceId sebagai parameter
+    if (!invoiceId) {
       setVoidError('Invoice ID tidak ditemukan')
       return
     }
@@ -21,9 +21,9 @@ export function useVoidInvoice(ref_number: string) {
 
     try {
       const response = await fetch(
-        `${HOST}/finance/invoices/${getIdAtInvoice.id}/void`,
+        `${HOST}/finance/invoices/${invoiceId}/void`,
         {
-          method: 'POST', // Bisa jadi method lain, tergantung dokumentasi API
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${TOKEN}`,
@@ -37,9 +37,13 @@ export function useVoidInvoice(ref_number: string) {
 
       const responseData = await response.json()
       setVoidSuccess(true)
+      message.success('Transaksi berhasil dibatalkan!')
       console.log('Void invoice berhasil:', responseData)
     } catch (error: any) {
-      setVoidError(error.message || 'Terjadi kesalahan saat void invoice')
+      const errorMessage =
+        error.message || 'Terjadi kesalahan saat void invoice'
+      setVoidError(errorMessage)
+      message.error(errorMessage)
     } finally {
       setVoidLoading(false)
     }

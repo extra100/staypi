@@ -79,6 +79,7 @@ const ProductStocksPage: React.FC = () => {
       .join(','),
     combinedWarehouseIds
   )
+  console.log({ stocks })
   const { mutate: addWarehouseTransfer } = useAddWarehouseTransferMutation()
 
   useEffect(() => {

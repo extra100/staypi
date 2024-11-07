@@ -36,13 +36,20 @@ const SudahDivalidasi: React.FC = () => {
   const { data: idWarehouseMonggo } = useGetWarehousesQuery()
 
   const { data: transferData } = useGetWarehouseTransferByRefQuery(ref_number!)
-
+  console.log({ transferData })
   const transferArray = Array.isArray(transferData) ? transferData : []
   const transfer = transferArray[0] || {}
   const sumberData = transfer.items || []
-
+  console.log({ sumberData })
   const warehouseMap: Record<any, any> = {}
-
+  const formattedTransDate = new Date(transfer.trans_date).toLocaleString(
+    'id-ID',
+    {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }
+  )
   if (idWarehouseMonggo && Array.isArray(idWarehouseMonggo)) {
     idWarehouseMonggo.forEach((warehouse) => {
       warehouseMap[warehouse.id] = warehouse.id
@@ -101,6 +108,7 @@ const SudahDivalidasi: React.FC = () => {
   // }
 
   const [dataSource, setDataSource] = useState<any[]>([])
+  console.log({ dataSource })
   const combinedWarehouseIds = `${fromWarehouseId},${toWarehouseId}`
   const { stocks, loading } = useProductStocks(
     dataSource
@@ -149,68 +157,18 @@ const SudahDivalidasi: React.FC = () => {
     }
   }, [transferData])
 
-  // const handleSaveTransfer = async () => {
-  //   const validRefNumber = ref_number || ''
-
-  //   const transferData = {
-  //     from_warehouse_id: fromWarehouseId,
-  //     to_warehouse_id: toWarehouseId,
-  //     trans_date: '2024-10-26',
-  //     ref_number: validRefNumber,
-  //     memo: '',
-  //     code: 2,
-
-  //     items: dataSource.map((row, index) => ({
-  //       qty_minta: row.qty_minta,
-  //       code: row.code,
-  //       product_id: row.product_id,
-  //       finance_account_id: row.id,
-
-  //       product_name: row.product_name,
-  //       qty: transferQty[index] || 0,
-  //       unit_name: row.unit_name,
-  //       before_qty_dari: fromQtyState[row.product_id] || 0,
-  //       before_qty_tujuan: toQtyState[row.product_id] || 0,
-  //     })),
-  //   }
-  //   // handlePrint()
-  //   // saveInvoiceMutasi(transferData)
-
-  //   // try {
-  //   //   message.success('Data transfer berhasil disimpan!')
-
-  //   //   updateWarehouseTransfer(
-  //   //     { ref_number: validRefNumber, updatedData: transferData },
-  //   //     {
-  //   //       onSuccess: () => {
-  //   //         message.success(
-  //   //           'Data transfer berhasil diupdate berdasarkan ref_number!'
-  //   //         )
-  //   //       },
-  //   //       onError: (error) => {
-  //   //         message.error('Terjadi kesalahan saat mengupdate data transfer')
-  //   //         console.error('Error:', error)
-  //   //       },
-  //   //     }
-  //   //   )
-  //   // } catch (error) {
-  //   //   message.error('Terjadi kesalahan saat menyimpan data transfer')
-  //   //   console.error('Error:', error)
-  //   // }
-  // }
   const generateSerialNumber = (productId: number): string => {
     const fromQty = fromQtyState[productId] || 0
     const toQty = toQtyState[productId] || 0
 
     return `${fromQty}**${toQty}`
   }
-
-  // const printSuratJalan = useRef<HTMLDivElement>(null)
-
-  // const printSuratJalanHandler = useReactToPrint({
-  //   content: () => printSuratJalan.current,
-  // })
-
+  const today = new Date()
+  const formattedDate = today.toLocaleDateString('id-ID', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
   const columns = [
     {
       title: 'No',
@@ -283,13 +241,22 @@ const SudahDivalidasi: React.FC = () => {
 
                 <Row>
                   <Col span={6}>
-                    <Text>Tanggal</Text>
+                    <Text>Tanggal Validasi</Text>
                   </Col>
                   <Col span={12}>
-                    <Text strong>: {transfer.trans_date}</Text>
+                    <Text strong>: {formattedTransDate}</Text>
                   </Col>
+
                   <Col span={6} style={{ textAlign: 'center' }}>
                     <Text strong>{fromWarehouseName}</Text>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={6}>
+                    <Text>Tanggal Print</Text>
+                  </Col>
+                  <Col span={12}>
+                    <Text strong>: {formattedDate}</Text>
                   </Col>
                 </Row>
 
@@ -380,42 +347,41 @@ const SudahDivalidasi: React.FC = () => {
                 },
               }}
             />
-            <Row
-              style={{
-                marginTop: '0px',
-                paddingTop: '1px',
-              }}
-            >
-              <Col span={24}>
-                <Text>
-                  Pesan: Barang sudah sesuai dengan jumlah fisik yang diterima.
-                </Text>
-              </Col>
-            </Row>
+            <div className="print-message">
+              <Row style={{ marginTop: '0px', paddingTop: '1px' }}>
+                <Col span={24}>
+                  <Text>
+                    Pesan: Barang sudah sesuai dengan jumlah fisik yang
+                    diterima.
+                  </Text>
+                </Col>
+              </Row>
 
-            <Row
-              justify="space-between"
-              style={{ marginTop: '32px', textAlign: 'center' }}
-            >
-              <Col span={8}>
-                <Text>Diperiksa Oleh</Text>
-                <br />
-                <br />
-                <Text>(...................................)</Text>
-              </Col>
-              <Col span={8}>
-                <Text>Diterima Oleh</Text>
-                <br />
-                <br />
-                <Text>(...................................)</Text>
-              </Col>
-              <Col span={8}>
-                <Text>Pengirim</Text>
-                <br />
-                <br />
-                <Text>(...................................)</Text>
-              </Col>
-            </Row>
+              <Row
+                // className="print-message"
+                justify="space-between"
+                style={{ marginTop: '32px', textAlign: 'center' }}
+              >
+                <Col span={8}>
+                  <Text>Diperiksa Oleh</Text>
+                  <br />
+                  <br />
+                  <Text>(...................................)</Text>
+                </Col>
+                <Col span={8}>
+                  <Text>Diterima Oleh</Text>
+                  <br />
+                  <br />
+                  <Text>(...................................)</Text>
+                </Col>
+                <Col span={8}>
+                  <Text>Pengirim</Text>
+                  <br />
+                  <br />
+                  <Text>(...................................)</Text>
+                </Col>
+              </Row>
+            </div>
           </>
         )}
       </div>
@@ -423,6 +389,7 @@ const SudahDivalidasi: React.FC = () => {
       <div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
+            className="no-print" // Add this class
             onClick={handlePrint}
             style={{ color: '#AF8700', borderColor: '#AF8700' }}
           >

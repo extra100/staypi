@@ -10,6 +10,67 @@
     Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   margin-bottom: 1px;
 }
+
+.negative-stock-row {
+  background-color: #ffcccc !important; /* Warna merah muda */
+}
+
+/* Container untuk memusatkan elemen */
+.centered-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f2f5; /* Warna background untuk kontras */
+}
+
+/* Menu utama */
+.elevated-menu {
+  background: transparent; /* Supaya elemen di belakang terlihat */
+  border: none; /* Menghapus border default */
+}
+
+/* Item Menu dengan Efek Mengambang */
+.elevated-menu-item {
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px; /* Padding untuk memberikan ruang di dalam item */
+  font-size: 16px; /* Ukuran teks */
+  font-weight: 500;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Efek bayangan */
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-align: center; /* Memusatkan teks */
+  width: 50px; /* Ukuran lebar menu item (5 cm) */
+  height: 50px; /* Ukuran tinggi menu item (5 cm) */
+}
+@media print {
+  .print-message {
+    display: block !important; /* Show during print */
+  }
+}
+
+.print-message {
+  display: none; /* Hide normally */
+}
+/* Add this to your CSS file */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Efek hover pada menu item */
+.elevated-menu-item:hover {
+  transform: translateY(-5px); /* Efek mengambang */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); /* Bayangan lebih kuat saat di-hover */
+}
+
+/* Style untuk disabled menu item */
+.elevated-menu-item:disabled {
+  opacity: 0.6; /* Efek disabled dengan opacity */
+  pointer-events: none; /* Menonaktifkan interaksi */
+}
+
 @media print {
   @page {
     size: 4.33in 6.29in; /* Set custom paper size */

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { Button, Table } from 'antd'
+import { Button, Table, Input } from 'antd'
 import { useGetWarehouseTransfersQuery } from '../../hooks/pindahHooks'
 import { useIdWarehouse } from './namaWarehouse'
 import { useNavigate } from 'react-router-dom'
@@ -14,7 +14,6 @@ const ListSudahValidasiMasuk: React.FC = () => {
   }
 
   const { data: transfers } = useGetWarehouseTransfersQuery()
-
   const { idWarehouse } = useIdWarehouse()
   const navigate = useNavigate()
 
@@ -25,14 +24,17 @@ const ListSudahValidasiMasuk: React.FC = () => {
     })
     return map
   }, [idWarehouse])
-  console.log({ warehouseMap })
+
+  const [searchTerm, setSearchTerm] = useState('')
+
   const dataSource = Array.isArray(transfers)
     ? transfers
         .filter(
           (transfer: any) =>
             transfer.from_warehouse_id === idOutletLoggedIn &&
             transfer.to_warehouse_id !== idOutletLoggedIn &&
-            transfer.code === 2
+            transfer.code === 2 &&
+            transfer.ref_number.includes(searchTerm) // Filter by search term
         )
         .sort(
           (a: any, b: any) =>
@@ -43,6 +45,7 @@ const ListSudahValidasiMasuk: React.FC = () => {
   const handleRowClick = (record: any) => {
     navigate(`/sudah-validasi/${record.ref_number}`)
   }
+
   const [activeButton, setActiveButton] = useState('')
 
   const handleButtonClick = (value: any) => {
@@ -58,6 +61,7 @@ const ListSudahValidasiMasuk: React.FC = () => {
       navigate('/ListSudahValidasiMasuk')
     }
   }
+
   const columns = [
     {
       title: 'Dari',
@@ -132,6 +136,12 @@ const ListSudahValidasiMasuk: React.FC = () => {
       >
         <span>Sudah Divalidasi Masuk</span>
       </Button>
+      <Input
+        placeholder="Search by INV"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{ marginBottom: '16px', width: '300px' }} // Adjust width as needed
+      />
       <Table
         columns={columns}
         dataSource={dataSource}

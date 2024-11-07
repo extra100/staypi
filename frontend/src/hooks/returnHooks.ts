@@ -7,10 +7,10 @@ export const useAddReturnMutation = () => {
 
   return useMutation(
     (regak: Return) => {
-      const { _id, ...dataToSend } = regak
+      const { sales_id, ...dataToSend } = regak
       console.log('Data to Send:', dataToSend)
 
-      return apiClient.post<Return>(`/api/transactions`, dataToSend)
+      return apiClient.post<Return>(`/api/returns`, dataToSend)
     },
     {
       onSuccess: () => {
@@ -19,3 +19,9 @@ export const useAddReturnMutation = () => {
     }
   )
 }
+
+export const useGetReturnssQuery = () =>
+  useQuery({
+    queryKey: ['returns'],
+    queryFn: async () => (await apiClient.get<Return[]>(`/api/returns`)).data,
+  })

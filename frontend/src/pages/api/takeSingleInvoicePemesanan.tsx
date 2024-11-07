@@ -30,12 +30,12 @@ export function useIdInvoice(ref_number: string) {
 
         let allInvoices: Invoice[] = []
         let page = 1
-        const perPage = 10
+        const perPage = 50
         let hasMoreData = true
 
-        while (allInvoices.length < 10 && hasMoreData && !getIdAtInvoice) {
+        while (allInvoices.length < 500 && hasMoreData && !getIdAtInvoice) {
           const responGudang = await fetch(
-            `${HOST}/finance/invoices?ref_number=${ref_number}&page=${page}&perPage=${perPage}`,
+            `${HOST}/finance/orders?ref_number=${ref_number}&page=${page}&perPage=${perPage}`,
             {
               headers: {
                 Authorization: `Bearer ${TOKEN}`,

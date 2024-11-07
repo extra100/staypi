@@ -29,6 +29,9 @@ export function useProductStocks(
 ) {
   const [stocks, setStocks] = useState<ProductStock[]>([])
   const [loading, setLoading] = useState(true)
+  const [qtyById, setQtyById] = useState<{
+    [productId: string]: { [warehouseId: string]: number }
+  }>({})
 
   useEffect(() => {
     const fetchStocks = async () => {
@@ -48,6 +51,22 @@ export function useProductStocks(
 
         const stockData: ProductStocksResponse = await response.json()
         setStocks(stockData.data)
+
+        // Update qtyById based on the fetched data
+        const qtyData = stockData.data.reduce((acc, product) => {
+          const warehouseQuantities = Object.entries(product.stocks).reduce(
+            (stockAcc, [warehouseId, stock]) => {
+              stockAcc[warehouseId] = stock.qty
+              return stockAcc
+            },
+            {} as { [warehouseId: string]: number }
+          )
+
+          acc[product.id] = warehouseQuantities
+          return acc
+        }, {} as { [productId: string]: { [warehouseId: string]: number } })
+
+        setQtyById(qtyData)
       } catch (error) {
         console.error('Error fetching stocks:', error)
       } finally {
@@ -58,5 +77,5 @@ export function useProductStocks(
     fetchStocks()
   }, [productIds, warehouseIds, transDate])
 
-  return { stocks, loading }
+  return { stocks, loading, qtyById }
 }

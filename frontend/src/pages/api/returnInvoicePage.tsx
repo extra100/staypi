@@ -76,6 +76,11 @@ const Aneh: React.FC = () => {
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
   )
+  const getPosDetail = allTransactions?.find(
+    (transaction: any) => transaction.ref_number === ref_number
+  )
+  const idDariSDBEK = getPosDetail?.id
+  console.log({ idDariSDBEK })
   const { data: contacts } = useGetContactsQuery()
   const { data: akunBanks } = useGetAkunBanksQueryDb()
 
@@ -84,10 +89,6 @@ const Aneh: React.FC = () => {
   const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
 
   const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
-
-  const getPosDetail = allTransactions?.find(
-    (transaction: any) => transaction.ref_number === ref_number
-  )
 
   // const contactName = getPosDetail?.contacts?.[0]?.name
   const contactId = getPosDetail?.contacts?.[0]?.id
@@ -102,6 +103,7 @@ const Aneh: React.FC = () => {
   const price = getPosDetail?.items?.[0]?.price || null
 
   const amount = getPosDetail?.amount ?? 0
+  const warehouseNomor = getPosDetail?.warehouse_id ?? 0
   const status_id = getPosDetail?.status_id ?? 0
   const refTransaksi = getPosDetail?.ref_number ?? 0
   const witholdings = getPosDetail?.witholdings || []
@@ -178,8 +180,9 @@ const Aneh: React.FC = () => {
 
     if (refNumber) {
       const invoiceData = {
-        jalur: 'return',
+        jalur: 'returning',
         ref_transaksi: newRefNomor,
+        id: idDariSDBEK,
         // ref_number: newRefNomor,
 
         trans_date: formatDate(selectedDates),
@@ -207,6 +210,7 @@ const Aneh: React.FC = () => {
         const updatedInvoice = {
           ...existingInvoice,
           jalur: invoiceData.jalur,
+          id: idDariSDBEK,
           trans_date: formatDate(selectedDates),
           witholdings: updatedWithholdings,
           // ref_number: newRefNomor,
@@ -214,7 +218,7 @@ const Aneh: React.FC = () => {
         }
         console.log('Updated Invoice:', updatedInvoice)
 
-        simpanReturn.mutate(updatedInvoice as any)
+        // simpanReturn.mutate(updatedInvoice as any)
       } else {
         console.error('Invoice with ref_number not found:', refNumber)
       }
@@ -231,7 +235,7 @@ const Aneh: React.FC = () => {
       ref_number: newRefNomor,
       memo: '',
       attachment: [],
-      business_tran_id: invoiceId,
+      business_tran_id: idDariSDBEK,
       items:
         getPosDetail?.items?.map((item: any, index: any) => ({
           finance_account_id: item.finance_account_id,
@@ -247,14 +251,69 @@ const Aneh: React.FC = () => {
           // unit_id: 2,
         })) || [],
     }
+    saveReturn(payload)
+      .then((response: any) => {
+        console.log('Payment saved successfully:', response)
+      })
+      .catch((error: any) => {
+        console.error('Error saving payment:', error)
+      })
+    const simpanQty = {
+      trans_date: selectedDates,
+      due_date: selectedDates,
+      contact_id: contactId,
+      status_id: status_id,
+      include_tax: 0,
+      ref_transaksi: refTransaksi,
+      ref_number: newRefNomor,
+      memo: '',
+      attachment: [],
+      business_tran_id: idDariSDBEK,
+      id: idDariSDBEK,
+      witholding_account_id: accountId || bankAccountId,
+      witholding_amount: hutang,
+      witholding_percent: 0,
+      warehouse_id: warehouseNomor,
+      externalId: 1,
+      term_id: 2,
+      due: 3,
+      unique_id: 3,
+      reason_id: 3,
+      down_payment: amountPaid || 0,
+      amount: amountPaid || 0,
+      jalur: 'returning',
 
-    // saveReturn(payload)
-    //   .then((response: any) => {
-    //     console.log('Payment saved successfully:', response)
-    //   })
-    //   .catch((error: any) => {
-    //     console.error('Error saving payment:', error)
-    //   })
+      items:
+        getPosDetail?.items?.map((item: any, index: any) => ({
+          finance_account_id: item.finance_account_id,
+          tax_id: '',
+          desc: '',
+          qty_transaksi: item.qty,
+          qty: transferQty[index] || 0,
+
+          price: item.price,
+          amount: item.amount,
+          discount_amount: item.discount_amount,
+          discount_percent: 0,
+          price_after_tax: 0,
+          amount_after_tax: 0,
+          qty_update: 0,
+          // unit_id: 2,
+        })) || [],
+      withholdings: [
+        {
+          witholding_account_id: accountId || bankAccountId,
+          name: selectedBank || bankAccountName,
+          down_payment: amountPaid || 0,
+          witholding_percent: 0,
+          witholding_amount: hutang,
+        },
+      ],
+    }
+    simpanReturn.mutate(simpanQty as any)
+    console.log({ simpanReturn })
+
+    // useAddReturnMutation(simpanQty as any)
   }
   const printNota = useRef<HTMLDivElement>(null)
 
@@ -337,13 +396,6 @@ const Aneh: React.FC = () => {
 
   const [newRefNomor, setNewRefNomor] = useState('')
 
-  const { voidInvoice, voidLoading, voidError, voidSuccess } = useVoidInvoice(
-    refNumber as any
-  )
-  const { unvoidInvoice, unvoidLoading, unvoidError, unvoidSuccess } =
-    useUnvoidInvoice(refNumber as any)
-  //bisayok
-
   const [transferQty, setTransferQty] = useState<number[]>([])
   console.log({ transferQty })
   const [amounts, setAmounts] = useState<number[]>([])
@@ -383,29 +435,25 @@ const Aneh: React.FC = () => {
     price: number,
     discount_amount: number
   ) => {
-    // Update transfer quantity
     setTransferQty((prevTransferQty) => {
       const updatedTransferQty = [...prevTransferQty]
       updatedTransferQty[index] = value
       return updatedTransferQty
     })
 
-    // Calculate and update the amount for this row
     setAmounts((prevAmounts) => {
       const updatedAmounts = [...prevAmounts]
       updatedAmounts[index] = value * price
       return updatedAmounts
     })
 
-    // Calculate and update the total discount for this row
     setAaaDiskon((prevDiscount) => {
-      // Ensure prevDiscount is an array to avoid iterability issues
       const updatedTotalDiscount = [...(prevDiscount || [])]
       updatedTotalDiscount[index] = value * discount_amount
       return updatedTotalDiscount
     })
   }
-  const [isDiscountVisible, setIsDiscountVisible] = useState<boolean>(true) // Default is true
+  const [isDiscountVisible, setIsDiscountVisible] = useState<boolean>(true)
   const [selectedDates, setSelectedDates] = useState<string>()
 
   const handleDateRangeSave = (startDate: string) => {

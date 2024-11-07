@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Button, Table, Tag } from 'antd'
 
-import { useGetTransaksisQuery } from '../hooks/transactionHooks'
-import { useIdInvoice } from './api/takeSingleInvoice'
-import UserContext from '../contexts/UserContext'
-import { useGetContactsQuery } from '../hooks/contactHooks'
+import UserContext from '../../contexts/UserContext'
+import { useGetContactsQuery } from '../../hooks/contactHooks'
 import { useNavigate } from 'react-router-dom'
-import { useGetReturnssQuery } from '../hooks/returnHooks'
+import { useGetPpsQuery } from '../../hooks/ppHooks'
+import { useIdInvoice } from './takeSingleInvoicePemesanan'
 
-const ListReturn: React.FC = () => {
+const ListPp: React.FC = () => {
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
@@ -22,8 +21,8 @@ const ListReturn: React.FC = () => {
     }
   }, [user])
 
-  // const { data } = useGetTransaksisQuery()
-  const { data } = useGetReturnssQuery()
+  const { data } = useGetPpsQuery()
+  console.log({})
   const [selectedRefNumber, setSelectedRefNumber] = useState<string | null>(
     null
   )
@@ -42,7 +41,7 @@ const ListReturn: React.FC = () => {
     ?.filter(
       (transaction) =>
         transaction.warehouse_id === Number(user?.id_outlet) &&
-        transaction.jalur === 'returning'
+        transaction.jalur === 'pemesanan'
     )
     ?.sort(
       (a, b) =>
@@ -50,13 +49,12 @@ const ListReturn: React.FC = () => {
     )
   const [activeButton, setActiveButton] = useState('')
   const navigate = useNavigate()
-
   const handleButtonClick = (value: any) => {
     setActiveButton(value)
 
     if (value === '1') {
-      navigate('/listkledo')
-    } else if (value === '2') {
+      navigate('/listpp')
+    } else if (value === 'unvoid') {
       navigate('/listvoid')
     } else if (value === '3') {
       navigate('/listreturn')
@@ -69,14 +67,13 @@ const ListReturn: React.FC = () => {
       key: 'ref_number',
       render: (text: any, record: any) => (
         <a
-          href={`/detailkledo/${record.ref_number}`}
+          href={`/okepemesanan/${record.ref_number}`}
           onClick={() => handleRefNumberClick(record.ref_number)}
         >
           {text}
         </a>
       ),
     },
-
     {
       title: 'Pelanggan',
       dataIndex: ['contacts', 0, 'id'],
@@ -85,47 +82,68 @@ const ListReturn: React.FC = () => {
     },
     {
       title: 'Status',
-      dataIndex: 'status_id',
-      key: 'status_id',
-      render: (status_id: number) => {
+      key: 'status',
+      render: (record: any) => {
+        const totalDownPayment = record.witholdings.reduce(
+          (sum: number, witholding: any) =>
+            sum + (witholding.down_payment || 0),
+          0
+        )
+
+        const due = record.amount - totalDownPayment
         let color = ''
         let text = ''
 
-        switch (status_id) {
-          case 1:
-            color = 'red'
-            text = 'Belum Dibayar'
-            break
-          case 2:
-            color = 'orange'
-            text = 'Dibayar Sebagian'
-            break
-          case 3:
-            color = 'green'
-            text = 'Lunas'
-            break
-          default:
-            color = 'gray'
-            text = 'Unknown Status'
+        if (due === 0) {
+          color = 'green'
+          text = 'Lunas'
+        } else if (totalDownPayment > 0 && due > 0) {
+          color = 'orange'
+          text = 'Dibayar Sebagian'
+        } else {
+          color = 'red'
+          text = 'Belum Dibayar'
         }
 
         return <Tag color={color}>{text}</Tag>
       },
     },
     {
-      title: 'Terbayar',
-      dataIndex: 'down_payment',
-      key: 'down_payment',
-    },
-    {
-      title: 'Sisa Tagihan',
-      dataIndex: 'due',
-      key: 'due',
-    },
-    {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
+      render: (amount: number) => (
+        <div style={{ textAlign: 'right' }}>{amount}</div>
+      ),
+    },
+    {
+      title: 'Terbayar',
+      dataIndex: 'witholdings',
+      key: 'witholdings',
+      render: (witholdings: any[]) => {
+        const totalDownPayment = witholdings
+          .filter((witholding) => witholding.status === 0)
+          .reduce((sum, witholding) => sum + (witholding.down_payment || 0), 0)
+
+        return <div style={{ textAlign: 'right' }}>{totalDownPayment}</div>
+      },
+    },
+    {
+      title: 'Sisa Tagihan',
+      key: 'due',
+      render: (record: any) => {
+        const totalDownPayment = record.witholdings
+          .filter((witholding: any) => witholding.status === 0)
+          .reduce(
+            (sum: number, witholding: any) =>
+              sum + (witholding.down_payment || 0),
+            0
+          )
+
+        const due = record.amount - totalDownPayment
+
+        return <div style={{ textAlign: 'right' }}>{due}</div>
+      },
     },
   ]
 
@@ -176,4 +194,4 @@ const ListReturn: React.FC = () => {
   )
 }
 
-export default ListReturn
+export default ListPp

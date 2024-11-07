@@ -4,25 +4,30 @@ import TOKEN from '../../token'
 
 export interface Invoice {
   id: number
-  ref_number: string
+  memo: string // Mengganti ref_number dengan memo sebagai property
 }
 
-export function useIdInvoice(ref_number: string) {
+export function useIdBasedMemoAndrefNumber(ref_number: string) {
   const [loading, setLoading] = useState(true)
-  const [getIdAtInvoice, setgetIdAtInvoice] = useState<Invoice | null>(null)
+  const [
+    getIdFromKledoBasedRefNumberAndMemo,
+    setgetIdFromKledoBasedRefNumberAndMemo,
+  ] = useState<Invoice | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const storedData = sessionStorage.getItem('getIdAtInvoice')
+        const storedData = sessionStorage.getItem(
+          'getIdFromKledoBasedRefNumberAndMemo'
+        )
         if (storedData) {
           const parsedData: Invoice[] = JSON.parse(storedData)
 
           const matchedInvoice = parsedData.find(
-            (invoice) => invoice.ref_number === ref_number
+            (invoice) => invoice.memo === ref_number // Mencari berdasarkan property memo
           )
           if (matchedInvoice) {
-            setgetIdAtInvoice(matchedInvoice)
+            setgetIdFromKledoBasedRefNumberAndMemo(matchedInvoice)
             setLoading(false)
             return
           }
@@ -33,7 +38,11 @@ export function useIdInvoice(ref_number: string) {
         const perPage = 10
         let hasMoreData = true
 
-        while (allInvoices.length < 10 && hasMoreData && !getIdAtInvoice) {
+        while (
+          allInvoices.length < 10 &&
+          hasMoreData &&
+          !getIdFromKledoBasedRefNumberAndMemo
+        ) {
           const responGudang = await fetch(
             `${HOST}/finance/invoices?ref_number=${ref_number}&page=${page}&perPage=${perPage}`,
             {
@@ -52,15 +61,15 @@ export function useIdInvoice(ref_number: string) {
           if (dataGudang.data && dataGudang.data.data.length > 0) {
             allInvoices = allInvoices.concat(dataGudang.data.data)
             const matchedInvoice = dataGudang.data.data.find(
-              (item: Invoice) => item.ref_number === ref_number
+              (item: Invoice) => item.memo === ref_number // Cari berdasarkan property memo
             )
 
             if (matchedInvoice) {
-              setgetIdAtInvoice(matchedInvoice)
+              setgetIdFromKledoBasedRefNumberAndMemo(matchedInvoice)
               setLoading(false)
 
               sessionStorage.setItem(
-                'getIdAtInvoice',
+                'getIdFromKledoBasedRefNumberAndMemo',
                 JSON.stringify(allInvoices)
               )
               return
@@ -81,10 +90,12 @@ export function useIdInvoice(ref_number: string) {
     if (ref_number) {
       fetchData()
     }
-  }, [ref_number]) // Fetching only when ref_number changes
+  }, [ref_number])
 
-  // Memoize the fetched invoice data
-  const memoizedData = useMemo(() => getIdAtInvoice, [getIdAtInvoice])
+  const memoizedData = useMemo(
+    () => getIdFromKledoBasedRefNumberAndMemo,
+    [getIdFromKledoBasedRefNumberAndMemo]
+  )
 
-  return { loading, getIdAtInvoice }
+  return { loading, getIdFromKledoBasedRefNumberAndMemo }
 }

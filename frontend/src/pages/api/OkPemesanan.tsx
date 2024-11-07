@@ -58,15 +58,20 @@ import {
   PrinterOutlined,
   CarOutlined,
 } from '@ant-design/icons'
-import { useDeleteInvoice } from './DeleteInvoicePenjualan'
+import { useIdPemesanan } from './takeSingleIdPemesanan'
+import { useGetPpByIdQuery } from '../../hooks/ppHooks'
+import { SaveApiPemesananPenjualan } from './SaveApiPemesanan'
+import { SaveApi } from './SaveApi'
 
 const { Title, Text } = Typography
 const { Option } = Select
 
-const DetailKledo: React.FC = () => {
+const OkPemesanan: React.FC = () => {
   const [showButtons, setShowButtons] = useState(false)
   const currentDate = dayjs()
   const [startDate, setStartDate] = useState<Dayjs>(currentDate)
+  const addPosMutation = useAddTransactionMutation()
+  const { saveInvoiceData } = SaveApi()
 
   const handleStartDateChange = (date: Dayjs | null) => {
     if (date) {
@@ -84,52 +89,29 @@ const DetailKledo: React.FC = () => {
 
   const updatePosMutation = useUpdateTransactionMutation()
   //
-  const { data: allTransactions } = useGetTransactionByIdQuery(
-    ref_number as string
-  )
+  const { data: allTransactions } = useGetPpByIdQuery(ref_number as string)
+  console.log('semua property', allTransactions)
 
   const { data: contacts } = useGetContactsQuery()
   const { data: akunBanks } = useGetAkunBanksQueryDb()
 
   const { getIdAtInvoice } = useIdInvoice(ref_number || '')
-  console.log({ getIdAtInvoice })
+
   const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
   console.log('id dari kledo yang kotrol semua', invoiceId)
 
   const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
-  console.log('ref_number dari database keldo', refNumber)
+  // console.log('ref_number dari database keldo', refNumber) yang atas saya ganti dengan memo
 
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
-
-  //delete
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(
-    null
-  )
-  const IdYangAkanDiDelete = getPosDetail?.id
-  const { hapusLoading, isDeleted } = useDeleteInvoice(selectedInvoiceId ?? 0)
-
-  const handleDelete = () => {
-    if (IdYangAkanDiDelete) {
-      setSelectedInvoiceId(IdYangAkanDiDelete)
-      message.loading('Deleting invoice...')
-    }
-  }
-  useEffect(() => {
-    if (isDeleted) {
-      message.success('Invoice deleted successfully')
-      setSelectedInvoiceId(null)
-    }
-  }, [isDeleted])
-  //delete
+  console.log({ getPosDetail })
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
   const langka = getPosDetail?.id
-  console.log(
-    'langkaaaaaaaaaaaaaaaaaa dari databse sendiri sudah masuk oenjualan',
-    langka
-  )
+  const menujudetailpenjualan = getPosDetail?.ref_number
+  console.log('id dari database sendiri', langka)
   const tagName = getPosDetail?.tages?.map((tag: any) => tag.name) || []
 
   const amount = getPosDetail?.amount ?? 0
@@ -183,101 +165,76 @@ const DetailKledo: React.FC = () => {
 
   const today = dayjs().format('DD-MM-YYYY')
   const { saveNextPayment } = saveToApiNextPayment()
-  const handleVoid = (values: any) => {
-    if (langka) {
-      const existingInvoice = allTransactions?.find(
-        (transaction) => transaction.id === langka
-      )
+  // const handleVoid = (values: any) => {
+  //   if (refNumber) {
+  //     const existingInvoice = allTransactions?.find(
+  //       (transaction) => transaction.ref_number === refNumber
+  //     )
 
-      if (existingInvoice) {
-        // Panggil voidInvoice terlebih dahulu
-        voidInvoice(langka as any)
-          .then(() => {
-            // Jika void berhasil, buat objek updatedInvoice
-            const updatedInvoice: Transaction = {
-              ...existingInvoice,
-              reason_id: 'void',
-            }
+  //     if (existingInvoice) {
+  //       const updatedInvoice: Transaction = {
+  //         ...existingInvoice,
+  //         reason_id: 'void',
+  //       }
 
-            // Lanjutkan dengan mutasi untuk memperbarui database
-            updatePosMutation.mutate(updatedInvoice, {
-              onSuccess: () => {
-                message.success('Transaksi berhasil dibatalkan dan diperbarui!')
-                setLoadingSpinner(true)
+  //       updatePosMutation.mutate(updatedInvoice, {
+  //         onSuccess: () => {
+  //           message.success('Transaksi berhasil dibatalkan!')
+  //           setLoadingSpinner(true)
 
-                setTimeout(() => {
-                  setLoadingSpinner(false)
-                  navigate('/listvoid')
-                }, 3000)
-              },
-              onError: (error) => {
-                message.error(
-                  `Terjadi kesalahan saat memperbarui database: ${error.message}`
-                )
-              },
-            })
-          })
-          .catch((error) => {
-            message.error(
-              `Terjadi kesalahan saat void invoice: ${error.message}`
-            )
-          })
-      } else {
-        message.error('Melebihi batas pembatalan:')
-      }
-    } else {
-      message.error('Menyebabkan double data')
-    }
-  }
+  //           setTimeout(() => {
+  //             setLoadingSpinner(false)
+  //             navigate('/listvoid')
+  //           }, 3000)
+  //         },
+  //         onError: (error) => {
+  //           message.error(`Terjadi kesalahan: ${error.message}`)
+  //         },
+  //       })
+  //     } else {
+  //       message.error('Melebihi batas pembatalan:')
+  //     }
+  //   } else {
+  //     message.error('Menyebabkan double data')
+  //   }
+  // }
 
   const [loadingSpinner, setLoadingSpinner] = useState(false) // State untuk mengontrol spinner
 
-  const handleUnVoid = (values: any) => {
-    if (langka) {
-      const existingInvoice = allTransactions?.find(
-        (transaction) => transaction.id === langka
-      )
+  // const handleUnVoid = (values: any) => {
+  //   if (refNumber) {
+  //     const existingInvoice = allTransactions?.find(
+  //       (transaction) => transaction.ref_number === refNumber
+  //     )
 
-      if (existingInvoice) {
-        // Panggil voidInvoice terlebih dahulu
-        unvoidInvoice(langka as any)
-          .then(() => {
-            // Jika void berhasil, buat objek updatedInvoice
-            const updatedInvoice: Transaction = {
-              ...existingInvoice,
-              reason_id: 'unvoid',
-            }
+  //     if (existingInvoice) {
+  //       const updatedInvoice: Transaction = {
+  //         ...existingInvoice,
+  //         reason_id: 'unvoid',
+  //       }
 
-            // Lanjutkan dengan mutasi untuk memperbarui database
-            updatePosMutation.mutate(updatedInvoice, {
-              onSuccess: () => {
-                message.success('Transaksi berhasil dibatalkan dan diperbarui!')
-                setLoadingSpinner(true)
+  //       updatePosMutation.mutate(updatedInvoice, {
+  //         onSuccess: () => {
+  //           message.success('Transaksi berhasil diunvoid!')
+  //           setLoadingSpinner(true)
 
-                setTimeout(() => {
-                  setLoadingSpinner(false)
-                  navigate('/listvoid')
-                }, 3000)
-              },
-              onError: (error) => {
-                message.error(
-                  `Terjadi kesalahan saat memperbarui database: ${error.message}`
-                )
-              },
-            })
-          })
-          .catch((error) => {
-            message.error(
-              `Terjadi kesalahan saat void invoice: ${error.message}`
-            )
-          })
-      } else {
-        message.error('Melebihi batas pembatalan:')
-      }
-    } else {
-      message.error('Menyebabkan double data')
-    }
-  }
+  //           setTimeout(() => {
+  //             setLoadingSpinner(false)
+  //             navigate('/listvoid')
+  //           }, 3000)
+  //         },
+  //         onError: (error) => {
+  //           message.error(`Terjadi kesalahan: ${error.message}`)
+  //         },
+  //       })
+  //     } else {
+  //       message.error('Invoice dengan ref_number tidak ditemukan.')
+  //     }
+  //   } else {
+  //     message.error('Tidak ada ref_number yang valid ditemukan.')
+  //   }
+  // }
+
   const handleFormSubmit = (values: any) => {
     const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
       map[warehouse.name] = warehouse.id
@@ -297,58 +254,70 @@ const DetailKledo: React.FC = () => {
             witholding_amount: amountPaid || 0,
             status: 0,
             trans_date: selectedDates,
+            business_tran_id: langka,
           },
         ],
       }
 
-      // Mencari invoice yang sesuai berdasarkan `ref_number`
+      // Find the existing invoice based on `ref_number`
       const existingInvoice = allTransactions?.find(
         (transaction) => transaction.id === langka
       )
 
+      // Log the existing invoice to the console for debugging
+      console.log('Existing Invoice:', existingInvoice)
+
       if (existingInvoice) {
-        // Menggabungkan `witholdings` yang sudah ada dengan data baru
+        // Merge the existing `witholdings` with new data
         const updatedWithholdings = [
           ...existingInvoice.witholdings,
           ...invoiceData.witholdings,
         ]
 
-        // Membuat objek invoice yang diperbarui
+        // Create the updated invoice object
         const updatedInvoice = {
           ...existingInvoice,
           witholdings: updatedWithholdings,
+          business_tran_id: langka,
         }
+        saveInvoiceData(getPosDetail)
 
-        // Mutate untuk mengirim pembaruan ke server
-        updatePosMutation.mutate(updatedInvoice as any)
-      } else {
-        console.error('Invoice with ref_number not found:', refNumber)
+        addPosMutation.mutate(existingInvoice as any, {
+          onSuccess: () => {
+            message.success('Transaksi berhasil disimpan!') // Tampilkan pesan sukses
+
+            // Tambahkan timer 3 detik sebelum mengarahkan
+            setTimeout(() => {
+              setLoadingSpinner(false) // Matikan spinner
+              navigate(`/simpanidunikdarikledo/${menujudetailpenjualan}`)
+            }, 3000)
+          },
+          onError: (error: any) => {
+            message.error(`Terjadi kesalahan: ${error.message}`) // Tampilkan pesan error
+            setLoadingSpinner(false) // Matikan spinner jika terjadi error
+          },
+        })
       }
-    } else {
-      console.error('No valid ref_number found.')
     }
 
-    // Membuat payload untuk pembayaran baru
     const payload = {
-      amount: amountPaid || 0,
+      amount: amountPaid,
       attachment: [],
       bank_account_id: accountId || bankAccountId,
       business_tran_id: langka,
-      // 199588
       witholding_amount: amountPaid,
       memo: values.catatan || null,
       trans_date: selectedDates,
-      witholdings: [], // Kosongkan dengan sengaja atau tambahkan data lain jika diperlukan
+      witholdings: [], // Intentionally empty, or add other data if needed
     }
 
-    // Simpan pembayaran baru ke server (implementasi saveNextPayment diharapkan sudah tersedia)
-    saveNextPayment(payload)
-      .then((response: any) => {
-        console.log('Payment saved successfully:', response)
-      })
-      .catch((error: any) => {
-        console.error('Error saving payment:', error)
-      })
+    // saveNextPayment(payload)
+    //   .then((response: any) => {
+    //     console.log('Payment saved successfully:', response)
+    //   })
+    //   .catch((error: any) => {
+    //     console.error('Error saving payment:', error)
+    //   })
   }
 
   const printNota = useRef<HTMLDivElement>(null)
@@ -431,7 +400,9 @@ const DetailKledo: React.FC = () => {
   }, [warehouseName, akunBanks])
 
   const [refNumbers, setRefNumber] = useState('')
-  const { voidInvoice, voidLoading, voidError, voidSuccess } = useVoidInvoice()
+  // const { voidInvoice, voidLoading, voidError, voidSuccess } = useVoidInvoice(
+  //   refNumber as any
+  // )
   const { unvoidInvoice } = useUnvoidInvoice()
   const [selectedDates, setSelectedDates] = useState<string>()
 
@@ -445,64 +416,53 @@ const DetailKledo: React.FC = () => {
 
   const navigate = useNavigate()
 
-  const menu = (
-    <Menu>
-      <Menu.Item key="lihatAudit" icon={<FileSearchOutlined />}>
-        Lihat Audit
-      </Menu.Item>
-      {getPosDetail?.reason_id === 'void' && (
-        <Menu.Item
-          key="unvoid"
-          icon={<UndoOutlined />}
-          onClick={() => {
-            // unvoidInvoice()
-            handleUnVoid(null)
-          }}
-          disabled={voidLoading}
-        >
-          {voidLoading ? 'Proses UnVoid...' : 'UnVoid'}
-        </Menu.Item>
-      )}
-      {getPosDetail?.reason_id === 'unvoid' && (
-        <Menu.Item
-          key="void"
-          icon={<CloseCircleOutlined />}
-          onClick={() => {
-            // voidInvoice()
-            handleVoid(null)
-          }}
-          disabled={voidLoading}
-        >
-          {voidLoading ? 'Proses Void...' : 'Void'}
-        </Menu.Item>
-      )}
+  // const menu = (
+  //   <Menu>
+  //     <Menu.Item key="lihatAudit" icon={<FileSearchOutlined />}>
+  //       Lihat Audit
+  //     </Menu.Item>
+  //     {getPosDetail?.reason_id === 'void' && (
+  //       <Menu.Item
+  //         key="unvoid"
+  //         icon={<UndoOutlined />}
+  //         onClick={() => {
+  //           unvoidInvoice()
+  //           handleUnVoid(null)
+  //         }}
+  //         disabled={voidLoading}
+  //       >
+  //         {voidLoading ? 'Proses UnVoid...' : 'UnVoid'}
+  //       </Menu.Item>
+  //     )}
+  //     {getPosDetail?.reason_id === 'unvoid' && (
+  //       <Menu.Item
+  //         key="void"
+  //         icon={<CloseCircleOutlined />}
+  //         onClick={() => {
+  //           voidInvoice()
+  //           handleVoid(null)
+  //         }}
+  //         disabled={voidLoading}
+  //       >
+  //         {voidLoading ? 'Proses Void...' : 'Void'}
+  //       </Menu.Item>
+  //     )}
 
-      <Menu.Item
-        key="retur"
-        icon={<RollbackOutlined />}
-        onClick={() => {
-          navigate(`/returninvoice/${ref_number}`)
-        }}
-      >
-        Retur
-      </Menu.Item>
+  //     <Menu.Item
+  //       key="retur"
+  //       icon={<RollbackOutlined />}
+  //       onClick={() => {
+  //         navigate(`/returninvoice/${ref_number}`)
+  //       }}
+  //     >
+  //       Retur
+  //     </Menu.Item>
 
-      <Menu.Item key="edit" icon={<EditOutlined />}>
-        Edit
-      </Menu.Item>
-      <Menu.Item
-        key="hapus"
-        icon={<CloseCircleOutlined />}
-        onClick={() => {
-          handleDelete()
-          handleVoid(null)
-        }}
-        disabled={hapusLoading}
-      >
-        {hapusLoading ? 'Proses Penghapusan...' : 'hapus'}
-      </Menu.Item>
-    </Menu>
-  )
+  //     <Menu.Item key="edit" icon={<EditOutlined />}>
+  //       Edit
+  //     </Menu.Item>
+  //   </Menu>
+  // )
   const columns = [
     {
       title: 'No',
@@ -590,7 +550,7 @@ const DetailKledo: React.FC = () => {
               )}
             </Col>
 
-            <Dropdown
+            {/* <Dropdown
               overlay={menu}
               trigger={['click']}
               placement="bottomRight"
@@ -615,7 +575,7 @@ const DetailKledo: React.FC = () => {
                   </svg>
                 )}
               </a>
-            </Dropdown>
+            </Dropdown> */}
 
             <Col>
               {showButtons && (
@@ -811,7 +771,7 @@ const DetailKledo: React.FC = () => {
 
                   cursor: 'pointer',
                 }}
-                onClick={handleSetAmountPaid}
+                // onClick={handleSetAmountPaid}
               >
                 Jumlah Bayar
               </span>
@@ -844,6 +804,7 @@ const DetailKledo: React.FC = () => {
                   fontWeight: 'bold',
                   color: '#007BFF',
                 }}
+                disabled
               />
             </Col>
 
@@ -890,7 +851,7 @@ const DetailKledo: React.FC = () => {
           <Row justify="end">
             <Col>
               <Button type="primary" htmlType="submit">
-                Transaksi Berhail...klik submit
+                Simpan Pembayaran
               </Button>
             </Col>
           </Row>
@@ -900,4 +861,4 @@ const DetailKledo: React.FC = () => {
   )
 }
 
-export default DetailKledo
+export default OkPemesanan
