@@ -40,9 +40,10 @@ const ListTransaksi: React.FC = () => {
   const filteredData = data
     ?.filter(
       (transaction) =>
-        transaction.warehouse_id === Number(user?.id_outlet) &&
+        (transaction.warehouse_id === Number(user?.id_outlet) ||
+          user?.isAdmin) &&
         transaction.jalur === 'penjualan' &&
-        transaction.reason_id !== 'void' // Filter untuk mengecualikan transaksi dengan reason_id "void"
+        transaction.reason_id !== 'void'
     )
     ?.sort(
       (a, b) =>
