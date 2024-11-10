@@ -22,7 +22,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [id_outlet, setIdOutlet] = useState('') // Add this line
-
+  console.log({ id_outlet })
   const { state, dispatch } = useContext(Store)
   const { userInfo } = state
 
@@ -40,9 +40,6 @@ export default function SignupPage() {
       toast.error('Passwords do not match')
       return
     }
-
-    // Log the id_outlet value to the console
-    console.log('id_outlet:', id_outlet)
 
     try {
       const data = await signup({
@@ -91,7 +88,7 @@ export default function SignupPage() {
             </option>
             {outletsData &&
               outletsData.map((outlet) => (
-                <option key={outlet._id} value={outlet._id}>
+                <option key={outlet.id_outlet} value={outlet.id_outlet}>
                   {outlet.nama_outlet}
                 </option>
               ))}

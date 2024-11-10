@@ -487,7 +487,13 @@ const DetailKledo: React.FC = () => {
         Retur
       </Menu.Item>
 
-      <Menu.Item key="edit" icon={<EditOutlined />}>
+      <Menu.Item
+        key="edit"
+        icon={<EditOutlined />}
+        onClick={() => {
+          navigate(`/edittransaksi/${ref_number}`)
+        }}
+      >
         Edit
       </Menu.Item>
       <Menu.Item

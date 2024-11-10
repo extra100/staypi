@@ -40,13 +40,15 @@ const AmbilDetailBarangDariKledo = () => {
   }
 
   const filteredStock = useMemo(() => {
-    return warehouseStock
-      .filter((item: any) => item.stock > 0)
-      .filter(
-        (item: any) =>
-          item.name.toLowerCase().includes(searchTerm) ||
-          item.id.toString().includes(searchTerm)
-      )
+    return (
+      warehouseStock
+        // .filter((item: any) => item.stock > 0)
+        .filter(
+          (item: any) =>
+            item.name.toLowerCase().includes(searchTerm) ||
+            item.id.toString().includes(searchTerm)
+        )
+    )
   }, [warehouseStock, searchTerm])
   //
   const handleSave = () => {
@@ -139,7 +141,7 @@ const AmbilDetailBarangDariKledo = () => {
         dataSource={filteredStock}
         columns={columns}
         rowKey="id"
-        pagination={{ pageSize: 50 }}
+        pagination={{ pageSize: 100 }}
       />
       <Button type="primary" onClick={handleSave} style={{ margin: '16px 0' }}>
         Save Filtered Stock

@@ -280,11 +280,11 @@ const ProductStocksPage: React.FC = () => {
         const productStock = stocks.find(
           (stock) => String(stock.id) === String(record.id)
         )
-        const qtyDari = productStock?.stocks?.[warehouseDariId]?.qty || 0
-        const qtyTujuan = productStock?.stocks?.[warehouseTujuanId]?.qty || 0
+        const qtyDaris = productStock?.stocks?.[warehouseDariId]?.qty || 0
+        const qtyTujuans = productStock?.stocks?.[warehouseTujuanId]?.qty || 0
 
-        const qtyDariAfter = qtyDari + (record.transferQty || 0)
-        const qtyTujuanAfter = qtyTujuan - (record.transferQty || 0)
+        const qtyDariAfter = qtyDaris + (record.transferQty || 0)
+        const qtyTujuanAfter = qtyTujuans - (record.transferQty || 0)
 
         return (
           <>
@@ -336,9 +336,7 @@ const ProductStocksPage: React.FC = () => {
         code: 1,
       })),
     }
-    // saveInvoiceMutasi(transferData)
-    // addWarehouseTransfer(transferData as any)
-    // navigate('/listpindah')
+
     try {
       await addWarehouseTransfer(transferData as any)
       message.success('Data transfer berhasil disimpan!')

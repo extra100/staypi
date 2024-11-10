@@ -19,7 +19,6 @@ const LaporanStock = () => {
   const { user } = userContext || {}
   const { data: gudangdb } = useGetWarehousesQuery()
   const idOutletLoggedIn = user ? Number(user.id_outlet) : 0
-  console.log({ idOutletLoggedIn })
 
   const [selectedWarehouseId, setSelectedWarehouseId] =
     useState<number>(idOutletLoggedIn)
@@ -103,7 +102,7 @@ const LaporanStock = () => {
       .filter(
         (mutasi: any) =>
           mutasi.trans_date === selectedDate &&
-          mutasi.to_warehouse_id === selectedWarehouseId
+          mutasi.from_warehouse_id === selectedWarehouseId
       )
       .forEach((mutasi: any) => {
         mutasi.items.forEach((item: any) => {
@@ -124,7 +123,7 @@ const LaporanStock = () => {
       .filter(
         (mutasi: any) =>
           mutasi.trans_date === selectedDate &&
-          mutasi.from_warehouse_id === selectedWarehouseId
+          mutasi.to_warehouse_id === selectedWarehouseId
       )
       .forEach((mutasi: any) => {
         mutasi.items.forEach((item: any) => {
@@ -164,7 +163,7 @@ const LaporanStock = () => {
   const filteredWarehouseStock =
     stokBaku?.filter(
       (item) =>
-        item.stock > 0 &&
+        // item.stock > 0 &&
         (selectedWarehouseId === null ||
           item.warehouse_id === selectedWarehouseId) &&
         (item.id.toString().includes(searchTerm) ||
@@ -326,15 +325,16 @@ const LaporanStock = () => {
         rowKey="id"
         pagination={false}
         rowClassName={(record) => {
-          const stock = record.stock || 0
-
+          const stock = record.stock ?? 0
           const penjualan = totalQtyTerjual[record.id] || 0
           const mutasi = totalMutasiKeluar[record.id] || 0
           const mutasiMasuk = totalMutasiMasuk[record.id] || 0
-
           const returning = totalQtyReturn[record.id] || 0
+
           const stokTerupdate =
             stock + mutasiMasuk + returning - penjualan - mutasi
+          //
+          // return stokTerupdate < 0 && stock !== 0 ? 'negative-stock-row' : ''
           return stokTerupdate < 0 ? 'negative-stock-row' : ''
         }}
       />

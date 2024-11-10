@@ -62,6 +62,32 @@ transactionRouter.put(
     res.json(updatedTransaction)
   })
 )
+transactionRouter.put(
+  '/by-contact_id/:ref_number',
+  asyncHandler(async (req: any, res: any) => {
+    console.log('Ref Number in Request:', req.params.ref_number)
+
+    // Find transaction by ref_number
+    const transaction = await TransactionModel.findOne({
+      ref_number: req.params.ref_number,
+    })
+
+    // If transaction not found, send error message
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction not found' })
+    }
+
+    // Update only specified fields using exact property names
+    if (req.body.contact_id) transaction.contact_id = req.body.contact_id
+    if (req.body.term_id) transaction.term_id = req.body.term_id
+    if (req.body.trans_date) transaction.trans_date = req.body.trans_date // Set trans_date
+    if (req.body.due_date) transaction.due_date = req.body.due_date // Set due_date
+
+    // Save the updated transaction and return it
+    const updatedTransaction = await transaction.save()
+    return res.json(updatedTransaction)
+  })
+)
 
 // PUT endpoint to update transaction by ref_number
 transactionRouter.put(

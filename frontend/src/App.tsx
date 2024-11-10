@@ -218,7 +218,7 @@ function App() {
                   </Link>
                   <Link
                     className="nav-link header-link p-1 px-3"
-                    to={`/listpindah`}
+                    to={`/listsiapvalidasi`}
                   >
                     History Transfer
                   </Link>

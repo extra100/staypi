@@ -94,6 +94,47 @@ export const useUpdateTransactionMutation = () => {
   )
 }
 
+type UpdateContactPayload = {
+  ref_number: string
+  contact_id: number
+  term_id: number
+  trans_date?: string // Trans_date from getPosDetail
+  due_date?: string // Due_date from getPosDetail
+}
+
+export const useUpdateContactMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    async ({
+      ref_number,
+      contact_id,
+      term_id,
+      trans_date,
+      due_date,
+    }: UpdateContactPayload) => {
+      const response = await apiClient.put(
+        `/api/transactions/by-contact_id/${ref_number}`,
+        {
+          contact_id,
+          term_id,
+          trans_date, // Use exact property name trans_date
+          due_date, // Use exact property name due_date
+        }
+      )
+      return response.data
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['transactions'])
+      },
+      onError: (error: any) => {
+        console.error('Error updating contact_id:', error)
+      },
+    }
+  )
+}
+
 // export const useUpdateTransactionMutation = () => {
 //   const queryClient = useQueryClient()
 

@@ -70,8 +70,10 @@ const Aneh: React.FC = () => {
 
     return () => clearTimeout(timer)
   }, [])
-  const { ref_number } = useParams<{ ref_number?: string }>()
+
   const updatePosMutation = useUpdateTransactionMutation()
+
+  const { ref_number } = useParams<{ ref_number?: string }>()
   //
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
@@ -83,6 +85,9 @@ const Aneh: React.FC = () => {
   console.log({ idDariSDBEK })
   const { data: contacts } = useGetContactsQuery()
   const { data: akunBanks } = useGetAkunBanksQueryDb()
+  //
+
+  //
 
   const { getIdAtInvoice } = useIdInvoice(ref_number || '')
 

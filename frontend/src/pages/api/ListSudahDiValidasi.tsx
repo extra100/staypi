@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { Button, Table } from 'antd'
+import { Button, Input, Table } from 'antd'
 import { useGetWarehouseTransfersQuery } from '../../hooks/pindahHooks'
 import { useIdWarehouse } from './namaWarehouse'
 import { useNavigate } from 'react-router-dom'
@@ -26,15 +26,21 @@ const ListSudahDivalidasi: React.FC = () => {
     })
     return map
   }, [idWarehouse])
-  console.log({ warehouseMap })
+  const [searchTerm, setSearchTerm] = useState('')
+
   const dataSource = Array.isArray(transfers)
     ? transfers
-        .filter(
-          (transfer: any) =>
-            transfer.from_warehouse_id !== idOutletLoggedIn &&
-            transfer.to_warehouse_id === idOutletLoggedIn &&
-            transfer.code === 2 // Tambahkan filter untuk code
-        )
+        .filter((transfer: any) => {
+          const refNumber = String(transfer.ref_number || '')
+          const fromWarehouseId = String(transfer.from_warehouse_id || '')
+
+          return (
+            (transfer.from_warehouse_id === idOutletLoggedIn ||
+              transfer.to_warehouse_id === idOutletLoggedIn) &&
+            (refNumber.includes(searchTerm) ||
+              fromWarehouseId.includes(searchTerm))
+          )
+        })
         .sort(
           (a: any, b: any) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -45,17 +51,16 @@ const ListSudahDivalidasi: React.FC = () => {
     navigate(`/sudah-validasi/${record.ref_number}`)
   }
   const [activeButton, setActiveButton] = useState('')
-
   const handleButtonClick = (value: any) => {
     setActiveButton(value)
 
     if (value === '1') {
       navigate('/listsiapvalidasi')
+      // } else if (value === '2') {
+      //   navigate('/listpindah')
     } else if (value === '2') {
-      navigate('/listpindah')
-    } else if (value === '3') {
       navigate('/listsudahdivalidasikeluar')
-    } else if (value === '4') {
+    } else if (value === '3') {
       navigate('/ListSudahValidasiMasuk')
     }
   }
@@ -63,14 +68,14 @@ const ListSudahDivalidasi: React.FC = () => {
   const columns = [
     {
       title: 'Dari',
-      dataIndex: 'to_warehouse_id',
-      key: 'to_warehouse_id',
+      dataIndex: 'from_warehouse_id',
+      key: 'from_warehouse_id',
       render: (id: number) => warehouseMap[id] || id,
     },
     {
       title: 'Tujuan',
-      dataIndex: 'from_warehouse_id',
-      key: 'from_warehouse_id',
+      dataIndex: 'to_warehouse_id',
+      key: 'to_warehouse_id',
       render: (id: number) => warehouseMap[id] || id,
     },
     {
@@ -92,6 +97,14 @@ const ListSudahDivalidasi: React.FC = () => {
 
   return (
     <>
+      <div style={{ marginBottom: '16px' }}>
+        <Input
+          placeholder="Pencarian No"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ width: '300px' }} // Adjust width as needed
+        />
+      </div>
       <div id="btn-filter-status-container" style={{ display: 'inline-flex' }}>
         <Button
           id="btn-filter-2"
@@ -115,12 +128,12 @@ const ListSudahDivalidasi: React.FC = () => {
         <span>Validasi Permintaan</span>
       </Button>
       <Button
-        id="btn-filter-1"
-        value="1"
+        id="btn-filter-2"
+        value="2"
         type="default"
-        className={activeButton === '3' ? 'btn-default-selected' : ''}
+        className={activeButton === '2' ? 'btn-default-selected' : ''}
         style={{ borderRadius: '0px' }}
-        onClick={() => handleButtonClick('3')}
+        onClick={() => handleButtonClick('2')}
       >
         <span>Sudah Divalidasi Keluar</span>
       </Button>
@@ -128,9 +141,9 @@ const ListSudahDivalidasi: React.FC = () => {
         id="btn-filter-1"
         value="1"
         type="default"
-        className={activeButton === '4' ? 'btn-default-selected' : ''}
+        className={activeButton === '3' ? 'btn-default-selected' : ''}
         style={{ borderRadius: '0px' }}
-        onClick={() => handleButtonClick('4')}
+        onClick={() => handleButtonClick('3')}
       >
         <span>Sudah Divalidasi Masuk</span>
       </Button>

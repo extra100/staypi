@@ -101,6 +101,7 @@ import LaporanKeListTransaksi from './pages/api/LaporanKeListTransaksi'
 import FilterContactBasedIdAndGroupid from './pages/api/PageFilteredContactBasedIdAndGroupId'
 import DetailPiutangKontak from './pages/api/DetailPiutangPerKontak'
 import BarangTetuk from './pages/api/BarangTetukList'
+import EditTransaksi from './pages/api/editTransactions'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -180,6 +181,8 @@ const router = createBrowserRouter(
       /> */}
       <Route path="/okepemesanan/:ref_number" element={<OkPemesanan />} />
       <Route path="/returninvoice/:ref_number" element={<Aneh />} />
+      <Route path="/edittransaksi/:ref_number" element={<EditTransaksi />} />
+
       <Route path="/printnota/:ref_number" element={<Receipt />} />
       {/* <Route path="/printmutasi/:ref_number" element={<MutasiSuratJalan />} /> */}
       <Route path="/printsuratjalan/:ref_number" element={<ReceiptJalan />} />

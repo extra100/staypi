@@ -40,7 +40,7 @@ const SudahDivalidasi: React.FC = () => {
   const transferArray = Array.isArray(transferData) ? transferData : []
   const transfer = transferArray[0] || {}
   const sumberData = transfer.items || []
-  console.log({ sumberData })
+  console.log({ transfer })
   const warehouseMap: Record<any, any> = {}
   const formattedTransDate = new Date(transfer.trans_date).toLocaleString(
     'id-ID',
@@ -150,6 +150,8 @@ const SudahDivalidasi: React.FC = () => {
         product_name: item.product_name,
         qty_minta: item.qty_minta,
         unit_name: item.unit_name,
+        before_qty_dari: item.before_qty_dari,
+        before_qty_tujuan: item.before_qty_tujuan,
         transferQty: 0,
         code: 2,
       }))
@@ -172,12 +174,14 @@ const SudahDivalidasi: React.FC = () => {
   const columns = [
     {
       title: 'No',
-      dataIndex: 'serial_number',
-      key: 'serial_number',
-      render: (_: any, record: any) => {
-        const serialNumber = generateSerialNumber(record.product_id)
-        return serialNumber
-      },
+      key: 'stok_terakhir',
+      render: (text: any, record: any) => (
+        <>
+          <div>
+            {record.before_qty_tujuan} **{record.before_qty_dari}
+          </div>
+        </>
+      ),
     },
     {
       title: 'Item',
@@ -185,7 +189,7 @@ const SudahDivalidasi: React.FC = () => {
       key: 'product_name',
     },
     {
-      title: 'Qty',
+      title: 'Order',
       dataIndex: 'qty_minta',
       key: 'qty_minta',
     },
@@ -248,7 +252,7 @@ const SudahDivalidasi: React.FC = () => {
                   </Col>
 
                   <Col span={6} style={{ textAlign: 'center' }}>
-                    <Text strong>{toWarehouseName}</Text>
+                    <Text strong>{fromWarehouseName}</Text>
                   </Col>
                 </Row>
                 <Row>
@@ -283,7 +287,7 @@ const SudahDivalidasi: React.FC = () => {
                     <Text>: -</Text>
                   </Col>
                   <Col span={6} style={{ textAlign: 'center' }}>
-                    <Text strong>{fromWarehouseName}</Text>
+                    <Text strong>{toWarehouseName}</Text>
                   </Col>
                 </Row>
               </Col>

@@ -68,11 +68,10 @@ const ValidatePindah: React.FC = () => {
     productMap[barang.id] = barang.name
   })
 
-  const fromWarehouseId =
-    warehouseMap[transfer.from_warehouse_id] || transfer.from_warehouse_name
+  const fromWarehouseId = warehouseMap[transfer.from_warehouse_id]
   console.log({ fromWarehouseId })
-  const toWarehouseId =
-    warehouseMap[transfer.to_warehouse_id] || transfer.to_warehouse_name
+  const toWarehouseId = warehouseMap[transfer.to_warehouse_id]
+  console.log({ fromWarehouseId })
 
   const fromWarehouseCode = idWarehouseMonggo?.find(
     (warehouse) => warehouse.name === fromWarehouseId
@@ -108,76 +107,46 @@ const ValidatePindah: React.FC = () => {
     }
   }, [transfer.to_warehouse_name])
 
-  const [transferQty, setTransferQty] = useState<number[]>([]) // State for transfer quantities
-  console.log({ transferQty })
-
   const handleTransferChange = (value: number, index: number) => {
     console.log({ value })
     const updatedTransferQty = [...transferQty]
     updatedTransferQty[index] = value
     setTransferQty(updatedTransferQty)
   }
+  const [transferQty, setTransferQty] = useState<number[]>([])
 
   const [dataSource, setDataSource] = useState<any[]>([])
 
   const [fromQtyState, setFromQtyState] = useState<{ [key: number]: number }>(
     {}
   )
-
+  console.log({ fromQtyState })
   const [toQtyState, setToQtyState] = useState<{ [key: number]: number }>({})
-  const { mutate: addWarehouseTransfer } = useAddWarehouseTransferMutation()
+  console.log({ toQtyState })
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (transferData) {
-      const initialDataSource = sumberData.map((item: any, index: number) => ({
-        key: index,
-        product_id: item.product_id,
-        product_name: item.product_name,
-        qty_minta: item.qty_minta,
-        unit_name: item.unit_name,
-        transferQty: 0,
-        code: null,
-      }))
-      setDataSource(initialDataSource)
-    }
-  }, [transferData])
-  const navigate = useNavigate()
-
-  const { data: existingBarangList } = useAmbilDetailBarangGoretsQuery()
-  const { mutate: saveBarang } = useSimpanDetailBarangDariGoretMutation()
-
-  const simpanBarangBaru = async (): Promise<boolean[]> => {
-    return Promise.all(
-      dataSource.map((row, index) => {
-        // Periksa apakah barang sudah ada berdasarkan `id` dan `warehouse_id`
-        const barangSudahAda = existingBarangList?.some(
-          (barang) => barang.id === row.product_id
+      const initialDataSource = sumberData.map((item: any, index: number) => {
+        const product = stocks.find(
+          (product) => String(product.id) === String(item.product_id)
         )
 
-        if (barangSudahAda) {
-          return Promise.resolve(false) // Barang sudah ada, tidak perlu simpan ulang
+        return {
+          key: index,
+          product_id: item.product_id,
+          product_name: item.product_name,
+          qty_minta: item.qty_minta,
+          unit_name: item.unit_name,
+          transferQty: 0,
+          fromQty: 0,
+          toQty: 0,
+          code: null,
         }
-
-        const barangBaru = {
-          warehouse_id: toWarehouseId,
-          trans_date: selectedDates,
-          start_date: selectedDates,
-          code: 2,
-          id: row.product_id,
-          name: row.product_name,
-          stock: transferQty[index] || 0,
-        }
-
-        // Simpan barang baru jika tidak ada duplikat
-        return new Promise<boolean>((resolve) => {
-          saveBarang(barangBaru as any, {
-            onSuccess: () => resolve(true),
-            onError: () => resolve(false),
-          })
-        })
       })
-    )
-  }
+      setDataSource(initialDataSource)
+    }
+  }, [transferData, sumberData, fromWarehouseId, toWarehouseId])
 
   const handleSaveTransfer = async () => {
     const validRefNumber = ref_number || ''
@@ -190,32 +159,22 @@ const ValidatePindah: React.FC = () => {
       memo: '',
       code: 2,
 
-      items: dataSource.map((row, index) => ({
+      items: dataSource.map((row) => ({
         qty_minta: row.qty_minta,
         code: row.code,
         product_id: row.product_id,
         finance_account_id: row.id,
         product_name: row.product_name,
-        qty: transferQty[index] || 0,
-        unit_name: row.unit_name,
+        qty: transferQty[row.key] || 0,
         before_qty_dari: fromQtyState[row.product_id] || 0,
         before_qty_tujuan: toQtyState[row.product_id] || 0,
+        unit_name: row.unit_name,
       })),
     }
+
     saveInvoiceMutasi(transferData)
 
     try {
-      const simpanBarangResults = await simpanBarangBaru()
-
-      if (simpanBarangResults.every((result) => result)) {
-        message.success('Semua barang baru berhasil disimpan.')
-      } else {
-        message.info('Beberapa barang sudah ada dan tidak disimpan ulang.')
-      }
-
-      message.success('Data transfer berhasil disimpan!')
-      navigate(`/sudah-validasi/${ref_number}`)
-
       updateWarehouseTransfer(
         { ref_number: validRefNumber, updatedData: transferData },
         {
@@ -235,6 +194,7 @@ const ValidatePindah: React.FC = () => {
       message.error(errorMessage)
       console.error('Error:', error)
     }
+    navigate(`/sudah-validasi/${ref_number}`)
   }
 
   const printSuratJalan = useRef<HTMLDivElement>(null)
@@ -270,19 +230,41 @@ const ValidatePindah: React.FC = () => {
           onChange={(e) => {
             const value = Number(e.target.value)
             console.log(`Transfer Input: ${value}`) // Cek nilai input
+
             setTransferQty((prev) => {
               const newQty = [...prev]
-              newQty[index] = value // Update jumlah transfer
+              newQty[index] = value
               return newQty
             })
+
+            // Update fromQtyState dan toQtyState
+            const productId = record.product_id
+            const product = stocks.find(
+              (p) => String(p.id) === String(productId)
+            )
+            if (product) {
+              const qtyDari = product.stocks?.[fromWarehouseId]?.qty || 0
+              const qtyTujuan = product.stocks?.[toWarehouseId]?.qty || 0
+
+              setFromQtyState((prevState) => ({
+                ...prevState,
+                [productId]: qtyDari + value,
+              }))
+
+              setToQtyState((prevState) => ({
+                ...prevState,
+                [productId]: qtyTujuan - value,
+              }))
+            }
           }}
         />
       ),
     },
+
     {
       title: 'No',
-      dataIndex: 'stok_awal',
-      key: 'stok_awal',
+      dataIndex: 'transferQty',
+      key: 'transferQty',
       render: (_: any, record: any, index: number) => {
         const product = stocks.find(
           (product) => String(product.id) === String(record.product_id)
@@ -290,22 +272,19 @@ const ValidatePindah: React.FC = () => {
 
         if (!product) return <span>Product not found</span>
 
-        // Debugging info
-        console.log('Product:', product)
-        console.log('FromWarehouseId:', fromWarehouseId)
-        console.log('ToWarehouseId:', toWarehouseId)
-
         const qtyDariValue = product?.stocks?.[fromWarehouseId]?.qty || 0
         const qtyTujuanValue = product?.stocks?.[toWarehouseId]?.qty || 0
 
-        // Cek transfer amount berdasarkan indeks
         const transferAmount = transferQty[index] || 0 // Gunakan index
         const updatedQtyDariValue = qtyDariValue + transferAmount
         const updatedQtyTujuanValue = qtyTujuanValue - transferAmount
+        console.log('Product:', product)
+        console.log('qtyFromWarehouseId:', updatedQtyDariValue)
+        console.log('qtyToWarehouseId:', updatedQtyTujuanValue)
 
         return (
           <div>
-            <span>{`${updatedQtyTujuanValue} / ${updatedQtyDariValue}`}</span>
+            <span>{`${updatedQtyDariValue} / ${updatedQtyTujuanValue}`}</span>
           </div>
         )
       },

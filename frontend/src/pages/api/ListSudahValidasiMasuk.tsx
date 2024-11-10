@@ -29,13 +29,18 @@ const ListSudahValidasiMasuk: React.FC = () => {
 
   const dataSource = Array.isArray(transfers)
     ? transfers
-        .filter(
-          (transfer: any) =>
-            transfer.from_warehouse_id === idOutletLoggedIn &&
-            transfer.to_warehouse_id !== idOutletLoggedIn &&
+        .filter((transfer: any) => {
+          const refNumber = String(transfer.ref_number || '')
+          const fromWarehouseId = String(transfer.to_warehouse_id || '')
+
+          return (
+            transfer.from_warehouse_id !== idOutletLoggedIn &&
+            transfer.to_warehouse_id === idOutletLoggedIn &&
             transfer.code === 2 &&
-            transfer.ref_number.includes(searchTerm) // Filter by search term
-        )
+            (refNumber.includes(searchTerm) ||
+              fromWarehouseId.includes(searchTerm)) // Filter by ref_number or from_warehouse_id
+          )
+        })
         .sort(
           (a: any, b: any) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -53,8 +58,8 @@ const ListSudahValidasiMasuk: React.FC = () => {
 
     if (value === '1') {
       navigate('/listsiapvalidasi')
-    } else if (value === '2') {
-      navigate('/listpindah')
+      // } else if (value === '2') {
+      //   navigate('/listpindah')
     } else if (value === '3') {
       navigate('/listsudahdivalidasikeluar')
     } else if (value === '4') {
@@ -65,14 +70,14 @@ const ListSudahValidasiMasuk: React.FC = () => {
   const columns = [
     {
       title: 'Dari',
-      dataIndex: 'to_warehouse_id',
-      key: 'to_warehouse_id',
+      dataIndex: 'from_warehouse_id',
+      key: 'from_warehouse_id',
       render: (id: number) => warehouseMap[id] || id,
     },
     {
       title: 'Tujuan',
-      dataIndex: 'from_warehouse_id',
-      key: 'from_warehouse_id',
+      dataIndex: 'to_warehouse_id',
+      key: 'to_warehouse_id',
       render: (id: number) => warehouseMap[id] || id,
     },
     {
@@ -94,6 +99,25 @@ const ListSudahValidasiMasuk: React.FC = () => {
 
   return (
     <>
+      <div style={{ marginBottom: '16px' }}>
+        <Input
+          placeholder="Pencarian No"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ width: '300px' }} // Adjust width as needed
+        />
+      </div>
+
+      <Button
+        id="btn-filter-1"
+        value="1"
+        type="default"
+        className={activeButton === '2' ? 'btn-default-selected' : ''}
+        style={{ borderRadius: '0px' }}
+        onClick={() => handleButtonClick('2')}
+      >
+        <span>Validasi Permintaan</span>
+      </Button>
       <div id="btn-filter-status-container" style={{ display: 'inline-flex' }}>
         <Button
           id="btn-filter-2"
@@ -106,16 +130,6 @@ const ListSudahValidasiMasuk: React.FC = () => {
           <span>List Permintaan</span>
         </Button>
       </div>
-      <Button
-        id="btn-filter-1"
-        value="1"
-        type="default"
-        className={activeButton === '1' ? 'btn-default-selected' : ''}
-        style={{ borderRadius: '0px' }}
-        onClick={() => handleButtonClick('1')}
-      >
-        <span>Validasi Permintaan</span>
-      </Button>
       <Button
         id="btn-filter-1"
         value="1"
@@ -136,12 +150,7 @@ const ListSudahValidasiMasuk: React.FC = () => {
       >
         <span>Sudah Divalidasi Masuk</span>
       </Button>
-      <Input
-        placeholder="Search by INV"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ marginBottom: '16px', width: '300px' }} // Adjust width as needed
-      />
+
       <Table
         columns={columns}
         dataSource={dataSource}

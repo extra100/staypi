@@ -24,8 +24,13 @@ import { useIdContact } from './NamaContact'
 import { useFiac } from './Fiac'
 import { SaveApi } from './SaveApi'
 import { v4 as uuidv4 } from 'uuid'
-import { useAddTransactionMutation } from '../../hooks/transactionHooks'
-import { Navigate } from 'react-router-dom'
+import {
+  useAddTransactionMutation,
+  useGetTransactionByIdQuery,
+  useUpdateContactMutation,
+  useUpdateTransactionMutation,
+} from '../../hooks/transactionHooks'
+import { Navigate, useParams } from 'react-router-dom'
 import { useGetBarangsQuery } from '../../hooks/barangHooks'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
 import { saveToApiNextPayment } from './NextPayment'
@@ -45,7 +50,37 @@ import { DeleteOutlined } from '@ant-design/icons'
 const { Option } = Select
 const { Title, Text } = Typography
 
-const StockSelectorTable = () => {
+const EditTransaksi = () => {
+  const { ref_number } = useParams<{ ref_number?: string }>()
+  //
+  const { data: allTransactions } = useGetTransactionByIdQuery(
+    ref_number as string
+  )
+  const getPosDetail = allTransactions?.find(
+    (transaction: any) => transaction.ref_number === ref_number
+  )
+
+  useEffect(() => {
+    if (getPosDetail && getPosDetail.contact_id) {
+      setSelectedContact(getPosDetail.contact_id)
+    }
+  }, [getPosDetail])
+  useEffect(() => {
+    if (getPosDetail && (getPosDetail.trans_date as any)) {
+      setTermIdSimpan(getPosDetail.trans_date as any)
+    }
+  }, [getPosDetail])
+  useEffect(() => {
+    if (getPosDetail && (getPosDetail.trans_date as any)) {
+      setTermIdSimpan(getPosDetail.trans_date as any)
+    }
+  }, [getPosDetail])
+  useEffect(() => {
+    if (getPosDetail && (getPosDetail.term_id as any)) {
+      setTermIdSimpan(getPosDetail.term_id as any)
+    }
+  }, [getPosDetail])
+
   const [loadingSpinner, setLoadingSpinner] = useState(false) // State untuk spinner
 
   const { Panel } = Collapse
@@ -59,6 +94,7 @@ const StockSelectorTable = () => {
   const [selectedWarehouse, setSelectedWarehouse] = useState<any>(undefined)
 
   const [selectedDate, setSelectedDate] = useState<string | undefined>()
+  console.log({ selectedDate })
   const { warehouseStock } = useWarehouseStock(
     selectedDate || '',
     selectedWarehouseId
@@ -150,13 +186,26 @@ const StockSelectorTable = () => {
     )
     return matchingBankAccount ? matchingBankAccount.id : null
   }
-
+  //tel
   useEffect(() => {
     const id = getBankAccountId()
     setBankAccountId(id as any)
   }, [warehouseName, akunBanks])
-  const addPosMutation = useAddTransactionMutation()
-
+  const updateContactMutation = useUpdateContactMutation()
+  const handleSimpan = async () => {
+    if (selectedContact !== null && ref_number) {
+      try {
+        await updateContactMutation.mutateAsync({
+          ref_number,
+          contact_id: selectedContact,
+          term_id: termIdSimpan,
+        })
+        message.success('Contact ID berhasil diperbarui')
+      } catch (error) {
+        message.error('Gagal memperbarui Contact ID')
+      }
+    }
+  }
   const [productQuantities, setProductQuantities] = useState<{
     [key: string]: any
   }>({})
@@ -488,18 +537,17 @@ const StockSelectorTable = () => {
 
   const [selectedDifference, setSelectedDifference] = useState<number>(0)
   const [termIdSimpan, setTermIdSimpan] = useState<number>(0)
+  console.log({ termIdSimpan })
+
   const handleDateRangeSave = (
     startDate: string,
     endDate: string,
     difference: number,
-    termId: number // Add termId parameter
+    termId: number
   ) => {
     setSelectedDates([startDate, endDate])
     setSelectedDifference(difference)
     setTermIdSimpan(termId)
-
-    // Anda bisa menyimpan atau menggunakan termId sesuai kebutuhan
-    console.log('Saved Term ID:', termId) // Contoh penggunaan termId
   }
 
   const [paymentForm] = Form.useForm()
@@ -511,7 +559,7 @@ const StockSelectorTable = () => {
   }
 
   const [selectedContact, setSelectedContact] = useState<number | null>(null)
-
+  console.log({ selectedContact })
   const handleContactChange = (value: number) => {
     setSelectedContact(value)
   }
@@ -750,24 +798,24 @@ const StockSelectorTable = () => {
     setLoadingSpinner(true)
 
     // Simpan invoice data
-    saveInvoiceData(invoiceData)
+    // saveInvoiceData(invoiceData)
 
     // Panggil mutasi untuk menambahkan transaksi
-    addPosMutation.mutate(invoiceData as any, {
-      onSuccess: () => {
-        message.success('Transaksi berhasil disimpan!') // Tampilkan pesan sukses
+    // addPosMutation.mutate(invoiceData as any, {
+    //   onSuccess: () => {
+    //     message.success('Transaksi berhasil disimpan!') // Tampilkan pesan sukses
 
-        // Tambahkan timer 3 detik sebelum mengarahkan
-        setTimeout(() => {
-          setLoadingSpinner(false) // Matikan spinner
-          navigate(`/simpanidunikdarikledopenjualan/${refNumber}`)
-        }, 1500)
-      },
-      onError: (error: any) => {
-        message.error(`Terjadi kesalahan: ${error.message}`) // Tampilkan pesan error
-        setLoadingSpinner(true)
-      },
-    })
+    //     // Tambahkan timer 3 detik sebelum mengarahkan
+    //     setTimeout(() => {
+    //       setLoadingSpinner(false) // Matikan spinner
+    //       navigate(`/simpanidunikdarikledopenjualan/${refNumber}`)
+    //     }, 2000)
+    //   },
+    //   onError: (error: any) => {
+    //     message.error(`Terjadi kesalahan: ${error.message}`) // Tampilkan pesan error
+    //     setLoadingSpinner(true)
+    //   },
+    // })
   }
 
   const columns = [
@@ -966,7 +1014,7 @@ const StockSelectorTable = () => {
                     .toLowerCase()
                     .includes(input.toLowerCase())
                 }
-                value={selectedContact}
+                value={selectedContact} // Menampilkan nilai awal sesuai `contact_id`
                 onChange={handleContactChange}
               >
                 {Array.isArray(contacts) &&
@@ -1249,6 +1297,13 @@ const StockSelectorTable = () => {
             <p>No stock data available</p>
           )}
         </div> */}
+          <Button
+            type="primary"
+            onClick={handleSimpan}
+            disabled={selectedContact === null}
+          >
+            Simpan
+          </Button>
           <Table
             dataSource={dataSource}
             columns={columns}
@@ -1401,11 +1456,11 @@ const StockSelectorTable = () => {
             </Row>
             <Row>
               <Button
-                onClick={handleSave}
+                onClick={handleSimpan}
                 type="primary"
                 style={{ marginTop: '10px', width: '45%' }}
                 // disabled={limitizeTrans}
-                disabled={isSaveDisabled} // Tombol dinonaktifkan jika salah satu masih kosong
+                disabled={selectedContact === null}
               >
                 Simpan
               </Button>
@@ -1417,4 +1472,4 @@ const StockSelectorTable = () => {
   )
 }
 
-export default StockSelectorTable
+export default EditTransaksi

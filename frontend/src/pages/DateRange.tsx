@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Col, DatePicker, Row, Slider } from 'antd'
-import dayjs from 'dayjs'
-import type { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
+import { useParams } from 'react-router-dom'
+import { useGetTransactionByIdQuery } from '../hooks/transactionHooks'
 
 interface DateRangeProps {
   value?: [string, string]
@@ -18,17 +19,29 @@ interface DateRangeProps {
 }
 
 const DateRange: React.FC<DateRangeProps> = (props) => {
-  const currentDate = dayjs()
-  const [startDate, setStartDate] = useState<Dayjs>(
-    props.value ? dayjs(props.value[0]) : currentDate
+  const { ref_number } = useParams<{ ref_number?: string }>()
+  const { data: allTransactions } = useGetTransactionByIdQuery(
+    ref_number as string
   )
-  const [endDate, setEndDate] = useState<Dayjs>(
-    props.value ? dayjs(props.value[1]) : currentDate.add(1, 'day')
+
+  const getPosDetail = allTransactions?.find(
+    (transaction: any) => transaction.ref_number === ref_number
   )
+  console.log({ getPosDetail })
+  const initialStartDate = getPosDetail?.trans_date
+    ? dayjs(getPosDetail.trans_date, 'YYYY-MM-DD')
+    : dayjs()
+  const initialEndDate = getPosDetail?.due_date
+    ? dayjs(getPosDetail.due_date, 'YYYY-MM-DD')
+    : initialStartDate.add(1, 'day')
+  const initialTermId = getPosDetail?.term_id ?? 2
+
+  const [startDate, setStartDate] = useState<Dayjs>(initialStartDate)
+  const [endDate, setEndDate] = useState<Dayjs>(initialEndDate)
   const [dateDifference, setDateDifference] = useState<number>(
-    props.difference !== undefined ? props.difference : 1
+    initialEndDate.diff(initialStartDate, 'days')
   )
-  const [termId, setTermId] = useState<number>(2) // Default term_id for COD
+  const [termId, setTermId] = useState<number>(initialTermId)
 
   useEffect(() => {
     if (props.difference !== undefined && props.difference !== dateDifference) {
@@ -51,10 +64,7 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
     }
   }, [dateDifference])
 
-  const handleStartDateChange = (
-    date: Dayjs | null,
-    dateString: string | string[]
-  ) => {
+  const handleStartDateChange = (date: Dayjs | null) => {
     if (date) {
       setStartDate(date)
       const newDifference = endDate.diff(date, 'days')
@@ -67,23 +77,21 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
     setEndDate(newEndDate)
     setDateDifference(value)
 
-    // Set term_id based on selected days
     let newTermId: number
     if (value === 0) newTermId = 2 // COD
-    else if (value === 10) newTermId = 7 // 10 days
-    else if (value === 14) newTermId = 3 // 14 days
-    else if (value === 30) newTermId = 1 // 30 days
-    else newTermId = 2 // Default to COD if unmatched
+    else if (value === 10) newTermId = 7
+    else if (value === 14) newTermId = 3
+    else if (value === 30) newTermId = 1
+    else newTermId = 2
 
     setTermId(newTermId)
 
-    // Save values when the term changes
     if (props.onSave) {
       props.onSave(
         startDate.format('DD-MM-YYYY'),
         newEndDate.format('DD-MM-YYYY'),
-        dateDifference,
-        newTermId // Add termId here
+        value,
+        newTermId
       )
     }
 
@@ -99,40 +107,54 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
     30: <strong>30</strong>,
   }
 
-  const labelStyle = {
-    display: 'inline-block' as const,
-    minWidth: '120px' as const,
-    textAlign: 'left' as const,
-  }
-
-  const labelColonStyle = {
-    display: 'inline-block' as const,
-    minWidth: '10px' as const,
-    textAlign: 'left' as const,
-  }
-
-  const sliderWrapperStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    width: '70%',
-  }
-
   return (
     <div style={{ padding: '0px' }}>
       <Row gutter={16} style={{ marginBottom: '10px' }}>
         <Col span={12}>
-          <span style={labelStyle}>Tgl. Transaksi</span>
-          <span style={labelColonStyle}>:</span>
+          <span
+            style={{
+              display: 'inline-block',
+              minWidth: '120px',
+              textAlign: 'left',
+            }}
+          >
+            Tgl. Transaksi
+          </span>
+          <span
+            style={{
+              display: 'inline-block',
+              minWidth: '10px',
+              textAlign: 'left',
+            }}
+          >
+            :
+          </span>
           <DatePicker
             style={{ width: '70%' }}
-            value={startDate as any}
+            value={startDate}
             onChange={handleStartDateChange}
           />
         </Col>
         <Col span={12} style={{ display: 'flex', alignItems: 'center' }}>
-          <span style={labelStyle}>Termin (Hari)</span>
-          <span style={labelColonStyle}>: </span>
-          <div style={sliderWrapperStyle}>
+          <span
+            style={{
+              display: 'inline-block',
+              minWidth: '120px',
+              textAlign: 'left',
+            }}
+          >
+            Termin (Hari)
+          </span>
+          <span
+            style={{
+              display: 'inline-block',
+              minWidth: '10px',
+              textAlign: 'left',
+            }}
+          >
+            :
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', width: '70%' }}>
             <Slider
               marks={marks}
               step={null}
@@ -146,8 +168,6 @@ const DateRange: React.FC<DateRangeProps> = (props) => {
           </div>
         </Col>
       </Row>
-      {/* Display term_id for debugging */}
-      <div>Term ID: {termId}</div>
     </div>
   )
 }

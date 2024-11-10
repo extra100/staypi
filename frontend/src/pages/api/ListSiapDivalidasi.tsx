@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { Button, Table } from 'antd'
+import { Button, Input, Table } from 'antd'
 import { useGetWarehouseTransfersQuery } from '../../hooks/pindahHooks'
 import { useIdWarehouse } from './namaWarehouse'
 import { useNavigate } from 'react-router-dom'
@@ -27,14 +27,23 @@ const ListSiapDiValidasi: React.FC = () => {
     return map
   }, [idWarehouse])
   console.log({ warehouseMap })
+
+  const [searchTerm, setSearchTerm] = useState('')
+
   const dataSource = Array.isArray(transfers)
     ? transfers
-        .filter(
-          (transfer: any) =>
+        .filter((transfer: any) => {
+          const refNumber = String(transfer.ref_number || '')
+          const fromWarehouseId = String(transfer.from_warehouse_id || '')
+
+          return (
             transfer.from_warehouse_id !== idOutletLoggedIn &&
             transfer.to_warehouse_id === idOutletLoggedIn &&
-            transfer.code === 1
-        )
+            transfer.code === 1 &&
+            (refNumber.includes(searchTerm) ||
+              fromWarehouseId.includes(searchTerm))
+          )
+        })
         .sort(
           (a: any, b: any) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -51,8 +60,8 @@ const ListSiapDiValidasi: React.FC = () => {
 
     if (value === '1') {
       navigate('/listsiapvalidasi')
-    } else if (value === '2') {
-      navigate('/listpindah')
+      // } else if (value === '2') {
+      //   navigate('/listpindah')
     } else if (value === '3') {
       navigate('/listsudahdivalidasikeluar')
     } else if (value === '4') {
@@ -61,12 +70,12 @@ const ListSiapDiValidasi: React.FC = () => {
   }
 
   const columns = [
-    {
-      title: 'Dari',
-      dataIndex: 'to_warehouse_id',
-      key: 'to_warehouse_id',
-      render: (id: number) => warehouseMap[id] || id,
-    },
+    // {
+    //   title: 'Dari',
+    //   dataIndex: 'to_warehouse_id',
+    //   key: 'to_warehouse_id',
+    //   render: (id: number) => warehouseMap[id] || id,
+    // },
     {
       title: 'Tujuan',
       dataIndex: 'from_warehouse_id',
@@ -92,6 +101,14 @@ const ListSiapDiValidasi: React.FC = () => {
 
   return (
     <>
+      <div style={{ marginBottom: '16px' }}>
+        <Input
+          placeholder="Pencarian No"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ width: '300px' }} // Adjust width as needed
+        />
+      </div>
       <div id="btn-filter-status-container" style={{ display: 'inline-flex' }}>
         <Button
           id="btn-filter-2"
@@ -104,13 +121,14 @@ const ListSiapDiValidasi: React.FC = () => {
           <span>List Permintaan</span>
         </Button>
       </div>
+
       <Button
         id="btn-filter-1"
         value="1"
         type="default"
-        className={activeButton === '1' ? 'btn-default-selected' : ''}
+        className={activeButton === '2' ? 'btn-default-selected' : ''}
         style={{ borderRadius: '0px' }}
-        onClick={() => handleButtonClick('1')}
+        onClick={() => handleButtonClick('2')}
       >
         <span>Validasi Permintaan</span>
       </Button>
