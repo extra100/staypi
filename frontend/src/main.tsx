@@ -102,6 +102,7 @@ import FilterContactBasedIdAndGroupid from './pages/api/PageFilteredContactBased
 import DetailPiutangKontak from './pages/api/DetailPiutangPerKontak'
 import BarangTetuk from './pages/api/BarangTetukList'
 import EditTransaksi from './pages/api/editTransactions'
+import BatchProcessPelangggans from './pages/api/savePelanggan'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -135,6 +136,7 @@ const router = createBrowserRouter(
       <Route path="/savebarangtetuk" element={<BarangTetuk />} />
       <Route path="/saveakunbank" element={<BatchProcessAkunBanks />} />
       <Route path="/savecontact" element={<BatchProcessContacts />} />
+      <Route path="/simpanpelanggan" element={<BatchProcessPelangggans />} />
       <Route path="/po" element={<ProductStocksTable />} />
       <Route path="/langsungstok" element={<ListStok />} />
       {/* <Route path="/simpanlangsung" element={<SaveApi />} /> */}
