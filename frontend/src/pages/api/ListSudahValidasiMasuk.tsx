@@ -52,7 +52,6 @@ const ListSudahValidasiMasuk: React.FC = () => {
   }
 
   const [activeButton, setActiveButton] = useState('')
-
   const handleButtonClick = (value: any) => {
     setActiveButton(value)
 
@@ -60,13 +59,12 @@ const ListSudahValidasiMasuk: React.FC = () => {
       navigate('/listsiapvalidasi')
       // } else if (value === '2') {
       //   navigate('/listpindah')
-    } else if (value === '3') {
+    } else if (value === '2') {
       navigate('/listsudahdivalidasikeluar')
-    } else if (value === '4') {
+    } else if (value === '3') {
       navigate('/ListSudahValidasiMasuk')
     }
   }
-
   const columns = [
     {
       title: 'Dari',
@@ -87,8 +85,8 @@ const ListSudahValidasiMasuk: React.FC = () => {
     },
     {
       title: 'Memo',
-      dataIndex: 'memo',
-      key: 'memo',
+      dataIndex: 'code',
+      key: 'code',
     },
     {
       title: 'Tanggal',
@@ -112,31 +110,19 @@ const ListSudahValidasiMasuk: React.FC = () => {
         id="btn-filter-1"
         value="1"
         type="default"
-        className={activeButton === '2' ? 'btn-default-selected' : ''}
+        className={activeButton === '1' ? 'btn-default-selected' : ''}
         style={{ borderRadius: '0px' }}
-        onClick={() => handleButtonClick('2')}
+        onClick={() => handleButtonClick('1')}
       >
         <span>Validasi Permintaan</span>
       </Button>
-      <div id="btn-filter-status-container" style={{ display: 'inline-flex' }}>
-        <Button
-          id="btn-filter-2"
-          value="2"
-          type="default"
-          className={activeButton === '2' ? 'btn-default-selected' : ''}
-          style={{ borderRadius: '0px' }}
-          onClick={() => handleButtonClick('2')}
-        >
-          <span>List Permintaan</span>
-        </Button>
-      </div>
       <Button
-        id="btn-filter-1"
-        value="1"
+        id="btn-filter-2"
+        value="2"
         type="default"
-        className={activeButton === '3' ? 'btn-default-selected' : ''}
+        className={activeButton === '2' ? 'btn-default-selected' : ''}
         style={{ borderRadius: '0px' }}
-        onClick={() => handleButtonClick('3')}
+        onClick={() => handleButtonClick('2')}
       >
         <span>Sudah Divalidasi Keluar</span>
       </Button>
@@ -144,9 +130,9 @@ const ListSudahValidasiMasuk: React.FC = () => {
         id="btn-filter-1"
         value="1"
         type="default"
-        className={activeButton === '4' ? 'btn-default-selected' : ''}
+        className={activeButton === '3' ? 'btn-default-selected' : ''}
         style={{ borderRadius: '0px' }}
-        onClick={() => handleButtonClick('4')}
+        onClick={() => handleButtonClick('3')}
       >
         <span>Sudah Divalidasi Masuk</span>
       </Button>

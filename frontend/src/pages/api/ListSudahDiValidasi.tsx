@@ -27,18 +27,20 @@ const ListSudahDivalidasi: React.FC = () => {
     return map
   }, [idWarehouse])
   const [searchTerm, setSearchTerm] = useState('')
-
   const dataSource = Array.isArray(transfers)
     ? transfers
         .filter((transfer: any) => {
           const refNumber = String(transfer.ref_number || '')
-          const fromWarehouseId = String(transfer.from_warehouse_id || '')
+          const fromWarehouseId = String(transfer.to_warehouse_id || '')
 
           return (
-            (transfer.from_warehouse_id === idOutletLoggedIn ||
-              transfer.to_warehouse_id === idOutletLoggedIn) &&
-            (refNumber.includes(searchTerm) ||
-              fromWarehouseId.includes(searchTerm))
+            (transfer.from_warehouse_id === idOutletLoggedIn &&
+              transfer.to_warehouse_id === idOutletLoggedIn) ||
+            (user?.isAdmin &&
+              transfer.code === 2 &&
+              transfer.items.qty !== 0 &&
+              (refNumber.includes(searchTerm) ||
+                fromWarehouseId.includes(searchTerm)))
           )
         })
         .sort(
@@ -56,15 +58,12 @@ const ListSudahDivalidasi: React.FC = () => {
 
     if (value === '1') {
       navigate('/listsiapvalidasi')
-      // } else if (value === '2') {
-      //   navigate('/listpindah')
     } else if (value === '2') {
       navigate('/listsudahdivalidasikeluar')
     } else if (value === '3') {
       navigate('/ListSudahValidasiMasuk')
     }
   }
-
   const columns = [
     {
       title: 'Dari',
@@ -84,9 +83,9 @@ const ListSudahDivalidasi: React.FC = () => {
       key: 'ref_number',
     },
     {
-      title: 'Memo',
-      dataIndex: 'memo',
-      key: 'memo',
+      title: 'code',
+      dataIndex: 'code',
+      key: 'code',
     },
     {
       title: 'Tanggal',
@@ -105,18 +104,7 @@ const ListSudahDivalidasi: React.FC = () => {
           style={{ width: '300px' }} // Adjust width as needed
         />
       </div>
-      <div id="btn-filter-status-container" style={{ display: 'inline-flex' }}>
-        <Button
-          id="btn-filter-2"
-          value="2"
-          type="default"
-          className={activeButton === '2' ? 'btn-default-selected' : ''}
-          style={{ borderRadius: '0px' }}
-          onClick={() => handleButtonClick('2')}
-        >
-          <span>List Permintaan</span>
-        </Button>
-      </div>
+
       <Button
         id="btn-filter-1"
         value="1"
@@ -147,6 +135,7 @@ const ListSudahDivalidasi: React.FC = () => {
       >
         <span>Sudah Divalidasi Masuk</span>
       </Button>
+
       <Table
         columns={columns}
         dataSource={dataSource}

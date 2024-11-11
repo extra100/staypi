@@ -323,7 +323,7 @@ const LaporanStock = () => {
         }
         columns={columns}
         rowKey="id"
-        pagination={false}
+        pagination={{ pageSize: 100 }}
         rowClassName={(record) => {
           const stock = record.stock ?? 0
           const penjualan = totalQtyTerjual[record.id] || 0
