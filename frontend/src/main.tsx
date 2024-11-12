@@ -104,6 +104,9 @@ import BarangTetuk from './pages/api/BarangTetukList'
 import EditTransaksi from './pages/api/editTransactions'
 import BatchProcessPelangggans from './pages/api/savePelanggan'
 
+import ControlPage from './pages/api/ControlPage'
+import MyTablePage from './pages/api/MyTablePage'
+
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
 const router = createBrowserRouter(
@@ -139,6 +142,9 @@ const router = createBrowserRouter(
       <Route path="/simpanpelanggan" element={<BatchProcessPelangggans />} />
       <Route path="/po" element={<ProductStocksTable />} />
       <Route path="/langsungstok" element={<ListStok />} />
+      <Route path="/control" element={<ControlPage />} />
+      <Route path="/mytable" element={<MyTablePage showTable={false} />} />{' '}
+      {/* Bisa dikirim sebagai default */}
       {/* <Route path="/simpanlangsung" element={<SaveApi />} /> */}
       <Route path="/terjual" element={<BatchProcessBarangTerjuals />} />
       <Route
@@ -159,7 +165,6 @@ const router = createBrowserRouter(
       <Route path="/laporanstok" element={<LaporanStock />} />
       <Route path="/laporankeuangan" element={<LaporanKeuangan />} />
       <Route path="/product-history/:id" element={<ProductHistory />} />
-
       <Route path="/listpp" element={<ListPp />} />
       <Route path="/listvoid" element={<ListVoid />} />
       <Route path="/laporanstok" element={<ListVoid />} />
@@ -184,7 +189,6 @@ const router = createBrowserRouter(
       <Route path="/okepemesanan/:ref_number" element={<OkPemesanan />} />
       <Route path="/returninvoice/:ref_number" element={<Aneh />} />
       <Route path="/edittransaksi/:ref_number" element={<EditTransaksi />} />
-
       <Route path="/printnota/:ref_number" element={<Receipt />} />
       {/* <Route path="/printmutasi/:ref_number" element={<MutasiSuratJalan />} /> */}
       <Route path="/printsuratjalan/:ref_number" element={<ReceiptJalan />} />

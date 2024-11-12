@@ -160,7 +160,6 @@ const StockSelectorTable = () => {
   const [productQuantities, setProductQuantities] = useState<{
     [key: string]: any
   }>({})
-  console.log({ productQuantities })
 
   const [selectedFinanceAccountIds, setSelectedFinanceAccountIds] = useState<
     any[]
@@ -172,6 +171,7 @@ const StockSelectorTable = () => {
     }
   }, [user])
   const [dataSource, setDataSource] = useState<any[]>([])
+  console.log({ dataSource })
   useEffect(() => {
     if (selectedFinanceAccountIds.length > 0 && selectedWarehouseId !== null) {
       selectedFinanceAccountIds.forEach((productId: any) => {
@@ -181,7 +181,7 @@ const StockSelectorTable = () => {
   }, [selectedFinanceAccountIds, selectedWarehouseId])
 
   const [selectedProductStocks, setSelectedProductStocks] = useState<any[]>([])
-  console.log({ selectedProductStocks })
+
   useEffect(() => {
     if (warehouseStock && selectedFinanceAccountIds.length > 0) {
       const newQuantities: Record<number, number> = {}
@@ -222,6 +222,7 @@ const StockSelectorTable = () => {
   }>({})
 
   const discountRates = [
+    { label: 'Harga Dasar', percentage: 0 },
     { label: 'Retail 10%', percentage: 10 },
     { label: 'Applikator 16%', percentage: 16 },
     { label: 'Toko 18%', percentage: 18 },
@@ -292,6 +293,7 @@ const StockSelectorTable = () => {
   const calculateGapPrice = (gapPrice: number, qty: number) => {
     return gapPrice * qty
   }
+
   const handleDiscountChange = (value: string, record: any) => {
     const selectedDiscount = discountRates.find((rate) => rate.label === value)
 
@@ -398,8 +400,11 @@ const StockSelectorTable = () => {
     }
   }
   const retailDiscount =
-    discountRates.find((rate) => rate.label === 'Retail 10%')?.percentage || 0
+    discountRates.find((rate) => rate.label === 'Harga Dasar')?.percentage || 0
+  //oceoce
 
+  const [hargaDasar, setHargaDasar] = useState<{ [key: string]: number }>({})
+  console.log({ hargaDasar })
   const handleOkClick = () => {
     setDropdownVisible(false)
 
@@ -427,7 +432,7 @@ const StockSelectorTable = () => {
 
             qty: 1,
 
-            selectedDiscount: selectedPrices[item.id] || 'Retail 10%',
+            selectedDiscount: selectedPrices[item.id] || 'Harga Dasar',
 
             selectedDiscountValue: selectedDiscounts[item.id] || retailDiscount,
 
@@ -441,6 +446,14 @@ const StockSelectorTable = () => {
           }
         })
 
+      setHargaDasar((prevHargaDasar) => {
+        const updatedHargaDasar = { ...prevHargaDasar }
+        newItems.forEach((item) => {
+          updatedHargaDasar[item.finance_account_id] = item.basePrice
+        })
+        return updatedHargaDasar
+      })
+
       return [...prev, ...newItems]
     })
 
@@ -448,14 +461,16 @@ const StockSelectorTable = () => {
   }
 
   const handleQtyChange = (value: number, record: any) => {
+    // Determine whether we are using the base price or discounted price
     const basePrice =
       selectedProductPrices[record.finance_account_id] || record.basePrice
     const newPrice = calculateDiscount(
       basePrice,
       record.selectedDiscountValue || 0
     )
-    const gapPrice = Number(basePrice) - Number(newPrice)
-    const gapPriceTotal = gapPrice * value
+
+    const priceToUse = record.harga_setelah_diskon || newPrice
+    const newSubtotal = priceToUse * value // This handles subtotal update based on the correct price
 
     setDataSource((prev) =>
       prev.map((item) =>
@@ -464,9 +479,10 @@ const StockSelectorTable = () => {
               ...item,
               qty: value,
               price: newPrice,
-              subtotal: calculateSubtotal(newPrice, value),
-              gapPrice: gapPrice,
-              gapPriceTotal: gapPriceTotal,
+              harga_setelah_diskon: priceToUse,
+              subtotal: newSubtotal,
+              gapPrice: Number(basePrice) - Number(newPrice),
+              gapPriceTotal: (Number(basePrice) - Number(newPrice)) * value,
             }
           : item
       )
@@ -499,7 +515,6 @@ const StockSelectorTable = () => {
     setTermIdSimpan(termId)
 
     // Anda bisa menyimpan atau menggunakan termId sesuai kebutuhan
-    console.log('Saved Term ID:', termId) // Contoh penggunaan termId
   }
 
   const [paymentForm] = Form.useForm()
@@ -689,7 +704,8 @@ const StockSelectorTable = () => {
         const latest_stock = matchingStock - item.qty
         return {
           amount: item.subtotal,
-          discount_amount: item.gapPriceTotal || item.gapPrice,
+          discount_amount:
+            item.input_diskon_manual || item.gapPriceTotal || item.gapPrice,
           finance_account_id: item.finance_account_id,
           discount_percent: item.selectedDiscountValue || 0,
           name: item.finance_account_name,
@@ -699,7 +715,7 @@ const StockSelectorTable = () => {
 
           qty_update: latest_stock || 0,
 
-          price: item.price,
+          price: item.harga_setelah_diskon || item.price,
           unit_id: item.unit_id,
           satuan: item.name,
         }
@@ -823,33 +839,13 @@ const StockSelectorTable = () => {
         </div>
       ),
     },
-    {
-      title: 'Qty',
-      dataIndex: 'qty',
-      key: 'qty',
-      render: (text: any, record: any) => (
-        <div>
-          <NumericFormat
-            value={text}
-            allowNegative={false}
-            thousandSeparator="."
-            decimalSeparator=","
-            decimalScale={0}
-            onValueChange={(values) => {
-              const { floatValue } = values
-              handleQtyChange(floatValue || 0, record)
-            }}
-            customInput={Input}
-            style={{ textAlign: 'left', width: '70px' }}
-          />
-        </div>
-      ),
-    },
+
     {
       title: 'Satuan',
       dataIndex: 'satuan',
       key: 'satuan',
     },
+
     {
       title: 'Harga',
       dataIndex: 'price',
@@ -875,7 +871,6 @@ const StockSelectorTable = () => {
             onChange={(value) => handleDiscountChange(value, record)}
             bordered={false}
           >
-            <Select.Option value="Retail">Retail</Select.Option>
             {discountRates.map((rate) => (
               <Select.Option key={rate.label} value={rate.label}>
                 {rate.label}
@@ -886,16 +881,86 @@ const StockSelectorTable = () => {
       ),
     },
     {
-      title: 'Subtotal',
-      dataIndex: 'subtotal',
-      key: 'subtotal',
-      render: (text: number) => (
-        <div style={{ textAlign: 'center' }}>
-          {Math.floor(text).toLocaleString('id-ID')}
+      title: 'Qty',
+      dataIndex: 'qty',
+      key: 'qty',
+      render: (text: any, record: any) => (
+        <div>
+          <NumericFormat
+            value={text}
+            allowNegative={false}
+            thousandSeparator="."
+            decimalSeparator=","
+            decimalScale={0}
+            onValueChange={(values) => {
+              const { floatValue } = values
+              handleQtyChange(floatValue || 0, record)
+            }}
+            customInput={Input}
+            style={{ textAlign: 'left', width: '70px' }}
+          />
+        </div>
+      ),
+    },
+    {
+      title: 'Harga Dasar',
+      dataIndex: 'finance_account_id',
+      key: 'base_price',
+      render: (id: any) => (
+        <div>
+          {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
+        </div>
+      ),
+    },
+    {
+      title: 'Harga Setelah Diskon',
+      dataIndex: 'harga_setelah_diskon',
+      key: 'harga_setelah_diskon',
+      render: (text: any) => (
+        <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
+      ),
+    },
+    {
+      title: 'Input Diskon Manual',
+      dataIndex: 'input_diskon_manual',
+      key: 'input_diskon_manual',
+      render: (text: any, record: any) => (
+        <div>
+          <Input
+            type="number"
+            defaultValue={text || 0}
+            onChange={(e) => {
+              const inputDiskonManual = parseFloat(e.target.value) || 0
+              const basePrice = hargaDasar[record.finance_account_id] || 0
+              const hargaSetelahDiskon = basePrice - inputDiskonManual
+              const newSubtotal = hargaSetelahDiskon * record.qty
+
+              setDataSource((prev) =>
+                prev.map((item) =>
+                  item.finance_account_id === record.finance_account_id
+                    ? {
+                        ...item,
+                        input_diskon_manual: inputDiskonManual,
+                        harga_setelah_diskon: hargaSetelahDiskon,
+                        subtotal: newSubtotal,
+                      }
+                    : item
+                )
+              )
+            }}
+          />
         </div>
       ),
     },
 
+    {
+      title: 'Subtotal',
+      dataIndex: 'subtotal',
+      key: 'subtotal',
+      render: (text: any) => (
+        <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
+      ),
+    },
     {
       title: '',
       key: 'action',
@@ -928,6 +993,13 @@ const StockSelectorTable = () => {
     minWidth: '10px' as const,
     textAlign: 'left' as const,
   }
+
+  const isColumnsVisible = false // Set this flag based on your needs
+  const filteredColumns = isColumnsVisible
+    ? columns
+    : columns.filter(
+        (col) => col.key !== 'base_price' && col.key !== 'harga_setelah_diskon'
+      )
   return (
     <>
       <div
@@ -1251,7 +1323,7 @@ const StockSelectorTable = () => {
         </div> */}
           <Table
             dataSource={dataSource}
-            columns={columns}
+            columns={filteredColumns}
             rowKey="finance_account_id"
             style={{ marginTop: '20px', marginBottom: '20px' }}
             pagination={false}
