@@ -34,6 +34,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const qtyUpdated = getPosDetail?.items?.[0]?.qty_update
 
   const tglTransaksi = getPosDetail?.trans_date ?? 0
+  const tglJatuhTempo = getPosDetail?.due_date ?? 0
   const refNumber = getPosDetail?.ref_number ?? 0
   const jumlahBayar = getPosDetail?.down_payment ?? 0
   const totalSemua = getPosDetail?.amount ?? 0
@@ -57,6 +58,8 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const codeGudang = getGudangDetail?.code ?? 0
   const photoGudang = getGudangDetail?.photo ?? 0
   const contactGudang = getGudangDetail?.contact ?? 0
+  const namaTag = getPosDetail?.tages?.[1]?.name
+
   console.log({ contactGudang })
 
   const { data: pelanggans } = useGetPelangganByIdQuery(name as unknown)
@@ -189,7 +192,14 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         </Col>
 
         <Col span={12} style={{ textAlign: 'right' }}>
-          <span>{tglTransaksi}</span>
+          <span>Tgl. Trans: {tglTransaksi}</span>
+        </Col>
+        <Col span={12} style={{ textAlign: 'left' }}>
+          <span>Sales: {namaTag}</span>
+        </Col>
+
+        <Col span={12} style={{ textAlign: 'right' }}>
+          <span>Tgl. Jatuh Tempo: {tglJatuhTempo}</span>
         </Col>
       </Row>
 
