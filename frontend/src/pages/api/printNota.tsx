@@ -148,6 +148,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         background: '#fff',
         margin: 'auto',
         paddingTop: 10,
+        paddingRight: 40,
       }}
     >
       <Row justify="center" align="middle">
