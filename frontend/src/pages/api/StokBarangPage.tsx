@@ -227,7 +227,7 @@ const StockSelectorTable = () => {
     { label: 'Applikator 16%', percentage: 16 },
     { label: 'Toko 18%', percentage: 18 },
     { label: 'Nego 19%', percentage: 19 },
-    { label: 'Khusus 21%', percentage: 21 },
+    { label: 'Khusus 21%', percentage: 20.5 },
   ]
 
   const [discountedPrices, setDiscountedPrices] = useState<{
