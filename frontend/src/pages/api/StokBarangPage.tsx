@@ -680,6 +680,12 @@ const StockSelectorTable = () => {
     }, {})
     const simpanGudang = saveNamaGudang[selectedWarehouseId as any]
 
+    // Tentukan due_date sesuai dengan term_id
+    let dueDate = formatDate(selectedDates[1]) // default to selected due date
+    if (termIdSimpan === 2) {
+      dueDate = formatDate(selectedDates[0]) // Jika term_id 2 (COD), due_date = trans_date
+    }
+
     const invoiceData = {
       id: uniqueNumber,
       jalur: 'penjualan',
@@ -688,7 +694,7 @@ const StockSelectorTable = () => {
       status_id: status,
       unique_id: uniqueNumber,
       trans_date: formatDate(selectedDates[0]),
-      due_date: formatDate(selectedDates[1]),
+      due_date: dueDate, // Gunakan due_date yang telah disesuaikan
       contact_id: selectedContact,
       sales_id: null,
       include_tax: 0,
@@ -712,9 +718,7 @@ const StockSelectorTable = () => {
           tax_id: null,
           desc: '',
           qty: item.qty,
-
           qty_update: latest_stock || 0,
-
           price: item.harga_setelah_diskon || item.price,
           unit_id: item.unit_id,
           satuan: item.name,
