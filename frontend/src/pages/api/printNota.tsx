@@ -11,6 +11,7 @@ import {
   useGetPelangganByIdQuery,
 } from '../../hooks/contactHooks'
 import { useGetBarangByIdQuery } from '../../hooks/barangHooks'
+import { formatDate } from './FormatDate'
 
 const { Title, Text } = Typography
 
@@ -86,8 +87,18 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
       }
     }
   }, [allTransactions, contacts])
-  const formatNumber = (num: number) => {
-    return num.toLocaleString('en-US')
+  const roundUpIndonesianNumber = (value: any): string => {
+    let numberValue: number
+
+    if (typeof value === 'string') {
+      numberValue = parseFloat(value.replace(/\./g, '').replace(',', '.'))
+    } else {
+      numberValue = value
+    }
+
+    const rounded = Math.ceil(numberValue)
+
+    return rounded.toLocaleString('id-ID')
   }
   const columns = [
     {
@@ -100,7 +111,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         const item = inv?.items.find(
           (item: any) => item.finance_account_id === record.finance_account_id
         )
-        return inv && item ? `inv-${item.qty_update}` : 'inv -'
+        return inv && item ? `**${item.qty_update}` : '**'
       },
     },
     {
@@ -119,24 +130,26 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         </div>
       ),
     },
-
     {
       title: 'Harga',
       dataIndex: 'price',
       key: 'price',
+      align: 'center',
       render: (price: number) => (
         <div style={{ textAlign: 'right' }}>
-          {price !== undefined ? `${price.toLocaleString()}` : 'Rp 0'}
+          {price !== undefined ? roundUpIndonesianNumber(price) : 'Rp 0'}
         </div>
       ),
     },
+
     {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
+      align: 'center',
       render: (amount: number) => (
         <div style={{ textAlign: 'right' }}>
-          {amount !== undefined ? `${amount.toLocaleString()}` : 'Rp 0'}
+          {amount !== undefined ? roundUpIndonesianNumber(amount) : 'Rp 0'}
         </div>
       ),
     },
@@ -146,12 +159,12 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
     <div
       ref={ref} // Attach the ref here for printing
       style={{
-        padding: 30,
-        maxWidth: 600,
+        padding: 20,
+        maxWidth: 700,
         background: '#fff',
         margin: 'auto',
         paddingTop: 10,
-        paddingRight: 40,
+        paddingRight: 10,
       }}
     >
       <Row justify="center" align="middle">
@@ -192,14 +205,14 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         </Col>
 
         <Col span={12} style={{ textAlign: 'right' }}>
-          <span>Tgl. Trans: {tglTransaksi}</span>
+          <span>Tgl. Trans: {formatDate(tglTransaksi as any)}</span>
         </Col>
         <Col span={12} style={{ textAlign: 'left' }}>
           <span>Sales: {namaTag}</span>
         </Col>
 
         <Col span={12} style={{ textAlign: 'right' }}>
-          <span>Tgl. Jatuh Tempo: {tglJatuhTempo}</span>
+          <span>Tgl. Jatuh Tempo: {formatDate(tglJatuhTempo as any)}</span>
         </Col>
       </Row>
 
@@ -259,8 +272,8 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
               Total Tagihan:
             </Text>
-            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
-              {totalSemua?.toLocaleString('id-ID')}
+            <Text strong style={{ minWidth: '100px', textAlign: 'right' }}>
+              {roundUpIndonesianNumber(totalSemua)}
             </Text>
           </div>
 
@@ -274,7 +287,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
               Jml Bayar:
             </Text>
-            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
+            <Text strong style={{ minWidth: '100px', textAlign: 'right' }}>
               {witholdings
                 .filter((witholding: any) => witholding.status === 0)
                 .map((witholding: any, index) => (
@@ -282,7 +295,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
                     <Col span={12} style={{ textAlign: 'left' }}></Col>
                     <Col span={12} style={{ textAlign: 'right' }}>
                       <Text strong>
-                        {formatNumber(witholding.down_payment)}
+                        {roundUpIndonesianNumber(witholding.down_payment)}
                       </Text>
                     </Col>
                   </Row>
@@ -299,8 +312,8 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
               Total Bayar:
             </Text>
-            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
-              {totalDownPayment?.toLocaleString('id-ID')}
+            <Text strong style={{ minWidth: '100px', textAlign: 'right' }}>
+              {roundUpIndonesianNumber(totalDownPayment)}
             </Text>
             {/* <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
               {witholdings.map((witholding: any, index: number) => (
@@ -324,8 +337,8 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
               Sisa Tagihan:
             </Text>
-            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
-              {sisaTagohan?.toLocaleString('id-ID')}
+            <Text strong style={{ minWidth: '100px', textAlign: 'right' }}>
+              {roundUpIndonesianNumber(sisaTagohan)}
             </Text>
           </div>
         </Col>

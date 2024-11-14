@@ -3,13 +3,16 @@ import { Button, Table, Tag } from 'antd'
 import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
 import { useNavigate, useLocation } from 'react-router-dom'
 import UserContext from '../../contexts/UserContext'
+import { useGetContactsQuery } from '../../hooks/contactHooks'
+import { formatDate } from './FormatDate'
 
 const LaporanKeListTransaksi: React.FC = () => {
   const { data: transaksiData } = useGetTransaksisQuery()
   const location = useLocation()
   const navigate = useNavigate()
   // const { currentUser } = useContext(UserContext as any)
-
+  const { data: contacts } = useGetContactsQuery()
+  console.log({ contacts })
   const [filteredData, setFilteredData] = useState<any[]>([])
 
   // Retrieve `warehouse_id` and `date` from URL query parameters
@@ -39,14 +42,25 @@ const LaporanKeListTransaksi: React.FC = () => {
       ),
     },
     {
-      title: 'Warehouse ID',
-      dataIndex: 'warehouse_id',
-      key: 'warehouse_id',
+      title: 'Pelanggan',
+      dataIndex: 'contact_id',
+      key: 'contact_id',
+      render: (contactId: any) => {
+        const contact = contacts?.find((contact) => contact.id === contactId)
+        return contact ? contact.name : 'Pelanggan tidak ditemukan'
+      },
     },
     {
-      title: 'Transaction Date',
+      title: 'Jatuh Tempo',
       dataIndex: 'trans_date',
       key: 'trans_date',
+      render: (value: string) => formatDate(value),
+    },
+    {
+      title: 'Jatuh Tempo',
+      dataIndex: 'due_date',
+      key: 'due_date',
+      render: (value: string) => formatDate(value),
     },
     {
       title: 'Amount',

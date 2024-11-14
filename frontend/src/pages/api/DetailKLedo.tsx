@@ -150,8 +150,19 @@ const DetailKledo: React.FC = () => {
   const { fiAc } = useFiac()
 
   const [amountPaid, setAmountPaid] = useState<number | null>(null)
-  const formatNumber = (num: number) => {
-    return num.toLocaleString('en-US')
+
+  const roundUpIndonesianNumber = (value: any): string => {
+    let numberValue: number
+
+    if (typeof value === 'string') {
+      numberValue = parseFloat(value.replace(/\./g, '').replace(',', '.'))
+    } else {
+      numberValue = value
+    }
+
+    const rounded = Math.ceil(numberValue)
+
+    return rounded.toLocaleString('id-ID')
   }
 
   const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -554,7 +565,7 @@ const DetailKledo: React.FC = () => {
       align: 'center',
       render: (price: number) => (
         <div style={{ textAlign: 'right' }}>
-          {price !== undefined ? `${price.toLocaleString()}` : 'Rp 0'}
+          {price !== undefined ? roundUpIndonesianNumber(price) : 'Rp 0'}
         </div>
       ),
     },
@@ -565,7 +576,7 @@ const DetailKledo: React.FC = () => {
       align: 'center',
       render: (amount: number) => (
         <div style={{ textAlign: 'right' }}>
-          {amount !== undefined ? `${amount.toLocaleString()}` : 'Rp 0'}
+          {amount !== undefined ? roundUpIndonesianNumber(amount) : 'Rp 0'}
         </div>
       ),
     },
@@ -691,13 +702,15 @@ const DetailKledo: React.FC = () => {
             <div style={{ marginBottom: '0px' }}>
               <Text strong>Tgl. Transaksi:</Text>
             </div>
-            <Title level={5}>{getPosDetail?.trans_date || []}</Title>
+            <Title level={5}>
+              {formatDate(getPosDetail?.trans_date || '')}
+            </Title>
           </Col>
           <Col span={12}>
             <div style={{ marginBottom: '0px' }}>
               <Text strong>Tgl. Jatuh Tempo:</Text>
             </div>
-            <Title level={5}>{getPosDetail?.due_date || []}</Title>
+            <Title level={5}>{formatDate(getPosDetail?.due_date || '')}</Title>
           </Col>
         </Row>
         <Row>
@@ -711,7 +724,10 @@ const DetailKledo: React.FC = () => {
             <div style={{ marginBottom: '0px' }}>
               <Text strong>Tag:</Text>
             </div>
-            <Title level={5}>{tagName}</Title>
+            <Title level={5}>
+              {getPosDetail?.tages?.map((tag: any) => tag.name).join(' - ') ||
+                'No Tags'}
+            </Title>
           </Col>
         </Row>
       </Card>
@@ -741,7 +757,7 @@ const DetailKledo: React.FC = () => {
                 <Text strong>Sub Total</Text>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>{formatNumber(subTotal)}</Text>
+                <Text strong>{roundUpIndonesianNumber(subTotal)}</Text>
               </Col>
             </Row>
             <Row style={{ marginTop: '8px' }}>
@@ -749,7 +765,7 @@ const DetailKledo: React.FC = () => {
                 <Text strong>Total Diskon</Text>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>{formatNumber(totalDiscount)}</Text>
+                <Text strong>{roundUpIndonesianNumber(totalDiscount)}</Text>
               </Col>
             </Row>
             <Row style={{ marginTop: '8px' }}>
@@ -757,7 +773,7 @@ const DetailKledo: React.FC = () => {
                 <Text strong>Total setelah diskon</Text>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>{formatNumber(amount)}</Text>
+                <Text strong>{roundUpIndonesianNumber(amount)}</Text>
               </Col>
             </Row>
             <Row style={{ marginTop: '8px' }}>
@@ -765,7 +781,7 @@ const DetailKledo: React.FC = () => {
                 <Title level={4}>Total</Title>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Title level={4}>{formatNumber(amount)}</Title>
+                <Title level={4}>{roundUpIndonesianNumber(amount)}</Title>
               </Col>
             </Row>
             <Divider style={{ margin: '16px 0' }} />
@@ -782,7 +798,7 @@ const DetailKledo: React.FC = () => {
                     </Col>
                     <Col span={12} style={{ textAlign: 'right' }}>
                       <Text strong>
-                        {formatNumber(witholding.down_payment)}
+                        {roundUpIndonesianNumber(witholding.down_payment)}
                       </Text>
                     </Col>
                   </Row>
@@ -799,7 +815,7 @@ const DetailKledo: React.FC = () => {
               <Col span={12} style={{ textAlign: 'right' }}>
                 <Text strong style={{ fontSize: '20px' }}>
                   {' '}
-                  {formatNumber(due)}
+                  {roundUpIndonesianNumber(due)}
                 </Text>
               </Col>
             </Row>
