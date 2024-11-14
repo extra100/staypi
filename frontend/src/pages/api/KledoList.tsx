@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Button, Table, Tag } from 'antd'
+import { Button, Input, Table, Tag } from 'antd'
 
 import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
 import { useIdInvoice } from './takeSingleInvoice'
@@ -32,12 +32,23 @@ const ListTransaksi: React.FC = () => {
     setSelectedRefNumber(ref_number)
   }
 
-  const getContactName = (contactId: string) => {
-    const contact = contacts?.find((c: any) => c.id === contactId)
-    return contact ? contact.name : 'Unknown Contact'
+  const [searchText, setSearchText] = useState<string>('')
+
+  // Gabungkan filter contact_id dengan filter yang sudah ada
+  const getContactName = (contact_id: string | number) => {
+    const contact = contacts?.find((c) => c.id === contact_id)
+    return contact ? contact.name : 'Nama tidak ditemukan'
   }
 
+  // Gabungkan filter contact_id dengan filter yang sudah ada
   const filteredData = data
+    ?.filter((transaction) =>
+      searchText
+        ? getContactName(transaction.contact_id)
+            .toLowerCase()
+            .includes(searchText.toLowerCase())
+        : true
+    )
     ?.filter(
       (transaction) =>
         (transaction.warehouse_id === Number(user?.id_outlet) ||
@@ -65,7 +76,7 @@ const ListTransaksi: React.FC = () => {
   }
   const columns = [
     {
-      title: 'Nomor',
+      title: 'No. Invoice',
       dataIndex: 'ref_number',
       key: 'ref_number',
       render: (text: any, record: any) => (
@@ -186,7 +197,12 @@ const ListTransaksi: React.FC = () => {
       >
         <span>Return</span>
       </Button>
-
+      <Input
+        placeholder="Cari berdasarkan Nama Kontak"
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        style={{ marginBottom: 16, width: 300 }}
+      />
       <Table
         dataSource={filteredData}
         columns={columns}
