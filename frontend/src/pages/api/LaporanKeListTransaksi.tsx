@@ -1,21 +1,19 @@
-import React, { useEffect, useContext, useState, useMemo } from 'react'
-import { Button, Table, Tag } from 'antd'
+import React, { useEffect, useState, useMemo } from 'react'
+import { Button, Input, Table, Tag } from 'antd'
 import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
-import { useNavigate, useLocation } from 'react-router-dom'
-import UserContext from '../../contexts/UserContext'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { formatDate } from './FormatDate'
 
 const LaporanKeListTransaksi: React.FC = () => {
   const { data: transaksiData } = useGetTransaksisQuery()
+  const { data: contacts } = useGetContactsQuery()
   const location = useLocation()
   const navigate = useNavigate()
-  // const { currentUser } = useContext(UserContext as any)
-  const { data: contacts } = useGetContactsQuery()
-  console.log({ contacts })
-  const [filteredData, setFilteredData] = useState<any[]>([])
 
-  // Retrieve `warehouse_id` and `date` from URL query parameters
+  const [filteredData, setFilteredData] = useState<any[]>([])
+  const [searchText, setSearchText] = useState<string>('')
+
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search)
     const warehouseId = searchParams.get('warehouse_id')
@@ -31,6 +29,19 @@ const LaporanKeListTransaksi: React.FC = () => {
       setFilteredData(filtered)
     }
   }, [location.search, transaksiData])
+
+  // Filter transaksi berdasarkan pencarian nama kontak
+  const filteredByContactName = useMemo(() => {
+    if (!searchText) return filteredData
+    const filteredContacts = contacts?.filter((contact) =>
+      contact.name.toLowerCase().includes(searchText.toLowerCase())
+    )
+    const filteredContactIds = filteredContacts?.map((contact) => contact.id)
+
+    return filteredData.filter((transaction) =>
+      filteredContactIds?.includes(transaction.contact_id)
+    )
+  }, [filteredData, contacts, searchText])
 
   const columns = [
     {
@@ -51,7 +62,7 @@ const LaporanKeListTransaksi: React.FC = () => {
       },
     },
     {
-      title: 'Jatuh Tempo',
+      title: 'Tanggal Transaksi',
       dataIndex: 'trans_date',
       key: 'trans_date',
       render: (value: string) => formatDate(value),
@@ -77,9 +88,9 @@ const LaporanKeListTransaksi: React.FC = () => {
           .filter((witholding) => witholding.status === 0)
           .reduce((sum, witholding) => sum + (witholding.down_payment || 0), 0)
         return (
-          <div
-            style={{ textAlign: 'right' }}
-          >{`Rp ${totalDownPayment.toLocaleString()}`}</div>
+          <div style={{ textAlign: 'right' }}>
+            {`Rp ${totalDownPayment.toLocaleString()}`}
+          </div>
         )
       },
     },
@@ -96,9 +107,9 @@ const LaporanKeListTransaksi: React.FC = () => {
           )
         const due = record.amount - totalDownPayment
         return (
-          <div
-            style={{ textAlign: 'right' }}
-          >{`Rp ${due.toLocaleString()}`}</div>
+          <div style={{ textAlign: 'right' }}>
+            {`Rp ${due.toLocaleString()}`}
+          </div>
         )
       },
     },
@@ -134,8 +145,16 @@ const LaporanKeListTransaksi: React.FC = () => {
   return (
     <div>
       <h1>Transaction List</h1>
+
+      <Input
+        placeholder="Cari Nama Kontak"
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        style={{ marginBottom: '1rem', width: '300px' }}
+      />
+
       <Table
-        dataSource={filteredData}
+        dataSource={filteredByContactName}
         columns={columns}
         rowKey="id"
         summary={(pageData) => {
