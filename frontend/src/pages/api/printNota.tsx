@@ -272,7 +272,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
               Total Tagihan:
             </Text>
-            <Text strong style={{ minWidth: '100px', textAlign: 'right' }}>
+            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
               {roundUpIndonesianNumber(totalSemua)}
             </Text>
           </div>
@@ -287,7 +287,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
               Jml Bayar:
             </Text>
-            <Text strong style={{ minWidth: '100px', textAlign: 'right' }}>
+            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
               {witholdings
                 .filter((witholding: any) => witholding.status === 0)
                 .map((witholding: any, index) => (
@@ -312,7 +312,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
               Total Bayar:
             </Text>
-            <Text strong style={{ minWidth: '100px', textAlign: 'right' }}>
+            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
               {roundUpIndonesianNumber(totalDownPayment)}
             </Text>
             {/* <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
@@ -337,7 +337,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
               Sisa Tagihan:
             </Text>
-            <Text strong style={{ minWidth: '100px', textAlign: 'right' }}>
+            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
               {roundUpIndonesianNumber(sisaTagohan)}
             </Text>
           </div>
