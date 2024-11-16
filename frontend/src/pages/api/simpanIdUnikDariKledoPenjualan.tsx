@@ -61,28 +61,70 @@ const SimpanIdUnikDariKledoPenjualan: React.FC = () => {
 
     return () => clearTimeout(timer)
   }, [])
-  const { ref_number } = useParams<{ ref_number?: string }>()
-  console.log({ ref_number })
-  const updateHanyaId = updateDenganIdUnikDariKledo()
-  const { getIdAtInvoice } = useIdInvoice(ref_number as string)
-  const justPutId = getIdAtInvoice?.id ?? null
-  console.log('Invoice ID:', justPutId)
-  const updateInvoiceId = async () => {
-    if (!ref_number || !invoiceId) return
 
-    console.log('Values to be saved:', { ref_number, id: invoiceId })
+  const { ref_number } = useParams<{ ref_number?: string }>()
+
+  const updateHanyaId = updateDenganIdUnikDariKledo()
+  console.log({ updateHanyaId })
+
+  const { getIdAtInvoice } = useIdInvoice(ref_number as string)
+  console.log({ getIdAtInvoice })
+
+  const justPutId = getIdAtInvoice?.id ?? null
+
+  const idPadaItems =
+    getIdAtInvoice?.items?.map((item: any) => ({
+      id: item.id,
+      finance_account_id: item.finance_account_id,
+    })) || []
+
+  const updateInvoiceId = async () => {
+    if (!ref_number || !invoiceId || idPadaItems.length === 0) {
+      console.warn(
+        'Tidak dapat memperbarui karena data berikut Belum Tersedia:',
+        {
+          ref_number,
+          invoiceId,
+          idPadaItems,
+        }
+      )
+      return
+    }
 
     try {
-      await updateHanyaId.mutateAsync({
+      const response = await updateHanyaId.mutateAsync({
         ref_number,
-        id: invoiceId, // Pass `invoiceId` as `id`
+        id: invoiceId,
+        items: idPadaItems,
       })
-      console.log('Invoice ID updated successfully')
+
+      console.log('Invoice ID dan items berhasil diperbarui:', response)
     } catch (error) {
-      console.error('Failed to update Invoice ID:', error)
+      console.error('Gagal memperbarui Invoice ID dan items:', error)
     }
   }
+  // const updateInvoiceId = async () => {
+  //   if (!ref_number || !invoiceId || idPadaItems.length === 0) {
+  //     console.warn('Missing required data for update:', {
+  //       ref_number,
+  //       invoiceId,
+  //       idPadaItems,
+  //     })
+  //     return
+  //   }
 
+  //   try {
+  //     const response = await updateHanyaId.mutateAsync({
+  //       ref_number,
+  //       id: invoiceId,
+  //       items: idPadaItems, // Kirim items ke server
+  //     })
+
+  //     console.log('Invoice ID and items updated successfully:', response)
+  //   } catch (error) {
+  //     console.error('Failed to update Invoice ID and items:', error)
+  //   }
+  // }
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
   )
@@ -93,12 +135,11 @@ const SimpanIdUnikDariKledoPenjualan: React.FC = () => {
   // console.log('ref_number dari database keldo', refNumber)
 
   const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
-  // console.log('ref_number dari database keldo', invoiceId)
+  console.log('ref_number dari database keldo', invoiceId)
 
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
-  console.log('semua data dari kledo', getPosDetail)
 
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
@@ -507,9 +548,8 @@ const SimpanIdUnikDariKledoPenjualan: React.FC = () => {
         </Row>
       </div>
       <Modal
-        title="Submit"
-        visible={isModalVisible}
-        // onCancel={handleCancel}
+        title="Transaksi Berhasil Di Buat Klik Lanjutkan"
+        open={!!(isModalVisible && invoiceId && idPadaItems.length > 0)}
         footer={null}
         style={{ textAlign: 'center' }}
         bodyStyle={{
@@ -523,7 +563,7 @@ const SimpanIdUnikDariKledoPenjualan: React.FC = () => {
           <Spin />
         ) : (
           <Button type="primary" onClick={handleButtonClick}>
-            Submit
+            Lanjutkan
           </Button>
         )}
       </Modal>

@@ -36,6 +36,7 @@ export type Transaction = {
     discount_percent: number
     discount_amount: number
     unit_id: number
+    id: number
   }[]
 
   contacts: {
