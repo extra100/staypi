@@ -145,7 +145,7 @@ const DetailKledo: React.FC = () => {
   const { fiAc } = useFiac()
 
   const [amountPaid, setAmountPaid] = useState<number | null>(null)
-
+  console.log({ amountPaid })
   const roundUpIndonesianNumber = (value: any): string => {
     let numberValue: number
 
@@ -843,7 +843,7 @@ const DetailKledo: React.FC = () => {
 
               <NumericFormat
                 placeholder="Nilai Pembayaran"
-                value={amountPaid as any}
+                value={roundUpIndonesianNumber(amountPaid)}
                 thousandSeparator="."
                 decimalSeparator=","
                 decimalScale={2}
