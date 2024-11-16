@@ -43,13 +43,21 @@ const ListSiapDiValidasi: React.FC = () => {
           const refNumber = String(transfer.ref_number || '')
           const fromWarehouseId = String(transfer.to_warehouse_id || '')
 
-          return (
-            // transfer.from_warehouse_id !== idOutletLoggedIn &&
-            transfer.to_warehouse_id !== idOutletLoggedIn &&
-            user?.isAdmin === true && // Check if the user is an admin
+          // Syarat umum untuk semua pengguna
+          const isCommonCriteriaMet =
+            transfer.from_warehouse_id !== idOutletLoggedIn &&
             transfer.code === 1 &&
             (refNumber.includes(searchTerm) ||
               fromWarehouseId.includes(searchTerm))
+
+          // Admin memiliki akses penuh jika syarat umum terpenuhi
+          if (user?.isAdmin) {
+            return isCommonCriteriaMet
+          }
+
+          // Non-admin hanya dapat melihat data tertentu
+          return (
+            isCommonCriteriaMet && transfer.to_warehouse_id === idOutletLoggedIn // Contoh syarat tambahan untuk non-admin
           )
         })
         .sort(
@@ -100,8 +108,8 @@ const ListSiapDiValidasi: React.FC = () => {
     },
     {
       title: 'Memo',
-      dataIndex: 'memo',
-      key: 'memo',
+      dataIndex: 'code',
+      key: 'code',
     },
     {
       title: 'Tanggal',
