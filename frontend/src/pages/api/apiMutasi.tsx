@@ -24,9 +24,6 @@ export function saveMutation() {
         body: JSON.stringify(invoiceData),
       })
 
-      console.log('Response status:', response.status)
-      console.log('Response headers:', response.headers)
-
       if (!response.ok) {
         const errorData = await response.json()
         console.log('Error response data:', errorData)

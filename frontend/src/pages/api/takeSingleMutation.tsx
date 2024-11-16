@@ -2,51 +2,44 @@ import { useState, useEffect, useMemo } from 'react'
 import { CLIENT_ID, CLIENT_SECRET, HOST } from '../../config'
 import TOKEN from '../../token'
 
-export interface Invoice {
+export interface Mutation {
   id: number
   ref_number: string
   items: {
-    id: string
-    name: string
-    amount: number
-    discount_amount: number
-    discount_percent: number
+    id: number
     finance_account_id: number
-    price: number
-    qty: number
-    // idPadaItems: number
   }[]
 }
 
-export function useIdInvoice(ref_number: any) {
+export function useIdMutation(ref_number: any) {
   const [loading, setLoading] = useState(true)
-  const [getIdAtInvoice, setgetIdAtInvoice] = useState<Invoice | null>(null)
+  const [getIdAtMutation, setgetIdAtMutation] = useState<Mutation | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const storedData = sessionStorage.getItem('getIdAtInvoice')
+        const storedData = sessionStorage.getItem('getIdAtMutation')
         if (storedData) {
-          const parsedData: Invoice[] = JSON.parse(storedData)
+          const parsedData: Mutation[] = JSON.parse(storedData)
 
           const matchedInvoice = parsedData.find(
             (invoice) => invoice.ref_number === ref_number
           )
           if (matchedInvoice) {
-            setgetIdAtInvoice(matchedInvoice)
+            setgetIdAtMutation(matchedInvoice)
             setLoading(false)
             return // Stop fetching
           }
         }
 
-        let allInvoices: Invoice[] = []
+        let allInvoices: Mutation[] = []
         let page = 1
         const perPage = 20
         let hasMoreData = true
 
         while (hasMoreData) {
           const responGudang = await fetch(
-            `${HOST}/finance/invoices?ref_number=${ref_number}&page=${page}&perPage=${perPage}&include_items=1`,
+            `${HOST}/finance/warehouses/transfers?ref_number=${ref_number}&page=${page}&perPage=${perPage}&include_items=1`,
             {
               headers: {
                 Authorization: `Bearer ${TOKEN}`,
@@ -65,15 +58,19 @@ export function useIdInvoice(ref_number: any) {
             allInvoices = allInvoices.concat(dataGudang.data.data)
 
             const matchedInvoice = dataGudang.data.data.find(
-              (item: Invoice) => item.ref_number === ref_number
+              (item: Mutation) => item.ref_number === ref_number
+            )
+            console.log(
+              'allInvoices matchedInvoice matchedInvoice:',
+              allInvoices
             )
 
             if (matchedInvoice) {
-              setgetIdAtInvoice(matchedInvoice)
+              setgetIdAtMutation(matchedInvoice)
               setLoading(false)
 
               sessionStorage.setItem(
-                'getIdAtInvoice',
+                'getIdAtMutation',
                 JSON.stringify(allInvoices)
               )
               return // Stop fetching as soon as a match is found
@@ -97,7 +94,7 @@ export function useIdInvoice(ref_number: any) {
     }
   }, [ref_number]) // Trigger effect only when ref_number changes
 
-  const memoizedData = useMemo(() => getIdAtInvoice, [getIdAtInvoice])
+  const memoizedData = useMemo(() => getIdAtMutation, [getIdAtMutation])
 
-  return { loading, getIdAtInvoice }
+  return { loading, getIdAtMutation }
 }

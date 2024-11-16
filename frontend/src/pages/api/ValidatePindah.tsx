@@ -135,6 +135,7 @@ const ValidatePindah: React.FC = () => {
         return {
           key: index,
           product_id: item.product_id,
+          finance_product_id: item.finance_product_id,
           product_name: item.product_name,
           qty_minta: item.qty_minta,
           unit_name: item.unit_name,
@@ -142,6 +143,7 @@ const ValidatePindah: React.FC = () => {
           fromQty: 0,
           toQty: 0,
           code: null,
+          id: 14,
         }
       })
       setDataSource(initialDataSource)
@@ -158,17 +160,19 @@ const ValidatePindah: React.FC = () => {
       ref_number: validRefNumber,
       memo: '',
       code: 2,
+      id: 14,
 
       items: dataSource.map((row) => ({
         qty_minta: row.qty_minta,
         code: row.code,
         product_id: row.product_id,
-        finance_account_id: row.id,
+        finance_account_id: row.product_id,
         product_name: row.product_name,
         qty: transferQty[row.key] || 0,
         before_qty_dari: fromQtyState[row.product_id] || 0,
         before_qty_tujuan: toQtyState[row.product_id] || 0,
         unit_name: row.unit_name,
+        id: 14,
       })),
     }
 
@@ -194,7 +198,7 @@ const ValidatePindah: React.FC = () => {
       message.error(errorMessage)
       console.error('Error:', error)
     }
-    navigate(`/sudah-validasi/${ref_number}`)
+    navigate(`/simpanidunikdarikledomutasi/${ref_number}`)
   }
 
   const printSuratJalan = useRef<HTMLDivElement>(null)

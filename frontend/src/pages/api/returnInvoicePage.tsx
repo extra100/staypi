@@ -48,6 +48,7 @@ import { SaveReturnInvoice } from './returInvoice'
 import { v4 as uuidv4 } from 'uuid'
 import { useAddReturnMutation } from '../../hooks/returnHooks'
 import SingleDate from '../SingleDate'
+import { KirimEditKeKledo } from './KirimEditKeKledo'
 // ;/api/1v / finance / bankTrans / creditMemoPayment
 
 const { Title, Text } = Typography
@@ -92,7 +93,7 @@ const Aneh: React.FC = () => {
   const { getIdAtInvoice } = useIdInvoice(ref_number || '')
 
   const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
-
+  console.log({ invoiceId })
   const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
 
   // const contactName = getPosDetail?.contacts?.[0]?.name
@@ -174,6 +175,7 @@ const Aneh: React.FC = () => {
   const today = dayjs().format('DD-MM-YYYY')
   const { saveReturn } = SaveReturnInvoice()
   const simpanReturn = useAddReturnMutation()
+  const { editDataKelod } = KirimEditKeKledo()
 
   const handleFormSubmit = (values: any) => {
     const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
@@ -256,7 +258,7 @@ const Aneh: React.FC = () => {
           // unit_id: 2,
         })) || [],
     }
-    saveReturn(payload)
+    editDataKelod(payload as any, ref_number as any)
       .then((response: any) => {
         console.log('Payment saved successfully:', response)
       })

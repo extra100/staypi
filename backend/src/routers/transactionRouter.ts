@@ -44,8 +44,6 @@ transactionRouter.get(
 transactionRouter.put(
   '/by-id/:ref_number',
   asyncHandler(async (req: any, res: any) => {
-    console.log('Ref Number in Request:', req.params.ref_number)
-
     const transaction = await TransactionModel.findOne({
       ref_number: req.params.ref_number,
     })
@@ -58,68 +56,80 @@ transactionRouter.put(
       transaction.id = req.body.id
     }
 
-    const updatedTransaction = await transaction.save()
-    res.json(updatedTransaction)
+    if (Array.isArray(req.body.items) && req.body.items.length > 0) {
+      transaction.items = transaction.items.map((item) => {
+        // cocokan payload kence database
+        const updatedItem = req.body.items.find(
+          (i: any) => i.finance_account_id === item.finance_account_id
+        )
+
+        if (updatedItem) {
+          // update isi items isik data bru
+          return { ...item, id: updatedItem.id }
+        }
+
+        return item
+      })
+
+      // Simpan jok database
+      const updatedTransaction = await transaction.save()
+
+      res.json(updatedTransaction)
+    }
   })
 )
+
 transactionRouter.put(
   '/by-contact_id/:ref_number',
   asyncHandler(async (req: any, res: any) => {
     console.log('Ref Number in Request:', req.params.ref_number)
 
-    // Find transaction by ref_number
     const transaction = await TransactionModel.findOne({
       ref_number: req.params.ref_number,
     })
 
-    // If transaction not found, send error message
     if (!transaction) {
       return res.status(404).json({ message: 'Transaction not found' })
     }
 
-    // Update only specified fields using exact property names
     if (req.body.contact_id) transaction.contact_id = req.body.contact_id
     if (req.body.term_id) transaction.term_id = req.body.term_id
-    if (req.body.trans_date) transaction.trans_date = req.body.trans_date // Set trans_date
-    if (req.body.due_date) transaction.due_date = req.body.due_date // Set due_date
+    if (req.body.trans_date) transaction.trans_date = req.body.trans_date
+    if (req.body.due_date) transaction.due_date = req.body.due_date
+    if (req.body.id) transaction.id = req.body.id
 
-    // Save the updated transaction and return it
+    if (Array.isArray(req.body.contacts) && req.body.contacts.length > 0) {
+      transaction.contacts = req.body.contacts
+    }
+    if (Array.isArray(req.body.tages) && req.body.tages.length > 0) {
+      transaction.tages = req.body.tages
+    }
     const updatedTransaction = await transaction.save()
     return res.json(updatedTransaction)
   })
 )
 
-// PUT endpoint to update transaction by ref_number
 transactionRouter.put(
   '/full-update/:ref_number',
   asyncHandler(async (req: any, res: any) => {
-    // Cari transaksi berdasarkan ref_number yang diberikan dalam URL
     let transaction = await TransactionModel.findOne({
       ref_number: req.params.ref_number,
     })
 
-    // Jika transaksi tidak ditemukan, kirimkan respons 404
     if (!transaction) {
       return res.status(404).json({ message: 'Transaction not found' })
     }
 
-    // Periksa apakah field `witholdings` ada dalam request body dan update jika ada
     if (req.body.witholdings && Array.isArray(req.body.witholdings)) {
-      // Update field `witholdings` pada transaksi yang ditemukan
       transaction.witholdings = req.body.witholdings
     }
 
-    // Lakukan update pada field lain (misalnya `reason_id` atau lainnya)
     if (req.body.reason_id) {
       transaction.reason_id = req.body.reason_id
     }
 
-    // Tambahkan pembaruan untuk field lain yang diperlukan sesuai dengan model transaksi
-
-    // Simpan transaksi yang diperbarui ke database
     const updatedTransaction = await transaction.save()
 
-    // Kirimkan respons dengan data transaksi yang diperbarui
     res.json(updatedTransaction)
   })
 )

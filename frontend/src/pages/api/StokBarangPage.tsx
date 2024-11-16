@@ -1243,10 +1243,10 @@ const StockSelectorTable = () => {
                   item.name.toLowerCase().includes(searchValue.toLowerCase())
                 )
                 .map((product) => {
-                  // const stockQuantity =
-                  //   warehouseStock.find((stock: any) => stock.id === product.id)
-                  //     ?.stock || 0
-                  // if (stockQuantity === 0) return null
+                  const stockQuantity =
+                    warehouseStock.find((stock: any) => stock.id === product.id)
+                      ?.stock || 0
+                  if (stockQuantity === 0) return null
 
                   return (
                     <Select.Option
@@ -1267,7 +1267,7 @@ const StockSelectorTable = () => {
                           {product.name}
                         </span>
                         <span style={{ flex: 1, textAlign: 'center' }}>
-                          {/* {Number(stockQuantity).toLocaleString('id-ID')} */}
+                          {Number(stockQuantity).toLocaleString('id-ID')}
                         </span>
                         <span style={{ flex: 1, textAlign: 'center' }}>
                           {Number(product.price).toLocaleString('id-ID', {

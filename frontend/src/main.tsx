@@ -107,6 +107,9 @@ import BatchProcessPelangggans from './pages/api/savePelanggan'
 import ControlPage from './pages/api/ControlPage'
 import MyTablePage from './pages/api/MyTablePage'
 
+import EditTransaksiTes from './pages/api/editTransaksiTes'
+import SimpanIdUnikDariMutasi from './pages/api/simpanIdUnikDatiMutasi'
+
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
 const router = createBrowserRouter(
@@ -170,6 +173,7 @@ const router = createBrowserRouter(
       <Route path="/laporanstok" element={<ListVoid />} />
       <Route path="/listreturn" element={<ListReturn />} />
       <Route path="/detailkledo/:ref_number" element={<DetailKledo />} />
+      {/* New Route for InvoiceTable */}
       <Route
         path="/detailpemesananpenjualan/:ref_number"
         element={<DetailPemesananPenjualan />}
@@ -182,6 +186,10 @@ const router = createBrowserRouter(
         path="/simpanidunikdarikledopenjualan/:ref_number"
         element={<SimpanIdUnikDariKledoPenjualan />}
       />
+      <Route
+        path="/simpanidunikdarikledomutasi/:ref_number"
+        element={<SimpanIdUnikDariMutasi />}
+      />
       {/* <Route
         path="/pembayarankledo/:ref_number"
         element={<PembayaranKledo />}
@@ -189,6 +197,7 @@ const router = createBrowserRouter(
       <Route path="/okepemesanan/:ref_number" element={<OkPemesanan />} />
       <Route path="/returninvoice/:ref_number" element={<Aneh />} />
       <Route path="/edittransaksi/:ref_number" element={<EditTransaksi />} />
+      <Route path="/edittransaksites/:id" element={<EditTransaksiTes />} />
       <Route path="/printnota/:ref_number" element={<Receipt />} />
       {/* <Route path="/printmutasi/:ref_number" element={<MutasiSuratJalan />} /> */}
       <Route path="/printsuratjalan/:ref_number" element={<ReceiptJalan />} />

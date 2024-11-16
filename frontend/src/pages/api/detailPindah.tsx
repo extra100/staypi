@@ -155,55 +155,55 @@ const WarehouseTransferDetail: React.FC = () => {
 
   const { mutate: addWarehouseTransfer } = useAddWarehouseTransferMutation()
 
-  const handleSaveTransfer = async () => {
-    const validRefNumber = ref_number || ''
+  // const handleSaveTransfer = async () => {
+  //   const validRefNumber = ref_number || ''
 
-    const transferData = {
-      from_warehouse_id: fromWarehouseId,
+  //   const transferData = {
+  //     from_warehouse_id: fromWarehouseId,
 
-      to_warehouse_id: toWarehouseId,
-      trans_date: '2024-10-27',
-      ref_number: validRefNumber,
-      memo: '',
-      code: 2,
-      items: dataSource.map((row, index) => ({
-        qty_minta: row.qty_minta,
-        code: row.code,
-        product_id: row.product_id,
-        finance_account_id: row.id,
+  //     to_warehouse_id: toWarehouseId,
+  //     trans_date: '2024-10-27',
+  //     ref_number: validRefNumber,
+  //     memo: '',
+  //     code: 2,
+  //     items: dataSource.map((row, index) => ({
+  //       qty_minta: row.qty_minta,
+  //       code: row.code,
+  //       product_id: row.product_id,
+  //       finance_account_id: row.id,
 
-        product_name: row.product_name,
-        qty: transferQty[index] || 0,
-        unit_name: row.unit_name,
-        before_qty_dari: fromQtyState[row.product_id] || 0,
-        before_qty_tujuan: toQtyState[row.product_id] || 0,
-      })),
-    }
-    handlePrint()
-    saveInvoiceMutasi(transferData)
+  //       product_name: row.product_name,
+  //       qty: transferQty[index] || 0,
+  //       unit_name: row.unit_name,
+  //       before_qty_dari: fromQtyState[row.product_id] || 0,
+  //       before_qty_tujuan: toQtyState[row.product_id] || 0,
+  //     })),
+  //   }
+  //   handlePrint()
+  //   saveInvoiceMutasi(transferData)
 
-    try {
-      message.success('Data transfer berhasil disimpan!')
+  //   try {
+  //     message.success('Data transfer berhasil disimpan!')
 
-      updateWarehouseTransfer(
-        { ref_number: validRefNumber, updatedData: transferData },
-        {
-          onSuccess: () => {
-            message.success(
-              'Data transfer berhasil diupdate berdasarkan ref_number!'
-            )
-          },
-          onError: (error) => {
-            message.error('Terjadi kesalahan saat mengupdate data transfer')
-            console.error('Error:', error)
-          },
-        }
-      )
-    } catch (error) {
-      message.error('Terjadi kesalahan saat menyimpan data transfer')
-      console.error('Error:', error)
-    }
-  }
+  //     updateWarehouseTransfer(
+  //       { ref_number: validRefNumber, updatedData: transferData },
+  //       {
+  //         onSuccess: () => {
+  //           message.success(
+  //             'Data transfer berhasil diupdate berdasarkan ref_number!'
+  //           )
+  //         },
+  //         onError: (error) => {
+  //           message.error('Terjadi kesalahan saat mengupdate data transfer')
+  //           console.error('Error:', error)
+  //         },
+  //       }
+  //     )
+  //   } catch (error) {
+  //     message.error('Terjadi kesalahan saat menyimpan data transfer')
+  //     console.error('Error:', error)
+  //   }
+  // }
   const generateSerialNumber = (productId: number): string => {
     const fromQty = fromQtyState[productId] || 0
     const toQty = toQtyState[productId] || 0

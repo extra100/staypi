@@ -5,6 +5,7 @@ import SingleDate from '../SingleDate'
 import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
 import { useNavigate } from 'react-router-dom'
 import UserContext from '../../contexts/UserContext'
+import { useGetContactsQuery } from '../../hooks/contactHooks'
 
 const LaporanKeuangan = () => {
   const { data: gudangdb } = useGetWarehousesQuery()
@@ -84,6 +85,15 @@ const LaporanKeuangan = () => {
         })) || []
     )
   }, [transaksiData, selectedDate, selectedWarehouseId])
+  const { data: contacts } = useGetContactsQuery()
+  const [searchText, setSearchText] = useState<string>('') // State untuk teks pencarian
+
+  // Filter kontak berdasarkan teks pencarian
+  const filteredContacts = useMemo(() => {
+    return contacts?.filter((contact) =>
+      contact.name.toLowerCase().includes(searchText.toLowerCase())
+    )
+  }, [contacts, searchText])
 
   const columns = [
     {
@@ -194,6 +204,12 @@ const LaporanKeuangan = () => {
         rowKey="warehouse_id"
         pagination={true}
       /> */}
+      <Input
+        placeholder="Cari Nama Kontak"
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        style={{ marginBottom: '1rem', width: '300px' }}
+      />
       <Table
         dataSource={
           filteredWarehouseStock.length

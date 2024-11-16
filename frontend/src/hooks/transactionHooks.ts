@@ -46,21 +46,31 @@ export const useAddTransactionMutation = () => {
   )
 }
 
-type UpdatePpIdInput = { ref_number: string; id: number }
+type UpdatePpIdInput = {
+  ref_number: string
+  id: number
+  items?: {
+    id: number // id item yang ingin diperbarui
+    finance_account_id: number // id item yang ingin diperbarui
+  }[]
+}
 
 export const updateDenganIdUnikDariKledo = () => {
   const queryClient = useQueryClient()
 
   return useMutation(
-    ({ ref_number, id }: UpdatePpIdInput) => {
-      return apiClient.put(`/api/transactions/by-id/${ref_number}`, { id })
+    ({ ref_number, id, items }: UpdatePpIdInput) => {
+      return apiClient.put(`/api/transactions/by-id/${ref_number}`, {
+        id,
+        items, // Sertakan items di dalam body request
+      })
     },
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['transactions'])
       },
       onError: (error: any) => {
-        console.error('Error updating id:', error)
+        console.error('Error updating ID and items:', error)
       },
     }
   )
@@ -93,13 +103,16 @@ export const useUpdateTransactionMutation = () => {
     }
   )
 }
-
 type UpdateContactPayload = {
   ref_number: string
   contact_id: number
+  warehouse_id: number
   term_id: number
+  id: number
   trans_date?: string // Trans_date from getPosDetail
   due_date?: string // Due_date from getPosDetail
+  contacts?: { id: number }[]
+  tages?: { id: number }[]
 }
 
 export const useUpdateContactMutation = () => {
@@ -109,17 +122,25 @@ export const useUpdateContactMutation = () => {
     async ({
       ref_number,
       contact_id,
+      warehouse_id,
       term_id,
+      id,
       trans_date,
       due_date,
+      contacts,
+      tages,
     }: UpdateContactPayload) => {
       const response = await apiClient.put(
         `/api/transactions/by-contact_id/${ref_number}`,
         {
           contact_id,
+          warehouse_id,
           term_id,
-          trans_date, // Use exact property name trans_date
-          due_date, // Use exact property name due_date
+          id,
+          trans_date,
+          due_date,
+          contacts,
+          tages,
         }
       )
       return response.data

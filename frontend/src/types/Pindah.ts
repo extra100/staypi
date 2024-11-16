@@ -4,6 +4,7 @@ export type WarehouseTransfer = {
   from_warehouse_id: number
   to_warehouse_id: number
   code: number
+  id: number
 
   from_warehouse_name: string
   to_warehouse_name: string
@@ -19,6 +20,7 @@ export type TransferItem = {
   product_name: string
   qty: number
   qty_minta: number
+  id: number
 
   unit_name: string
 }

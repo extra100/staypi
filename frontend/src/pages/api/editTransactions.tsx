@@ -46,6 +46,10 @@ import { useGetTagsQueryDb } from '../../hooks/tagHooks'
 import { AnyRecord } from 'dns'
 import { useGetAkunBanksQueryDb } from '../../hooks/akunBankHooks'
 import { DeleteOutlined } from '@ant-design/icons'
+import axios from 'axios'
+import { HOST } from '../../config'
+import TOKEN from '../../token'
+import { useIdInvoice } from './takeSingleInvoice'
 
 const { Option } = Select
 const { Title, Text } = Typography
@@ -59,6 +63,10 @@ const EditTransaksi = () => {
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
+  const { getIdAtInvoice } = useIdInvoice(ref_number || '')
+  const editIdUtama = getIdAtInvoice?.items?.[0]?.id
+  const editPriceItem = getIdAtInvoice?.items?.[0]?.price
+  const editNamaProduct = getIdAtInvoice?.items?.[0]?.finance_account_id
 
   useEffect(() => {
     if (getPosDetail && getPosDetail.contact_id) {
@@ -92,9 +100,22 @@ const EditTransaksi = () => {
     null
   )
   const [selectedWarehouse, setSelectedWarehouse] = useState<any>(undefined)
+  const editAmount = getPosDetail?.amount
+  const editDue = getPosDetail?.due
+  const editTerbayar = getPosDetail?.witholding_amount
+  const editRefNumber = getPosDetail?.ref_number
+
+  const editDiskonPersen = getPosDetail?.items?.[0]?.discount_percent
+  const editPrice = getPosDetail?.items?.[0]?.price
+  const editQty = getPosDetail?.items?.[0]?.qty
+
+  const editTags = [
+    getPosDetail?.tages?.[0]?.name,
+    getPosDetail?.tages?.[1]?.name,
+  ].filter(Boolean)
 
   const [selectedDate, setSelectedDate] = useState<string | undefined>()
-  console.log({ selectedDate })
+
   const { warehouseStock } = useWarehouseStock(
     selectedDate || '',
     selectedWarehouseId
@@ -187,29 +208,82 @@ const EditTransaksi = () => {
     return matchingBankAccount ? matchingBankAccount.id : null
   }
   //tel
+
   useEffect(() => {
     const id = getBankAccountId()
     setBankAccountId(id as any)
   }, [warehouseName, akunBanks])
+  const idControl = getPosDetail?.id
+
   const updateContactMutation = useUpdateContactMutation()
   const handleSimpan = async () => {
     if (selectedContact !== null && ref_number) {
       try {
         await updateContactMutation.mutateAsync({
+          id: idControl as number,
           ref_number,
           contact_id: selectedContact,
+          warehouse_id: selectedWarehouseId,
           term_id: termIdSimpan,
+          trans_date: formatDate(selectedDates[0]),
+          due_date: formatDate(selectedDates[1]),
+          contacts: [{ id: selectedContact }],
         })
-        message.success('Contact ID berhasil diperbarui')
-      } catch (error) {
-        message.error('Gagal memperbarui Contact ID')
+
+        const payload = {
+          ref_number,
+          contact_id: selectedContact,
+          warehouse_id: selectedWarehouseId,
+
+          term_id: termIdSimpan,
+          trans_date: formatDate(selectedDates[0]),
+          due_date: formatDate(selectedDates[1]),
+          id: idControl as number,
+
+          items: dataSource.map((item) => {
+            return {
+              amount: item.amount,
+              amount_after_tax: item.amount_after_tax || item.amount, // Fallback jika tidak ada
+              finance_account_id: item.finance_account_id,
+              tax_id: '', // Bisa diisi jika ada data pajak
+              desc: item.name, // Menggunakan nama sebagai deskripsi
+              qty: item.qty,
+              price: item.price,
+              id: item.id,
+            }
+          }),
+        }
+
+        console.log('Payload being sent:', payload)
+
+        const response = await fetch(`${HOST}/finance/invoices/${idControl}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${TOKEN}`,
+          },
+          body: JSON.stringify(payload),
+        })
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} - ${response.statusText}`)
+        }
+
+        message.success(
+          'Contact ID dan invoice berhasil diperbarui dengan items'
+        )
+      } catch (error: any) {
+        message.error(
+          'Gagal memperbarui Contact ID dan invoice dengan items: ' +
+            error.message
+        )
       }
     }
   }
+
   const [productQuantities, setProductQuantities] = useState<{
     [key: string]: any
   }>({})
-  console.log({ productQuantities })
 
   const [selectedFinanceAccountIds, setSelectedFinanceAccountIds] = useState<
     any[]
@@ -220,7 +294,14 @@ const EditTransaksi = () => {
       setSelectedWarehouseId(user.id_outlet)
     }
   }, [user])
+  // const [dataSource, setDataSource] = useState<any[]>(getPosDetail?.items || [])
   const [dataSource, setDataSource] = useState<any[]>([])
+  console.log({ dataSource })
+  useEffect(() => {
+    if (getPosDetail && getPosDetail.items) {
+      setDataSource(getPosDetail.items)
+    }
+  }, [getPosDetail])
   useEffect(() => {
     if (selectedFinanceAccountIds.length > 0 && selectedWarehouseId !== null) {
       selectedFinanceAccountIds.forEach((productId: any) => {
@@ -230,7 +311,7 @@ const EditTransaksi = () => {
   }, [selectedFinanceAccountIds, selectedWarehouseId])
 
   const [selectedProductStocks, setSelectedProductStocks] = useState<any[]>([])
-  console.log({ selectedProductStocks })
+
   useEffect(() => {
     if (warehouseStock && selectedFinanceAccountIds.length > 0) {
       const newQuantities: Record<number, number> = {}
@@ -275,12 +356,15 @@ const EditTransaksi = () => {
     { label: 'Applikator 16%', percentage: 16 },
     { label: 'Toko 18%', percentage: 18 },
     { label: 'Nego 19%', percentage: 19 },
-    { label: 'Khusus 21%', percentage: 21 },
+    { label: 'Khusus 21%', percentage: 20.5 },
   ]
 
   const [discountedPrices, setDiscountedPrices] = useState<{
     [key: string]: number
   }>({})
+  const initialDiscountLabel = discountRates.find(
+    (rate) => rate.percentage === editDiskonPersen
+  )?.label
 
   const [priceDifferences, setPriceDifferences] = useState<{
     [key: string]: number
@@ -537,7 +621,6 @@ const EditTransaksi = () => {
 
   const [selectedDifference, setSelectedDifference] = useState<number>(0)
   const [termIdSimpan, setTermIdSimpan] = useState<number>(0)
-  console.log({ termIdSimpan })
 
   const handleDateRangeSave = (
     startDate: string,
@@ -559,7 +642,7 @@ const EditTransaksi = () => {
   }
 
   const [selectedContact, setSelectedContact] = useState<number | null>(null)
-  console.log({ selectedContact })
+
   const handleContactChange = (value: number) => {
     setSelectedContact(value)
   }
@@ -666,7 +749,7 @@ const EditTransaksi = () => {
     return shortNumber
   }
   const [uniqueNumber, setUniqueNumber] = useState('')
-  console.log({ uniqueNumber })
+
   useEffect(() => {
     const generatedNumber = generateUnique()
     setUniqueNumber(generatedNumber as any)
@@ -821,8 +904,8 @@ const EditTransaksi = () => {
   const columns = [
     {
       title: 'Barang',
-      dataIndex: 'finance_account_id',
-      key: 'finance_account_id',
+      dataIndex: 'name',
+      key: 'name',
       render: (id: any) => (
         <div>
           <Select
@@ -914,7 +997,7 @@ const EditTransaksi = () => {
             {Math.floor(record.price).toLocaleString('id-ID')}
           </div>
           <Select
-            value={record.selectedDiscount}
+            value={record.selectedDiscount || initialDiscountLabel}
             style={{
               width: '120px',
               fontSize: '12px',
@@ -923,7 +1006,6 @@ const EditTransaksi = () => {
             onChange={(value) => handleDiscountChange(value, record)}
             bordered={false}
           >
-            <Select.Option value="Retail">Retail</Select.Option>
             {discountRates.map((rate) => (
               <Select.Option key={rate.label} value={rate.label}>
                 {rate.label}
@@ -935,8 +1017,8 @@ const EditTransaksi = () => {
     },
     {
       title: 'Subtotal',
-      dataIndex: 'subtotal',
-      key: 'subtotal',
+      dataIndex: 'amount',
+      key: 'amount',
       render: (text: number) => (
         <div style={{ textAlign: 'center' }}>
           {Math.floor(text).toLocaleString('id-ID')}
@@ -965,6 +1047,7 @@ const EditTransaksi = () => {
       ),
     },
   ]
+
   const labelStyle = {
     display: 'inline-block' as const,
     minWidth: '120px' as const,
@@ -988,7 +1071,7 @@ const EditTransaksi = () => {
           borderBottom: '1px',
         }}
       >
-        Tambah Tagihan
+        Edit Tagihan
       </div>
       <div
         style={{
@@ -1108,11 +1191,12 @@ const EditTransaksi = () => {
             <Col span={12}>
               <span style={labelStyle}>No Invoice</span>
               <span style={labelColonStyle}>:</span>
-              <Input style={{ width: '70%' }} value={refNumber} readOnly />
+              <Input style={{ width: '70%' }} value={editRefNumber} readOnly />
             </Col>
             <Col span={12}>
               <span style={labelStyle}>Nama Tag</span>
               <span style={labelColonStyle}>:</span>
+
               <Select
                 mode="multiple"
                 placeholder="Tag"
@@ -1126,7 +1210,7 @@ const EditTransaksi = () => {
                     .includes(input.toLowerCase())
                 }
                 onChange={handleTag}
-                value={selectTag}
+                value={editTags as any} // Pass the combined tags array
               >
                 {Array.isArray(tagDb) &&
                   tagDb.map((product: any) => (
@@ -1297,13 +1381,13 @@ const EditTransaksi = () => {
             <p>No stock data available</p>
           )}
         </div> */}
-          <Button
+          {/* <Button
             type="primary"
             onClick={handleSimpan}
             disabled={selectedContact === null}
           >
             Simpan
-          </Button>
+          </Button> */}
           <Table
             dataSource={dataSource}
             columns={columns}
@@ -1345,7 +1429,7 @@ const EditTransaksi = () => {
                     fontSize: '16px',
                     fontWeight: 'bold',
                   }}
-                  value={formatRupiah(totalSubtotal)}
+                  value={formatRupiah(editAmount)}
                   readOnly
                 />
               </Col>
@@ -1375,7 +1459,7 @@ const EditTransaksi = () => {
 
                 <NumericFormat
                   placeholder="Nilai Pembayaran"
-                  value={amountPaid}
+                  value={editTerbayar}
                   thousandSeparator="."
                   decimalSeparator=","
                   decimalScale={2}
@@ -1416,7 +1500,7 @@ const EditTransaksi = () => {
                   :
                 </span>
                 <Input
-                  value={formatRupiah(piutang)}
+                  value={formatRupiah(editDue)}
                   style={{
                     width: '70%',
                     textAlign: 'right',
@@ -1462,7 +1546,7 @@ const EditTransaksi = () => {
                 // disabled={limitizeTrans}
                 disabled={selectedContact === null}
               >
-                Simpan
+                Simpan Perubahan
               </Button>
             </Row>
           </Form>

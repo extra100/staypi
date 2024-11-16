@@ -6,7 +6,7 @@ import { useAddTransactionPolosanMutation } from '../hooks/transaksiPolosanHooks
 import { useAddTransactionMutation } from '../hooks/transactionHooks'
 
 const Polosan = () => {
-  const { loading, allInvoices } = useIdInvoice()
+  const { allInvoices } = useIdInvoice()
 
   const addPosMutation = useAddTransactionPolosanMutation()
   const { RangePicker } = DatePicker
@@ -140,7 +140,7 @@ const Polosan = () => {
       <Button
         type="primary"
         onClick={handleSaveInvoices}
-        disabled={loading || !allInvoices || allInvoices.length === 0}
+        disabled={!allInvoices || allInvoices.length === 0}
         style={{ marginTop: '10px' }}
       >
         Save Invoices

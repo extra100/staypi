@@ -78,6 +78,8 @@ export class Transaction {
 
 class Item {
   @prop({ required: true })
+  public id!: number
+  @prop({ required: true })
   public finance_account_id!: number
   @prop()
   public name!: string
@@ -100,6 +102,7 @@ class Item {
   public discount_amount!: number
   @prop()
   public unit_id!: number
+
   @prop()
   public satuan!: string
 }

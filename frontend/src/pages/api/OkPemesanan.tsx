@@ -90,7 +90,6 @@ const OkPemesanan: React.FC = () => {
   const updatePosMutation = useUpdateTransactionMutation()
   //
   const { data: allTransactions } = useGetPpByIdQuery(ref_number as string)
-  console.log('semua property', allTransactions)
 
   const { data: contacts } = useGetContactsQuery()
   const { data: akunBanks } = useGetAkunBanksQueryDb()

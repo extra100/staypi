@@ -21,7 +21,35 @@ export const useGetWarehouseTransfersQuery = () => {
     return response.data
   })
 }
+type UpdatePpIdInput = {
+  ref_number: string
+  id: number
+  items?: {
+    id: number // id item yang ingin diperbarui
+    finance_account_id: number // id item yang ingin diperbarui
+  }[]
+}
 
+export const updateDenganIdUnikMutasiDariKledo = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    ({ ref_number, id, items }: UpdatePpIdInput) => {
+      return apiClient.put(`/api/warehousetransfers/by-id/${ref_number}`, {
+        id,
+        items, // Sertakan items di dalam body request
+      })
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['warehousetransfers'])
+      },
+      onError: (error: any) => {
+        console.error('Error updating ID and items:', error)
+      },
+    }
+  )
+}
 export const useGetWarehouseTransferByRefQuery = (ref_number: string) => {
   return useQuery<WarehouseTransfer, Error>(
     ['pindah', ref_number],

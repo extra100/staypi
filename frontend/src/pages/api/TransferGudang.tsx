@@ -320,7 +320,7 @@ const ProductStocksPage: React.FC = () => {
       // to_warehouse_name: toWarehouseName,
 
       trans_date: selectedDates,
-
+      id: 111,
       ref_number: refNumber,
       code: 1,
       memo: null,
@@ -334,6 +334,7 @@ const ProductStocksPage: React.FC = () => {
         before_qty_tujuan: qtyTujuan,
         unit_name: unitName,
         code: 1,
+        id: 222,
       })),
     }
 

@@ -30,7 +30,6 @@ const LaporanKeListTransaksi: React.FC = () => {
     }
   }, [location.search, transaksiData])
 
-  // Filter transaksi berdasarkan pencarian nama kontak
   const filteredByContactName = useMemo(() => {
     if (!searchText) return filteredData
     const filteredContacts = contacts?.filter((contact) =>

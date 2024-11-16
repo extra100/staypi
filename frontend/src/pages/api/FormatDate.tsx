@@ -4,8 +4,6 @@ import 'dayjs/locale/id'
 dayjs.locale('id') // Mengatur lokal ke Bahasa Indonesia
 
 export const formatDate = (dateString: any): string => {
-  console.log('dateString:', dateString)
-
   if (!dateString || isNaN(new Date(dateString).getTime())) {
     return 'Tanggal tidak valid'
   }
@@ -13,8 +11,6 @@ export const formatDate = (dateString: any): string => {
 }
 
 export const formatDateBulan = (dateString: any): string => {
-  console.log('dateString:', dateString)
-
   if (!dateString || isNaN(new Date(dateString).getTime())) {
     return 'Tanggal tidak valid'
   }

@@ -17,7 +17,6 @@ const DetailPiutangKontak: React.FC = () => {
   const [filteredData, setFilteredData] = useState<any[]>([])
   const { takeInvoicesFromKledoBasedOnPelanggan } =
     TakeInvoicesFromKledoBasedOnPelanggan(contactId as any)
-  console.log({ takeInvoicesFromKledoBasedOnPelanggan })
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search)
@@ -98,8 +97,8 @@ const DetailPiutangKontak: React.FC = () => {
     },
     {
       title: 'Grand Total',
-      dataIndex: 'amount',
-      key: 'amount',
+      dataIndex: 'amount_after_tax',
+      key: 'amount_after_tax',
       ellipsis: true,
       render: (value: any) => (
         <div style={{ textAlign: 'right' }}>
@@ -117,8 +116,6 @@ const DetailPiutangKontak: React.FC = () => {
     year: 'numeric',
   }
   const formattedDate = today.toLocaleDateString('id-ID', options)
-
-  console.log(formattedDate) // Output: 11 November 2024
 
   return (
     <div style={{ width: '800px' }}>

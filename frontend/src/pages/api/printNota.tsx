@@ -52,16 +52,14 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
     .reduce((total: number, witholding: any) => {
       return total + (witholding.down_payment || 0)
     }, 0)
-  console.log({ totalDownPayment })
+
   const sisaTagohan = totalSemua - totalDownPayment
   const namaGudang = getGudangDetail?.name ?? 0
-  console.log({ namaGudang })
+
   const codeGudang = getGudangDetail?.code ?? 0
   const photoGudang = getGudangDetail?.photo ?? 0
   const contactGudang = getGudangDetail?.contact ?? 0
   const namaTag = getPosDetail?.tages?.[1]?.name
-
-  console.log({ contactGudang })
 
   const { data: pelanggans } = useGetPelangganByIdQuery(name as unknown)
   const getPelangganDetil = pelanggans?.find(

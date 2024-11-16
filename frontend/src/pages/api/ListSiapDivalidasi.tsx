@@ -12,7 +12,7 @@ const ListSiapDiValidasi: React.FC = () => {
   if (user) {
     idOutletLoggedIn = Number(user.id_outlet)
   }
-
+  console.log({ idOutletLoggedIn })
   const { data: transfers } = useGetWarehouseTransfersQuery()
   console.log({ transfers })
 
@@ -44,8 +44,9 @@ const ListSiapDiValidasi: React.FC = () => {
           const fromWarehouseId = String(transfer.to_warehouse_id || '')
 
           return (
-            transfer.from_warehouse_id !== idOutletLoggedIn &&
-            transfer.to_warehouse_id === idOutletLoggedIn &&
+            // transfer.from_warehouse_id !== idOutletLoggedIn &&
+            transfer.to_warehouse_id !== idOutletLoggedIn &&
+            user?.isAdmin === true && // Check if the user is an admin
             transfer.code === 1 &&
             (refNumber.includes(searchTerm) ||
               fromWarehouseId.includes(searchTerm))
@@ -84,6 +85,12 @@ const ListSiapDiValidasi: React.FC = () => {
       title: 'Tujuan',
       dataIndex: 'from_warehouse_id',
       key: 'from_warehouse_id',
+      render: (id: number) => warehouseMap[id] || id,
+    },
+    {
+      title: 'Dari',
+      dataIndex: 'to_warehouse_id',
+      key: 'to_warehouse_id',
       render: (id: number) => warehouseMap[id] || id,
     },
     {

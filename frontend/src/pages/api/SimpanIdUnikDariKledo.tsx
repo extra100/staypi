@@ -63,13 +63,13 @@ const IdUnikDariKledo: React.FC = () => {
     return () => clearTimeout(timer)
   }, [])
   const { ref_number } = useParams<{ ref_number?: string }>()
-  console.log({ ref_number })
+
   const updateHanyaId = updateDenganIdUnikDariKledo()
   const { getIdFromKledoBasedRefNumberAndMemo } = useIdBasedMemoAndrefNumber(
     ref_number as string
   )
   const justPutId = getIdFromKledoBasedRefNumberAndMemo?.id ?? null
-  console.log('Invoice ID ok proses dari pemesanan ke penjualan:', justPutId)
+
   const updateInvoiceId = async () => {
     if (!ref_number || !invoiceId) return
 

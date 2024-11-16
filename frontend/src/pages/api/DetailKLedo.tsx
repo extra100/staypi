@@ -94,10 +94,8 @@ const DetailKledo: React.FC = () => {
   const { getIdAtInvoice } = useIdInvoice(ref_number || '')
   console.log({ getIdAtInvoice })
   const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
-  console.log('id dari kledo yang kotrol semua', invoiceId)
 
   const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
-  console.log('ref_number dari database keldo', refNumber)
 
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
@@ -126,10 +124,7 @@ const DetailKledo: React.FC = () => {
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
   const langka = getPosDetail?.id
-  console.log(
-    'langkaaaaaaaaaaaaaaaaaa dari databse sendiri sudah masuk oenjualan',
-    langka
-  )
+
   const tagName = getPosDetail?.tages?.map((tag: any) => tag.name) || []
 
   const amount = getPosDetail?.amount ?? 0

@@ -56,6 +56,45 @@ warehouseTransferRouter.get(
     }
   })
 )
+
+warehouseTransferRouter.put(
+  '/by-id/:ref_number',
+  asyncHandler(async (req: any, res: any) => {
+    const mutation = await WarehouseTransferModel.findOne({
+      ref_number: req.params.ref_number,
+    })
+
+    if (!mutation) {
+      return res.status(404).json({ message: 'Mutasi Tak Ditemukan' })
+    }
+
+    if (req.body.id) {
+      mutation.id = req.body.id
+    }
+
+    if (Array.isArray(req.body.items) && req.body.items.length > 0) {
+      mutation.items = mutation.items.map((item) => {
+        // cocokan payload kence database
+        const updatedItem = req.body.items.find(
+          (i: any) => i.finance_account_id === item.finance_account_id
+        )
+
+        if (updatedItem) {
+          // update isi items isik data bru
+          return { ...item, id: updatedItem.id }
+        }
+
+        return item
+      })
+
+      // Simpan jok database
+      const updatedMutation = await mutation.save()
+
+      res.json(updatedMutation)
+    }
+  })
+)
+
 warehouseTransferRouter.put(
   '/:eid',
   asyncHandler(async (req: Request, res: Response) => {

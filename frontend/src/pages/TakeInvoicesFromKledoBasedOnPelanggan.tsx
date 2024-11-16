@@ -48,7 +48,7 @@ export function TakeInvoicesFromKledoBasedOnPelanggan(
           }
 
           const data = await response.json()
-
+          console.log({ data })
           const formattedData: Contact[] = data.data.data
             .filter((item: any) => item.due > 0)
             .map((item: any) => ({
@@ -57,10 +57,8 @@ export function TakeInvoicesFromKledoBasedOnPelanggan(
               contact_id: item.contact_id,
               warehouse_id: item.warehouse_id,
               name: item.contact.name,
-
               due: item.due,
               amount: item.amount,
-
               trans_date: item.trans_date,
             }))
           allContacts = [...allContacts, ...formattedData]
