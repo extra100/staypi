@@ -34,7 +34,7 @@ export const updateDenganIdUnikMutasiDariKledo = () => {
   const queryClient = useQueryClient()
 
   return useMutation(
-    ({ ref_number, id, items }: UpdatePpIdInput) => {
+    ({ ref_number, id, items }: any) => {
       return apiClient.put(`/api/warehousetransfers/by-id/${ref_number}`, {
         id,
         items, // Sertakan items di dalam body request
