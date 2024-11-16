@@ -198,7 +198,7 @@ const ValidatePindah: React.FC = () => {
       message.error(errorMessage)
       console.error('Error:', error)
     }
-    navigate(`/simpanidunikdarikledomutasi/${ref_number}`)
+    navigate(`/sudah-validasi/${ref_number}`)
   }
 
   const printSuratJalan = useRef<HTMLDivElement>(null)
