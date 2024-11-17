@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { Navigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import {
   useAddWarehouseTransferMutation,
+  useDeleteMutasiMutation,
   useGetWarehouseTransferByRefQuery,
   useUpdateWarehouseTransferMutation,
 } from '../../hooks/pindahHooks'
@@ -14,6 +15,7 @@ import {
   InputNumber,
   message,
   Input,
+  Menu,
 } from 'antd'
 import { useIdWarehouse } from './namaWarehouse'
 import { useIdNamaBarang } from './NamaBarang'
@@ -22,6 +24,9 @@ import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
 import { useProductStocks } from './Po'
 import { saveMutation } from './apiMutasi'
 import UserContext from '../../contexts/UserContext'
+import { useIdMutation } from './takeSingleMutation'
+import { useDeleteMutation } from './DeleteInvoiceMutation'
+import { CloseCircleOutlined } from '@ant-design/icons'
 
 const { Title, Text } = Typography
 
@@ -171,6 +176,61 @@ const SudahDivalidasi: React.FC = () => {
     month: 'long',
     day: 'numeric',
   })
+
+  //hapus
+
+  const { getIdAtMutation } = useIdMutation(ref_number || '')
+  const invoiceId = getIdAtMutation ? getIdAtMutation.id : null
+
+  const refNumber = getIdAtMutation ? getIdAtMutation.ref_number : null
+
+  const getDetailMutasiQuery = transferArray?.find(
+    (transaction: any) => transaction.ref_number === ref_number
+  )
+  console.log({ getDetailMutasiQuery })
+
+  //delete
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(
+    null
+  )
+  const IdYangAkanDiDelete = getDetailMutasiQuery?.id
+  console.log({ IdYangAkanDiDelete })
+
+  const anjing = useDeleteMutation(selectedInvoiceId ?? 0)
+  const deleteMutasiMutation = useDeleteMutasiMutation()
+
+  const handleDelete = () => {
+    if (IdYangAkanDiDelete) {
+      // First, handle external API deletion
+      setSelectedInvoiceId(IdYangAkanDiDelete)
+      message.loading('Deleting invoice...')
+
+      // Then, trigger internal API deletion
+      if (ref_number) {
+        deleteMutasiMutation.mutate(ref_number as any, {
+          onSuccess: () => {
+            console.log('Data deleted successfully via internal API')
+          },
+          onError: (error) => {
+            console.error('Delete failed via internal API:', error)
+          },
+        })
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (anjing) {
+      message.success('Invoice deleted successfully via external API')
+      setSelectedInvoiceId(null)
+    }
+  }, [anjing])
+  const navigate = useNavigate()
+
+  const handleEditClick = () => {
+    navigate(`/editmutasi/${refNumber}`)
+  }
+
   const columns = [
     {
       title: 'No',
@@ -390,6 +450,31 @@ const SudahDivalidasi: React.FC = () => {
         )}
       </div>
       <br />
+      {/* <Button
+        key="hapus"
+        // icon={<CloseCircleOutlined />}
+        onClick={() => {
+          handleDelete()
+          // handleVoid(null)
+        }}
+        // disabled={hapusLoading}
+      >
+        {hapusLoading ? 'Proses Penghapusan...' : 'hapus'}
+      </Button> */}
+      <div>
+        {/* Display your data or any other content here */}
+        <Button
+          danger // Use the 'danger' prop directly, no need for 'type="danger"'
+          onClick={handleDelete}
+          loading={deleteMutasiMutation.isLoading}
+        >
+          Delete
+        </Button>
+        <br />
+        <Button type="primary" onClick={handleEditClick}>
+          Edit Mutasi
+        </Button>
+      </div>
       <div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button

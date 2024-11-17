@@ -30,11 +30,13 @@ import {
   useSimpanDetailBarangDariGoretMutation,
 } from '../../hooks/ambilDetailBarangDariGoretHooks'
 import { useAddBarangMutation } from '../../hooks/barangHooks'
+import { HOST } from '../../config'
+import TOKEN from '../../token'
 // import MutasiSuratJalan from './MutasiSuratJalan'
 
 const { Title, Text } = Typography
 
-const ValidatePindah: React.FC = () => {
+const EditMutasi: React.FC = () => {
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
   const idOutletLoggedIn = user ? String(user.id_outlet) : '0'
@@ -45,13 +47,16 @@ const ValidatePindah: React.FC = () => {
   const { data: idWarehouseMonggo } = useGetWarehousesQuery()
 
   const { data: transferData } = useGetWarehouseTransferByRefQuery(ref_number!)
-
+  console.log({ transferData })
   const { mutate: updateWarehouseTransfer } =
     useUpdateWarehouseTransferMutation()
 
   const transferArray = Array.isArray(transferData) ? transferData : []
   const transfer = transferArray[0] || {}
   const sumberData = transfer.items || []
+  const id = transfer.id
+  console.log({ id })
+
   const productIds = sumberData.map((item: any) => item.product_id).join(',')
 
   const warehouseMap: Record<any, any> = {}
@@ -129,6 +134,8 @@ const ValidatePindah: React.FC = () => {
         )
 
         return {
+          id: id,
+
           key: index,
           product_id: item.product_id,
           finance_product_id: item.finance_product_id,
@@ -139,7 +146,6 @@ const ValidatePindah: React.FC = () => {
           fromQty: 0,
           toQty: 0,
           code: null,
-          id: item.product_id,
         }
       })
       setDataSource(initialDataSource)
@@ -147,55 +153,68 @@ const ValidatePindah: React.FC = () => {
   }, [transferData, sumberData, fromWarehouseId, toWarehouseId])
 
   const handleSaveTransfer = async () => {
-    const validRefNumber = ref_number || ''
-
-    const transferData = {
-      from_warehouse_id: toWarehouseId,
-      to_warehouse_id: fromWarehouseId,
-      trans_date: selectedDates,
-      ref_number: validRefNumber,
-      memo: '',
-      code: 2,
-      id: 14,
-
-      items: dataSource.map((row) => ({
-        qty_minta: row.qty_minta,
-        code: row.code,
-        product_id: row.product_id,
-        finance_account_id: row.product_id,
-        product_name: row.product_name,
-        qty: transferQty[row.key] || 0,
-        before_qty_dari: fromQtyState[row.product_id] || 0,
-        before_qty_tujuan: toQtyState[row.product_id] || 0,
-        unit_name: row.unit_name,
-        id: row.product_id,
-      })),
-    }
-
-    saveInvoiceMutasi(transferData)
-
     try {
-      updateWarehouseTransfer(
+      const validRefNumber = ref_number || ''
+
+      const transferData = {
+        id: id,
+        from_warehouse_id: fromWarehouseId,
+        to_warehouse_id: toWarehouseId,
+        trans_date: selectedDates,
+        ref_number: validRefNumber,
+        memo: '',
+        code: 2,
+        items: dataSource.map((row) => ({
+          id: row.product_id,
+          qty_minta: row.qty_minta,
+          code: row.code,
+          product_id: row.product_id,
+          finance_account_id: row.product_id,
+          product_name: row.product_name,
+          qty: transferQty[row.key] || 0,
+          before_qty_dari: fromQtyState[row.product_id] || 0,
+          before_qty_tujuan: toQtyState[row.product_id] || 0,
+          unit_name: row.unit_name,
+        })),
+      }
+
+      const response = await fetch(
+        `${HOST}/finance/warehouses/transfers/${id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${TOKEN}`,
+          },
+          body: JSON.stringify(transferData),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${response.statusText}`)
+      }
+
+      message.success('Transfer berhasil diperbarui.')
+
+      // Perbarui data lokal
+      await updateWarehouseTransfer(
         { ref_number: validRefNumber, updatedData: transferData },
         {
           onError: (error) => {
-            const errorMessage =
-              error?.message ||
-              'Terjadi kesalahan saat mengupdate data transfer'
-            message.error(errorMessage)
-            console.error('Error:', error)
+            message.error(
+              `Gagal memperbarui data lokal: ${
+                error?.message || 'Unknown error'
+              }`
+            )
           },
         }
       )
-    } catch (error) {
-      const errorMessage =
-        (error as Error)?.message ||
-        'Terjadi kesalahan saat menyimpan data transfer'
-      message.error(errorMessage)
+    } catch (error: any) {
+      message.error(
+        `Gagal menyimpan transfer: ${error.message || 'Terjadi kesalahan'}`
+      )
       console.error('Error:', error)
     }
-    navigate(`/simpanidunikdarikledomutasi/${ref_number}`)
-    // navigate(`/transfer-detail/${ref_number}`)
   }
 
   const printSuratJalan = useRef<HTMLDivElement>(null)
@@ -292,9 +311,9 @@ const ValidatePindah: React.FC = () => {
     },
 
     {
-      title: 'Qty Permintaan',
-      dataIndex: 'qty_minta',
-      key: 'qty_minta',
+      title: 'Retur',
+      dataIndex: 'qty',
+      key: 'qty',
     },
     ...(transferData?.code === 1
       ? [
@@ -429,4 +448,4 @@ const ValidatePindah: React.FC = () => {
     </div>
   )
 }
-export default ValidatePindah
+export default EditMutasi

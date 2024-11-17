@@ -57,9 +57,47 @@ warehouseTransferRouter.get(
   })
 )
 
+// warehouseTransferRouter.put(
+//   '/by-id/:ref_number',
+//   asyncHandler(async (req: any, res: any) => {
+//     const mutation = await WarehouseTransferModel.findOne({
+//       ref_number: req.params.ref_number,
+//     })
+
+//     if (!mutation) {
+//       return res.status(404).json({ message: 'Mutasi Tak Ditemukan' })
+//     }
+
+//     if (req.body.id) {
+//       mutation.id = req.body.id
+//     }
+
+//     if (Array.isArray(req.body.items) && req.body.items.length > 0) {
+//       mutation.items = mutation.items.map((item) => {
+//         // cocokan payload kence database
+//         const updatedItem = req.body.items.find(
+//           (i: any) => i.finance_account_id === item.finance_account_id
+//         )
+
+//         if (updatedItem) {
+//           // update isi items isik data bru
+//           return { ...item, id: updatedItem.id }
+//         }
+
+//         return item
+//       })
+
+//       // Simpan jok database
+//       const updatedMutation = await mutation.save()
+
+//       res.json(updatedMutation)
+//     }
+//   })
+// )
 warehouseTransferRouter.put(
   '/by-id/:ref_number',
   asyncHandler(async (req: any, res: any) => {
+    // Cari mutasi berdasarkan `ref_number`
     const mutation = await WarehouseTransferModel.findOne({
       ref_number: req.params.ref_number,
     })
@@ -68,30 +106,18 @@ warehouseTransferRouter.put(
       return res.status(404).json({ message: 'Mutasi Tak Ditemukan' })
     }
 
+    // Perbarui hanya `id` jika ada di body request
     if (req.body.id) {
       mutation.id = req.body.id
+    } else {
+      return res.status(400).json({ message: 'ID tidak ditemukan di payload' })
     }
 
-    if (Array.isArray(req.body.items) && req.body.items.length > 0) {
-      mutation.items = mutation.items.map((item) => {
-        // cocokan payload kence database
-        const updatedItem = req.body.items.find(
-          (i: any) => i.finance_account_id === item.finance_account_id
-        )
+    // Simpan perubahan ke database
+    const updatedMutation = await mutation.save()
 
-        if (updatedItem) {
-          // update isi items isik data bru
-          return { ...item, id: updatedItem.id }
-        }
-
-        return item
-      })
-
-      // Simpan jok database
-      const updatedMutation = await mutation.save()
-
-      res.json(updatedMutation)
-    }
+    // Kirim respons dengan data yang diperbarui
+    res.json(updatedMutation)
   })
 )
 
@@ -152,6 +178,21 @@ warehouseTransferRouter.put(
     } catch (error) {
       console.error('Error updating warehouse transfer:', error)
       res.status(500).json({ message: 'Server error' })
+    }
+  })
+)
+warehouseTransferRouter.delete(
+  '/:refNumber', // Use refNumber instead of idin
+  asyncHandler(async (req, res) => {
+    const { refNumber } = req.params
+    const transfer = await WarehouseTransferModel.findOneAndDelete({
+      ref_number: refNumber,
+    })
+
+    if (transfer) {
+      res.json({ message: 'Data deleted successfully' })
+    } else {
+      res.status(404).json({ message: 'Data not found' })
     }
   })
 )

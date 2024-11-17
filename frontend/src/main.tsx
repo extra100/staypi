@@ -109,6 +109,9 @@ import MyTablePage from './pages/api/MyTablePage'
 
 import EditTransaksiTes from './pages/api/editTransaksiTes'
 import SimpanIdUnikDariMutasi from './pages/api/simpanIdUnikDatiMutasi'
+import Nota from './pages/api/NotaKosong'
+import NotaPage from './pages/api/NotPage'
+import EditMutasi from './pages/api/EditMutasi'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -210,6 +213,8 @@ const router = createBrowserRouter(
       <Route path="/hitunglah" element={<BarangSold />} />
       <Route path="/printnota" element={<Receipt />} />
       <Route path="/listpindah" element={<ListPindah />} />
+      <Route path="/notakosong" element={<Nota />} />
+      <Route path="/printnotakosong" element={<NotaPage />} />
       <Route
         path="/hapusarray/:ref_number"
         element={<DeleteWitholdingPage />}
@@ -232,6 +237,7 @@ const router = createBrowserRouter(
         element={<ListSudahValidasiMasuk />}
       />
       <Route path="/validasi-pindah/:ref_number" element={<ValidatePindah />} />
+      <Route path="/editmutasi/:ref_number" element={<EditMutasi />} />
       <Route path="/sudah-validasi/:ref_number" element={<SudahDivalidasi />} />
       <Route
         path="/ambildetailbarangdarikledo"

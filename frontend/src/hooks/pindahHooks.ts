@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import apiClient from '../apiClient'
 import { WarehouseTransfer } from '../types/Pindah'
 
@@ -24,25 +25,20 @@ export const useGetWarehouseTransfersQuery = () => {
 type UpdatePpIdInput = {
   ref_number: string
   id: number
-  items?: {
-    id: number // id item yang ingin diperbarui
-    finance_account_id: number // id item yang ingin diperbarui
-  }[]
 }
 
 export const updateDenganIdUnikMutasiDariKledo = () => {
   const queryClient = useQueryClient()
 
   return useMutation(
-    ({ ref_number, id, items }: any) => {
-      return apiClient.put(`/api/warehousetransfers/by-id/${ref_number}`, {
+    ({ ref_number, id }: UpdatePpIdInput) => {
+      return apiClient.put(`/api/pindah/by-id/${ref_number}`, {
         id,
-        items, // Sertakan items di dalam body request
       })
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['warehousetransfers'])
+        queryClient.invalidateQueries(['pindah'])
       },
       onError: (error: any) => {
         console.error('Error updating ID and items:', error)
@@ -82,6 +78,38 @@ export const useUpdateWarehouseTransferMutation = () => {
     },
     {
       onSuccess: (data, { ref_number }) => {
+        queryClient.invalidateQueries(['pindah', ref_number])
+      },
+    }
+  )
+}
+export const useDeleteMutasiMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    (refNumber: string) => apiClient.delete(`/api/pindah/${refNumber}`),
+    {
+      onSuccess: () => {
+        // After deletion, invalidate the query to refetch updated data
+        queryClient.invalidateQueries(['pindah'])
+      },
+      onError: (error: AxiosError) => {
+        // Handling error more specifically
+        console.error('Error response:', error.response?.data) // Log for debugging
+      },
+    }
+  )
+}
+
+export const useDeleteOutletMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    async ({ ref_number }: { ref_number: string }) => {
+      return apiClient.delete(`/api/pindah/${ref_number}/`)
+    },
+    {
+      onSuccess: (_, { ref_number }) => {
         queryClient.invalidateQueries(['pindah', ref_number])
       },
     }

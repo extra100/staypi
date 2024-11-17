@@ -14,7 +14,7 @@ export interface Mutation {
 export function useIdMutation(ref_number: any) {
   const [loading, setLoading] = useState(true)
   const [getIdAtMutation, setgetIdAtMutation] = useState<Mutation | null>(null)
-
+  console.log({ getIdAtMutation })
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -39,7 +39,7 @@ export function useIdMutation(ref_number: any) {
 
         while (hasMoreData) {
           const responGudang = await fetch(
-            `${HOST}/finance/warehouses/transfers?ref_number=${ref_number}&page=${page}&perPage=${perPage}&include_items=1`,
+            `${HOST}/finance/warehouses/transfers?ref_number=${ref_number}&page=${page}&perPage=${perPage}`,
             {
               headers: {
                 Authorization: `Bearer ${TOKEN}`,
@@ -52,17 +52,12 @@ export function useIdMutation(ref_number: any) {
           }
 
           const dataGudang = await responGudang.json()
-          console.log('Response dari Gudang:', dataGudang)
 
           if (dataGudang.data && dataGudang.data.data.length > 0) {
             allInvoices = allInvoices.concat(dataGudang.data.data)
 
             const matchedInvoice = dataGudang.data.data.find(
               (item: Mutation) => item.ref_number === ref_number
-            )
-            console.log(
-              'allInvoices matchedInvoice matchedInvoice:',
-              allInvoices
             )
 
             if (matchedInvoice) {
