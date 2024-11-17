@@ -15,7 +15,9 @@ const SimpanIdUnikDariMutasi: React.FC = () => {
   const { loading, getIdAtMutation } = useIdMutation(ref_number as string)
 
   const invoiceId = getIdAtMutation?.id ?? null
-
+  useEffect(() => {
+    console.log('State updated - invoiceId:', updateHanyaId)
+  }, [updateHanyaId])
   // Log debugging
   console.log('Data dari useIdMutation:', getIdAtMutation)
   console.log('Invoice ID:', invoiceId)

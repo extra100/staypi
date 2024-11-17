@@ -14,70 +14,75 @@ export interface Mutation {
 export function useIdMutation(ref_number: any) {
   const [loading, setLoading] = useState(true)
   const [getIdAtMutation, setgetIdAtMutation] = useState<Mutation | null>(null)
-  console.log({ getIdAtMutation })
+  const [refetchAttempted, setRefetchAttempted] = useState(false)
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const storedData = sessionStorage.getItem('getIdAtMutation')
         if (storedData) {
           const parsedData: Mutation[] = JSON.parse(storedData)
-
           const matchedInvoice = parsedData.find(
             (invoice) => invoice.ref_number === ref_number
           )
           if (matchedInvoice) {
             setgetIdAtMutation(matchedInvoice)
             setLoading(false)
-            return // Stop fetching
+            return
           }
         }
 
         let allInvoices: Mutation[] = []
         let page = 1
         const perPage = 20
-        let hasMoreData = true
+        let isDataFound = false
 
-        while (hasMoreData) {
-          const responGudang = await fetch(
-            `${HOST}/finance/warehouses/transfers?ref_number=${ref_number}&page=${page}&perPage=${perPage}`,
-            {
-              headers: {
-                Authorization: `Bearer ${TOKEN}`,
-              },
-            }
-          )
-
-          if (!responGudang.ok) {
-            throw new Error('Failed to fetch data from API')
+        console.log(`Fetching page ${page}...`)
+        const responGudang = await fetch(
+          `${HOST}/finance/warehouses/transfers?ref_number=${ref_number}&page=${page}&perPage=${perPage}`,
+          {
+            headers: {
+              Authorization: `Bearer ${TOKEN}`,
+            },
           }
+        )
 
-          const dataGudang = await responGudang.json()
-
-          if (dataGudang.data && dataGudang.data.data.length > 0) {
-            allInvoices = allInvoices.concat(dataGudang.data.data)
-
-            const matchedInvoice = dataGudang.data.data.find(
-              (item: Mutation) => item.ref_number === ref_number
-            )
-
-            if (matchedInvoice) {
-              setgetIdAtMutation(matchedInvoice)
-              setLoading(false)
-
-              sessionStorage.setItem(
-                'getIdAtMutation',
-                JSON.stringify(allInvoices)
-              )
-              return // Stop fetching as soon as a match is found
-            }
-
-            page += 1
-          } else {
-            hasMoreData = false // No more data to fetch
-          }
+        if (!responGudang.ok) {
+          throw new Error('Failed to fetch data from API')
         }
 
-        setLoading(false) // Set loading to false if no match is found
+        const dataGudang = await responGudang.json()
+
+        if (dataGudang.data && dataGudang.data.data.length > 0) {
+          console.log(`Data found on page ${page}`)
+          allInvoices = allInvoices.concat(dataGudang.data.data)
+
+          const matchedInvoice = dataGudang.data.data.find(
+            (item: Mutation) => item.ref_number === ref_number
+          )
+
+          if (matchedInvoice) {
+            console.log('Matched invoice found:', matchedInvoice)
+            setgetIdAtMutation(matchedInvoice)
+            setLoading(false)
+
+            sessionStorage.setItem(
+              'getIdAtMutation',
+              JSON.stringify(allInvoices)
+            )
+            isDataFound = true
+          }
+        } else {
+          console.log(`No data on page ${page}`)
+        }
+
+        if (!isDataFound && page === 1 && !refetchAttempted) {
+          setRefetchAttempted(true)
+          fetchData()
+          return
+        }
+
+        setLoading(false)
       } catch (error) {
         console.error('Error fetching data:', error)
         setLoading(false)
@@ -87,7 +92,7 @@ export function useIdMutation(ref_number: any) {
     if (ref_number) {
       fetchData()
     }
-  }, [ref_number]) // Trigger effect only when ref_number changes
+  }, [ref_number])
 
   const memoizedData = useMemo(() => getIdAtMutation, [getIdAtMutation])
 
