@@ -40,26 +40,30 @@ const ListSiapDiValidasi: React.FC = () => {
   const dataSource = Array.isArray(transfers)
     ? transfers
         .filter((transfer: any) => {
-          const refNumber = String(transfer.ref_number || '')
-          const fromWarehouseId = String(transfer.to_warehouse_id || '')
+          // Debug awal, pastikan code bernilai angka
+          console.log('Debug: transfer.code:', transfer.code)
+          console.log('Debug: typeof transfer.code:', typeof transfer.code)
 
-          // Syarat umum untuk semua pengguna
+          // Kriteria Umum
           const isCommonCriteriaMet =
+            transfer.code === 1 && // Harus hanya code === 1
             transfer.to_warehouse_id !== idOutletLoggedIn &&
-            transfer.code === 1 &&
-            (refNumber.includes(searchTerm) ||
-              fromWarehouseId.includes(searchTerm))
+            (String(transfer.ref_number || '').includes(searchTerm) ||
+              String(transfer.from_warehouse_id || '').includes(searchTerm))
 
-          // Admin memiliki akses penuh jika syarat umum terpenuhi
+          // Admin
           if (user?.isAdmin) {
+            console.log('Admin Filter Check:', isCommonCriteriaMet)
             return isCommonCriteriaMet
           }
 
-          // Non-admin hanya dapat melihat data tertentu
-          return (
-            isCommonCriteriaMet &&
-            transfer.from_warehouse_id === idOutletLoggedIn // Contoh syarat tambahan untuk non-admin
-          )
+          // Non-admin
+          const isNonAdminCriteriaMet =
+            transfer.code === 1 && // Tetap pastikan hanya code === 1
+            transfer.to_warehouse_id === idOutletLoggedIn
+
+          console.log('Non-Admin Filter Check:', isNonAdminCriteriaMet)
+          return isNonAdminCriteriaMet
         })
         .sort(
           (a: any, b: any) =>
@@ -108,9 +112,9 @@ const ListSiapDiValidasi: React.FC = () => {
       key: 'ref_number',
     },
     {
-      title: 'Memo',
-      dataIndex: 'memo',
-      key: 'memo',
+      title: 'Kode',
+      dataIndex: 'code',
+      key: 'code',
     },
     {
       title: 'Tanggal',

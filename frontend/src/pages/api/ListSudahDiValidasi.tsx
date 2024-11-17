@@ -30,18 +30,23 @@ const ListSudahDivalidasi: React.FC = () => {
   const dataSource = Array.isArray(transfers)
     ? transfers
         .filter((transfer: any) => {
-          const refNumber = String(transfer.ref_number || '')
-          const fromWarehouseId = String(transfer.to_warehouse_id || '')
+          const isCommonCriteriaMet =
+            transfer.code === 2 &&
+            transfer.from_warehouse_id !== idOutletLoggedIn &&
+            (String(transfer.ref_number || '').includes(searchTerm) ||
+              String(transfer.from_warehouse_id || '').includes(searchTerm))
 
-          return (
-            (transfer.from_warehouse_id === idOutletLoggedIn &&
-              transfer.to_warehouse_id === idOutletLoggedIn) ||
-            (user?.isAdmin &&
-              transfer.code === 2 &&
-              transfer.items.qty !== 0 &&
-              (refNumber.includes(searchTerm) ||
-                fromWarehouseId.includes(searchTerm)))
-          )
+          // Admin
+          if (user?.isAdmin) {
+            return isCommonCriteriaMet
+          }
+
+          // Non-admin
+          const isNonAdminCriteriaMet =
+            transfer.code === 2 &&
+            transfer.from_warehouse_id === idOutletLoggedIn
+
+          return isNonAdminCriteriaMet
         })
         .sort(
           (a: any, b: any) =>
@@ -101,7 +106,7 @@ const ListSudahDivalidasi: React.FC = () => {
           placeholder="Pencarian No"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: '300px' }} // Adjust width as needed
+          style={{ width: '300px' }}
         />
       </div>
 
