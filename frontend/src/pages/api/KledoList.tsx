@@ -156,7 +156,7 @@ const ListTransaksi: React.FC = () => {
 
         const due = record.amount - totalDownPayment
 
-        return <div style={{ textAlign: 'right' }}>{due}</div>
+        return <div style={{ textAlign: 'right' }}>{due < 0 ? 0 : due}</div>
       },
     },
   ]
