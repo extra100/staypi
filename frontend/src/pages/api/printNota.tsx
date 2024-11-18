@@ -109,7 +109,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         const item = inv?.items.find(
           (item: any) => item.finance_account_id === record.finance_account_id
         )
-        return inv && item ? `**${item.qty_update}` : '**'
+        return inv && item ? `${item.qty_update}` : ''
       },
     },
     {
@@ -157,12 +157,12 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
     <div
       ref={ref} // Attach the ref here for printing
       style={{
-        padding: 20,
+        padding: 40,
         maxWidth: 700,
         background: '#fff',
         margin: 'auto',
         paddingTop: 10,
-        paddingRight: 25,
+        paddingRight: 30,
       }}
     >
       <Row justify="center" align="middle">
@@ -178,6 +178,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
 
         <Col span={18}>
           <Title level={4} style={{ textAlign: 'left' }}>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             {namaGudang}
           </Title>
           <Text style={{ display: 'block', textAlign: 'left' }}>
@@ -218,9 +219,27 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         columns={columns as any}
         dataSource={getPosDetail?.items || []}
         pagination={false}
-        bordered
-        style={{ marginTop: 20 }}
+        style={{ marginTop: 20, marginBottom: 20 }}
         components={{
+          header: {
+            cell: ({
+              children,
+              ...restProps
+            }: React.ThHTMLAttributes<HTMLTableHeaderCellElement> & {
+              children: React.ReactNode
+            }) => (
+              <th
+                {...restProps}
+                style={{
+                  padding: '4px 8px',
+                  fontSize: '12px',
+                  borderBottom: '1px dashed #000',
+                }}
+              >
+                {children}
+              </th>
+            ),
+          },
           body: {
             row: ({
               children,
@@ -230,7 +249,11 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             }) => (
               <tr
                 {...restProps}
-                style={{ lineHeight: '1.2', padding: '4px 8px' }}
+                style={{
+                  lineHeight: '1.2',
+                  padding: '4px 8px',
+                  borderBottom: '1px dashed #000', // Garis putus-putus hitam pekat
+                }}
               >
                 {children}
               </tr>
@@ -241,7 +264,13 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             }: React.TdHTMLAttributes<HTMLTableDataCellElement> & {
               children: React.ReactNode
             }) => (
-              <td {...restProps} style={{ padding: '4px 8px' }}>
+              <td
+                {...restProps}
+                style={{
+                  padding: '4px 8px',
+                  borderBottom: '1px dashed #000', // Garis putus-putus hitam pekat
+                }}
+              >
                 {children}
               </td>
             ),
@@ -249,9 +278,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         }}
       />
 
-      <Divider />
-
-      <Row>
+      <Row style={{ marginRight: '20px' }}>
         <Col span={12}>
           <Text>Tanda Terima:</Text>
           <br />
