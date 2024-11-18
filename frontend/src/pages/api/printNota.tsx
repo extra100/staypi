@@ -314,13 +314,16 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             </Text>
             <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
               {witholdings
-                .filter((witholding: any) => witholding.status === 0)
+                .filter(
+                  (witholding: any) =>
+                    witholding.status === 0 && witholding.down_payment !== 0
+                ) // Tambahkan pengecekan down_payment !== 0
                 .map((witholding: any, index) => (
                   <Row key={index}>
                     <Col span={12} style={{ textAlign: 'left' }}></Col>
                     <Col span={12} style={{ textAlign: 'right' }}>
                       <Text strong>
-                        {roundUpIndonesianNumber(witholding.down_payment)}
+                        {roundUpIndonesianNumber(witholding.down_payment || 0)}
                       </Text>
                     </Col>
                   </Row>
@@ -338,18 +341,8 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
               Total Bayar:
             </Text>
             <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
-              {roundUpIndonesianNumber(totalDownPayment)}
+              {roundUpIndonesianNumber(totalDownPayment || 0)}
             </Text>
-            {/* <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
-              {witholdings.map((witholding: any, index: number) => (
-                <Row key={index}>
-                  <Col span={12} style={{ textAlign: 'left' }}></Col>
-                  <Col span={12} style={{ textAlign: 'right' }}>
-                    <Text strong>{formatNumber(totalDownPayment)}</Text>
-                  </Col>
-                </Row>
-              ))}
-            </Text> */}
           </div>
 
           <div

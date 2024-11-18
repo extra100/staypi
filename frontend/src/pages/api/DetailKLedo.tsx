@@ -783,7 +783,10 @@ const DetailKledo: React.FC = () => {
 
             <>
               {witholdings
-                .filter((witholding: any) => witholding.status === 0)
+                .filter(
+                  (witholding: any) =>
+                    witholding.status === 0 && witholding.down_payment !== 0
+                ) // Tambahkan pengecekan down_payment !== 0
                 .map((witholding: any, index: number) => (
                   <Row key={index} style={{ marginTop: '8px' }}>
                     <Col span={12} style={{ textAlign: 'left' }}>
