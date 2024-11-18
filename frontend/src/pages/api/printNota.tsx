@@ -336,7 +336,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
               Sisa Tagihan:
             </Text>
             <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
-              {roundUpIndonesianNumber(sisaTagohan)}
+              {roundUpIndonesianNumber(sisaTagohan < 0 ? 0 : sisaTagohan)}
             </Text>
           </div>
         </Col>

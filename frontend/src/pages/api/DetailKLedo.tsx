@@ -810,7 +810,7 @@ const DetailKledo: React.FC = () => {
               <Col span={12} style={{ textAlign: 'right' }}>
                 <Text strong style={{ fontSize: '20px' }}>
                   {' '}
-                  {roundUpIndonesianNumber(due)}
+                  {roundUpIndonesianNumber(due < 0 ? 0 : due)}
                 </Text>
               </Col>
             </Row>
