@@ -145,19 +145,18 @@ const DetailKledo: React.FC = () => {
   const { fiAc } = useFiac()
 
   const [amountPaid, setAmountPaid] = useState<number | null>(null)
+  useEffect(() => {
+    console.log({ due, amountPaid })
+  }, [due, amountPaid])
+
   console.log({ amountPaid })
-  const roundUpIndonesianNumber = (value: any): string => {
-    let numberValue: number
-
-    if (typeof value === 'string') {
-      numberValue = parseFloat(value.replace(/\./g, '').replace(',', '.'))
-    } else {
-      numberValue = value
-    }
-
-    const rounded = Math.ceil(numberValue)
-
-    return rounded.toLocaleString('id-ID')
+  const roundUpIndonesianNumber = (value: number | null): string => {
+    if (value === null) return ''
+    return new Intl.NumberFormat('id-ID', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value)
   }
 
   const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,8 +169,9 @@ const DetailKledo: React.FC = () => {
     }
   }
   const handleSetAmountPaid = () => {
-    setAmountPaid(due)
+    setAmountPaid(Math.round(due)) // Bulatkan nilai 'due' jika diperlukan
   }
+
   const [contactName, setContactName] = useState<string>('Unknown Contact')
 
   useEffect(() => {
@@ -843,14 +843,15 @@ const DetailKledo: React.FC = () => {
 
               <NumericFormat
                 placeholder="Nilai Pembayaran"
-                value={roundUpIndonesianNumber(amountPaid)}
+                value={amountPaid}
+                displayType="input"
                 thousandSeparator="."
                 decimalSeparator=","
-                decimalScale={2}
                 allowNegative={false}
+                decimalScale={0} // Pastikan hanya angka bulat
                 onValueChange={(values) => {
                   const { floatValue } = values
-                  setAmountPaid(floatValue || 0)
+                  setAmountPaid(floatValue || 0) // Simpan sebagai angka bulat
                 }}
                 customInput={Input}
                 max={due}
@@ -904,13 +905,20 @@ const DetailKledo: React.FC = () => {
               </Form.Item>
             </Col>
           </Row>
-          <Row justify="end">
-            <Col>
-              <Button type="primary" htmlType="submit">
-                Tambah Pembayaran
-              </Button>
-            </Col>
-          </Row>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading} // Spinner muncul saat true
+            onClick={() => {
+              setLoading(true) // Aktifkan spinner
+              setTimeout(() => {
+                setLoading(false) // Matikan spinner setelah 1 detik
+                message.success('Pembayaran berhasil ditambahkan!') // Pesan berhasil
+              }, 1000) // Spinner aktif selama 1 detik
+            }}
+          >
+            Tambah Pembayaran
+          </Button>
         </Form>
       </Card>
     </div>
