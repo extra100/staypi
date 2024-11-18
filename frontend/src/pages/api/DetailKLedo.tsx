@@ -59,6 +59,7 @@ import {
   CarOutlined,
 } from '@ant-design/icons'
 import { useDeleteInvoice } from './DeleteInvoicePenjualan'
+import { useIdPembayaranBank } from './takeSinglePembayaranBank'
 
 const { Title, Text } = Typography
 const { Option } = Select
@@ -123,13 +124,17 @@ const DetailKledo: React.FC = () => {
   //delete
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
+  const idididid = getPosDetail?.items?.[1]?.id
+  console.log({ idididid })
   const langka = getPosDetail?.id
 
   const tagName = getPosDetail?.tages?.map((tag: any) => tag.name) || []
 
-  const amount = getPosDetail?.amount ?? 0
-  const witholdings = getPosDetail?.witholdings || []
   const items = getPosDetail?.items || []
+
+  const witholdings = getPosDetail?.witholdings || []
+  const amount = getPosDetail?.amount ?? 0
+
   const totalDownPayment = witholdings
     .filter((witholding: any) => witholding.status === 0)
     .reduce((sum: number, witholding: any) => {
@@ -137,6 +142,7 @@ const DetailKledo: React.FC = () => {
     }, 0)
 
   const due = amount - totalDownPayment
+
   const totalDiscount = items.reduce((total: number, item: any) => {
     return total + (item.discount_amount || 0)
   }, 0)
@@ -590,16 +596,25 @@ const DetailKledo: React.FC = () => {
         title={
           <Row align="middle" justify="space-between">
             <Col>
-              {getPosDetail?.status_id === 1 && (
-                <Tag color="red">Belum Dibayar</Tag>
-              )}
-              {getPosDetail?.status_id === 2 && (
-                <Tag color="orange">Dibayar Sebagian</Tag>
-              )}
-              {getPosDetail?.status_id === 3 && <Tag color="green">Lunas</Tag>}
-              {getPosDetail?.status_id === undefined && (
-                <Title level={5}>Detail Tagihan</Title>
-              )}
+              {(() => {
+                const amount = getPosDetail?.amount ?? 0
+
+                const totalDownPayment = witholdings
+                  .filter((witholding: any) => witholding.status === 0)
+                  .reduce((sum: number, witholding: any) => {
+                    return sum + (witholding.down_payment || 0)
+                  }, 0)
+
+                const due = amount - totalDownPayment
+
+                if (totalDownPayment === 0) {
+                  return <Tag color="red">Belum Dibayar</Tag>
+                } else if (due <= 0) {
+                  return <Tag color="green">Lunas</Tag>
+                } else {
+                  return <Tag color="orange">Dibayar Sebagian</Tag>
+                }
+              })()}
             </Col>
 
             <Dropdown

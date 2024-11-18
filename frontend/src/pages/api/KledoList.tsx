@@ -74,6 +74,15 @@ const ListTransaksi: React.FC = () => {
       navigate('/listreturn')
     }
   }
+
+  const roundUpIndonesianNumber = (value: number | null): string => {
+    if (value === null) return ''
+    return new Intl.NumberFormat('id-ID', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value)
+  }
   const columns = [
     {
       title: 'No. Invoice',
@@ -108,7 +117,7 @@ const ListTransaksi: React.FC = () => {
         let color = ''
         let text = ''
 
-        if (due === 0) {
+        if (due === 0 || due <= 0) {
           color = 'green'
           text = 'Lunas'
         } else if (totalDownPayment > 0 && due > 0) {
@@ -126,25 +135,37 @@ const ListTransaksi: React.FC = () => {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
+      align: 'center',
       render: (amount: number) => (
-        <div style={{ textAlign: 'right' }}>{amount}</div>
+        <div style={{ textAlign: 'right' }}>
+          {amount !== undefined ? roundUpIndonesianNumber(amount) : 'Rp 0'}
+        </div>
       ),
     },
+
     {
       title: 'Terbayar',
       dataIndex: 'witholdings',
       key: 'witholdings',
+      align: 'center',
       render: (witholdings: any[]) => {
         const totalDownPayment = witholdings
           .filter((witholding) => witholding.status === 0)
           .reduce((sum, witholding) => sum + (witholding.down_payment || 0), 0)
 
-        return <div style={{ textAlign: 'right' }}>{totalDownPayment}</div>
+        return (
+          <div style={{ textAlign: 'right' }}>
+            {totalDownPayment !== undefined
+              ? roundUpIndonesianNumber(totalDownPayment)
+              : 'Rp 0'}
+          </div>
+        )
       },
     },
     {
       title: 'Sisa Tagihan',
       key: 'due',
+      align: 'center',
       render: (record: any) => {
         const totalDownPayment = record.witholdings
           .filter((witholding: any) => witholding.status === 0)
@@ -156,7 +177,11 @@ const ListTransaksi: React.FC = () => {
 
         const due = record.amount - totalDownPayment
 
-        return <div style={{ textAlign: 'right' }}>{due < 0 ? 0 : due}</div>
+        return (
+          <div style={{ textAlign: 'right' }}>
+            {roundUpIndonesianNumber(due < 0 ? 0 : due)}
+          </div>
+        )
       },
     },
   ]
@@ -205,7 +230,7 @@ const ListTransaksi: React.FC = () => {
       />
       <Table
         dataSource={filteredData}
-        columns={columns}
+        columns={columns as any}
         rowKey="_id"
         pagination={false}
       />
