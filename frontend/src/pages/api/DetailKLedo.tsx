@@ -59,7 +59,6 @@ import {
   CarOutlined,
 } from '@ant-design/icons'
 import { useDeleteInvoice } from './DeleteInvoicePenjualan'
-import { useIdPembayaranBank } from './takeSinglePembayaranBank'
 
 const { Title, Text } = Typography
 const { Option } = Select
