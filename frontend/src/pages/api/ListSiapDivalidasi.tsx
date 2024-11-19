@@ -47,7 +47,7 @@ const ListSiapDiValidasi: React.FC = () => {
           // Kriteria Umum
           const isCommonCriteriaMet =
             transfer.code === 1 && // Harus hanya code === 1
-            transfer.to_warehouse_id !== idOutletLoggedIn &&
+            transfer.to_warehouse_id !== user?.isAdmin &&
             (String(transfer.ref_number || '').includes(searchTerm) ||
               String(transfer.from_warehouse_id || '').includes(searchTerm))
 
