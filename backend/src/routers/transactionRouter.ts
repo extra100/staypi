@@ -278,6 +278,45 @@ export default transactionRouter
 //     res.json(updatedTransaction)
 //   })
 // )
+transactionRouter.put(
+  '/:ref_number/witholdings/:witholdingId',
+  asyncHandler(async (req: any, res: any) => {
+    const { ref_number, witholdingId } = req.params
+    const { trans_date, down_payment } = req.body
+
+    // Cek apakah ref_number dan witholdingId ada
+    if (!ref_number || !witholdingId) {
+      return res
+        .status(400)
+        .json({ message: 'Missing ref_number or witholdingId' })
+    }
+
+    // Cari transaksi berdasarkan ref_number
+    const transaction = await TransactionModel.findOne({ ref_number })
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction not found' })
+    }
+
+    // Cari witholding yang sesuai dengan witholdingId
+    const witholding = transaction.witholdings.find(
+      (item: any) => item._id.toString() === witholdingId
+    )
+
+    if (!witholding) {
+      return res.status(404).json({ message: 'Witholding not found' })
+    }
+
+    // Update fields with new values
+    witholding.trans_date = trans_date || witholding.trans_date
+    witholding.down_payment = down_payment || witholding.down_payment
+
+    // Simpan transaksi yang sudah diperbarui
+    await transaction.save()
+
+    // Kirim kembali data transaksi yang sudah diperbarui
+    res.json(transaction)
+  })
+)
 
 // // transactionRouter.delete(
 // //   '/:idol',

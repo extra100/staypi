@@ -112,6 +112,8 @@ import SimpanIdUnikDariMutasi from './pages/api/simpanIdUnikDatiMutasi'
 import Nota from './pages/api/NotaKosong'
 import NotaPage from './pages/api/NotPage'
 import EditMutasi from './pages/api/EditMutasi'
+import SimpanIdUnikDariReturn from './pages/api/simpanIdUnikDariReturn'
+import EditPembayaran from './pages/api/EditPembayaran'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -193,6 +195,10 @@ const router = createBrowserRouter(
         path="/simpanidunikdarikledomutasi/:ref_number"
         element={<SimpanIdUnikDariMutasi />}
       />
+      <Route
+        path="/simpanidunikdarikledoreturn/:memo"
+        element={<SimpanIdUnikDariReturn />}
+      />
       {/* <Route
         path="/pembayarankledo/:ref_number"
         element={<PembayaranKledo />}
@@ -200,9 +206,9 @@ const router = createBrowserRouter(
       <Route path="/okepemesanan/:ref_number" element={<OkPemesanan />} />
       <Route path="/returninvoice/:ref_number" element={<Aneh />} />
       <Route path="/edittransaksi/:ref_number" element={<EditTransaksi />} />
-      <Route path="/edittransaksites/:id" element={<EditTransaksiTes />} />
+      <Route path="/editpembayaran/:ref_number" element={<EditPembayaran />} />
+      <Route path="/update/:id" element={<EditTransaksiTes />} />
       <Route path="/printnota/:ref_number" element={<Receipt />} />
-      {/* <Route path="/printmutasi/:ref_number" element={<MutasiSuratJalan />} /> */}
       <Route path="/printsuratjalan/:ref_number" element={<ReceiptJalan />} />
       <Route path="/single" element={<ProductLookup />} />
       <Route path="/tabelbarang" element={<ProductTable />} />

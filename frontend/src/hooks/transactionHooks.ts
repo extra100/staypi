@@ -1,6 +1,43 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../apiClient'
 import { Transaction } from '../types/Transaction'
+export const useUpdateWitholdingMutation = () => {
+  return useMutation(
+    async ({
+      ref_number,
+      witholdingId,
+      trans_date,
+      down_payment,
+    }: {
+      ref_number: string
+      witholdingId: string
+      trans_date: string
+      down_payment: number
+    }) =>
+      apiClient.put(
+        `/api/transactions/${ref_number}/witholdings/${witholdingId}`,
+
+        { trans_date, down_payment }
+      )
+  )
+}
+
+export const useUpdateTransactionMutationsss = () => {
+  return useMutation(
+    async (updateData: {
+      ref_number: string
+      trans_date: string
+      down_payment: number
+    }) => {
+      const response = await apiClient.put(
+        `/api/transactions/${updateData.ref_number}`,
+        updateData
+      )
+      return response.data
+    }
+  )
+}
+
 export const useGetTransaksisQuery = () =>
   useQuery({
     queryKey: ['transactions'],

@@ -123,7 +123,7 @@ const DetailKledo: React.FC = () => {
   //delete
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
-  const idididid = getPosDetail?.items?.[1]?.id
+  const idididid = getPosDetail?.items?.[0]?.id
   console.log({ idididid })
   const langka = getPosDetail?.id
 
@@ -804,7 +804,7 @@ const DetailKledo: React.FC = () => {
                 .map((witholding: any, index: number) => (
                   <Row key={index} style={{ marginTop: '8px' }}>
                     <Col span={12} style={{ textAlign: 'left' }}>
-                      <a href={`/voidwitholdingpersen/${ref_number}`}>
+                      <a href={`/editpembayaran/${ref_number}`}>
                         <Text strong>{witholding.name}</Text>
                       </a>
                     </Col>

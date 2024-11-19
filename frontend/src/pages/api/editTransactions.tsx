@@ -254,8 +254,6 @@ const EditTransaksi = () => {
           }),
         }
 
-        console.log('Payload being sent:', payload)
-
         const response = await fetch(`${HOST}/finance/invoices/${idControl}`, {
           method: 'PUT',
           headers: {

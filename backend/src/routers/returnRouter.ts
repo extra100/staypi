@@ -38,3 +38,46 @@ returnRouter.get(
     }
   })
 )
+returnRouter.put(
+  '/by-id/:id',
+  asyncHandler(async (req: any, res: any) => {
+    console.log('Request Params ID:', req.params.id)
+    console.log('Request Body:', req.body)
+
+    const mutation = await ReturnModel.findOne({ id: req.params.id })
+    if (!mutation) {
+      console.log('Data tidak ditemukan!')
+      return res.status(404).json({ message: 'Mutasi Tak Ditemukan' })
+    }
+
+    mutation.id = req.body.id
+    const updatedMutation = await mutation.save()
+    res.json(updatedMutation)
+  })
+)
+returnRouter.put(
+  '/by-id/:memo',
+  asyncHandler(async (req: any, res: any) => {
+    // Cari mutasi berdasarkan `memo`
+    const mutation = await ReturnModel.findOne({
+      memo: req.params.memo,
+    })
+
+    if (!mutation) {
+      return res.status(404).json({ message: 'Mutasi Tak Ditemukan' })
+    }
+
+    // Perbarui hanya `id` jika ada di body request
+    if (req.body.id) {
+      mutation.id = req.body.id
+    } else {
+      return res.status(400).json({ message: 'ID tidak ditemukan di payload' })
+    }
+
+    // Simpan perubahan ke database
+    const updatedMutation = await mutation.save()
+
+    // Kirim respons dengan data yang diperbarui
+    res.json(updatedMutation)
+  })
+)

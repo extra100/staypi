@@ -25,3 +25,22 @@ export const useGetReturnssQuery = () =>
     queryKey: ['returns'],
     queryFn: async () => (await apiClient.get<Return[]>(`/api/returns`)).data,
   })
+export const updateDenganIdUnikReturnDariKledo = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    ({ memo, id }: any) => {
+      return apiClient.put(`/api/returns/by-id/${memo}`, {
+        id,
+      })
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['returns'])
+      },
+      onError: (error: any) => {
+        console.error('Error updating ID and items:', error)
+      },
+    }
+  )
+}

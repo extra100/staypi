@@ -23,7 +23,7 @@ import {
   useGetTransactionByIdQuery,
   useUpdateTransactionMutation,
 } from '../../hooks/transactionHooks'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AiOutlinePrinter } from 'react-icons/ai'
 import PosPrintKomponent from './PosPrintCok'
 import moment from 'moment'
@@ -83,7 +83,7 @@ const Aneh: React.FC = () => {
     (transaction: any) => transaction.ref_number === ref_number
   )
   const idDariSDBEK = getPosDetail?.id
-  console.log({ idDariSDBEK })
+
   const { data: contacts } = useGetContactsQuery()
   const { data: akunBanks } = useGetAkunBanksQueryDb()
   //
@@ -176,6 +176,7 @@ const Aneh: React.FC = () => {
   const { saveReturn } = SaveReturnInvoice()
   const simpanReturn = useAddReturnMutation()
   const { editDataKelod } = KirimEditKeKledo()
+  const navigate = useNavigate()
 
   const handleFormSubmit = (values: any) => {
     const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
@@ -190,7 +191,6 @@ const Aneh: React.FC = () => {
         jalur: 'returning',
         ref_transaksi: newRefNomor,
         id: idDariSDBEK,
-        // ref_number: newRefNomor,
 
         trans_date: formatDate(selectedDates),
         withholdings: [
@@ -209,10 +209,7 @@ const Aneh: React.FC = () => {
       )
 
       if (existingInvoice) {
-        const updatedWithholdings = [
-          ...existingInvoice.witholdings,
-          // ...invoiceData.withholdings,
-        ]
+        const updatedWithholdings = [...existingInvoice.witholdings]
 
         const updatedInvoice = {
           ...existingInvoice,
@@ -240,7 +237,7 @@ const Aneh: React.FC = () => {
       include_tax: 0,
       ref_transaksi: refTransaksi,
       ref_number: newRefNomor,
-      memo: '',
+      memo: refTransaksi,
       attachment: [],
       business_tran_id: idDariSDBEK,
       items:
@@ -258,7 +255,7 @@ const Aneh: React.FC = () => {
           // unit_id: 2,
         })) || [],
     }
-    editDataKelod(payload as any, ref_number as any)
+    saveReturn(payload as any)
       .then((response: any) => {
         console.log('Payment saved successfully:', response)
       })
@@ -273,7 +270,7 @@ const Aneh: React.FC = () => {
       include_tax: 0,
       ref_transaksi: refTransaksi,
       ref_number: newRefNomor,
-      memo: '',
+      memo: refTransaksi,
       attachment: [],
       business_tran_id: idDariSDBEK,
       id: idDariSDBEK,
@@ -318,7 +315,7 @@ const Aneh: React.FC = () => {
       ],
     }
     simpanReturn.mutate(simpanQty as any)
-    console.log({ simpanReturn })
+    navigate(`/simpanidunikdarikledoreturn/${refNumber}`)
 
     // useAddReturnMutation(simpanQty as any)
   }
@@ -404,7 +401,7 @@ const Aneh: React.FC = () => {
   const [newRefNomor, setNewRefNomor] = useState('')
 
   const [transferQty, setTransferQty] = useState<number[]>([])
-  console.log({ transferQty })
+
   const [amounts, setAmounts] = useState<number[]>([])
   const [aaadiskon, setAaaDiskon] = useState<number[]>([])
 
@@ -418,7 +415,7 @@ const Aneh: React.FC = () => {
     const total = amounts.reduce((acc, curr) => acc + (curr || 0), 0)
     const totalDiskons = aaadiskon.reduce((acc, curr) => acc + (curr || 0), 0)
 
-    const bingung = total - totalDownPayment
+    const bingung = total
 
     setConfue(bingung)
     setSubTotal(total)
@@ -742,16 +739,20 @@ const Aneh: React.FC = () => {
             </Row>
             <Divider style={{ margin: '16px 0' }} />
             <>
-              {witholdings.map((witholding: any, index: number) => (
-                <Row key={index} style={{ marginTop: '8px' }}>
-                  <Col span={12} style={{ textAlign: 'left' }}>
-                    <Text strong>{witholding.name}</Text>
-                  </Col>
-                  <Col span={12} style={{ textAlign: 'right' }}>
-                    <Text strong>{formatNumber(witholding.down_payment)}</Text>
-                  </Col>
-                </Row>
-              ))}
+              {witholdings
+                .filter((witholding: any) => witholding.down_payment > 0)
+                .map((witholding: any, index: number) => (
+                  <Row key={index} style={{ marginTop: '8px' }}>
+                    <Col span={12} style={{ textAlign: 'left' }}>
+                      <Text strong>{witholding.name}</Text>
+                    </Col>
+                    <Col span={12} style={{ textAlign: 'right' }}>
+                      <Text strong>
+                        {formatNumber(witholding.down_payment)}
+                      </Text>
+                    </Col>
+                  </Row>
+                ))}
             </>
 
             <Row style={{ marginTop: '8px' }}>
