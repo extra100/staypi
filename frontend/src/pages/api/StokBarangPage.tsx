@@ -548,7 +548,7 @@ const StockSelectorTable = () => {
     }, 0)
   const limitizeTrans = totalReceivable > 3800
   const [totalSubtotal, setTotalSubtotal] = useState<number>(0)
-
+  console.log({ totalSubtotal })
   const [formattedTotalSubtotal, setFormattedTotalSubtotal] =
     useState<string>('')
 
@@ -590,7 +590,7 @@ const StockSelectorTable = () => {
   }, [bankAccountName])
 
   const evaluateStatus = () => {
-    if (amountPaid === null || amountPaid === 0) {
+    if (amountPaid === null || amountPaid <= 0) {
       return 1
     } else if (amountPaid > 0 && amountPaid < totalSubtotal) {
       return 2
@@ -694,13 +694,15 @@ const StockSelectorTable = () => {
       status_id: status,
       unique_id: uniqueNumber,
       trans_date: formatDate(selectedDates[0]),
+
       due_date: dueDate, // Gunakan due_date yang telah disesuaikan
       contact_id: selectedContact,
       sales_id: null,
       include_tax: 0,
       term_id: termIdSimpan || 2,
       memo: '',
-      amount: totalSubtotal,
+      // amount: totalSubtotal,
+      amount: Math.ceil(totalSubtotal),
       amount_after_tax: 0,
       warehouse_id: selectedWarehouseId,
       attachment: [],
@@ -710,7 +712,7 @@ const StockSelectorTable = () => {
         const latest_stock = matchingStock - item.qty
         return {
           id: 12345,
-          amount: item.subtotal,
+          amount: Math.ceil(item.subtotal),
           discount_amount:
             item.input_diskon_manual || item.gapPriceTotal || item.gapPrice,
           finance_account_id: item.finance_account_id,
@@ -720,7 +722,7 @@ const StockSelectorTable = () => {
           desc: '',
           qty: item.qty,
           qty_update: latest_stock || 0,
-          price: item.harga_setelah_diskon || item.price,
+          price: Math.ceil(item.harga_setelah_diskon || item.price),
           unit_id: item.unit_id,
           satuan: item.name,
         }
@@ -730,9 +732,9 @@ const StockSelectorTable = () => {
         {
           witholding_account_id: accountId || bankAccountId,
           name: selectedBank || bankAccountName,
-          down_payment: amountPaid || 0,
+          down_payment: Math.ceil(amountPaid || 0),
           witholding_percent: 0,
-          witholding_amount: 0,
+          witholding_amount: Math.ceil(0),
           status: 0,
           trans_date: formatDate(selectedDates[0]),
         },
@@ -754,8 +756,8 @@ const StockSelectorTable = () => {
         id: tag?.id || tagId,
         name: tag?.name || tagName,
       })),
-      due: piutang,
-      down_payment: amountPaid || 0,
+      due: Math.ceil(piutang),
+      down_payment: Math.ceil(amountPaid || 0),
       down_payment_bank_account_id: accountId || bankAccountId,
       witholding_account_id: accountId || bankAccountId,
 
