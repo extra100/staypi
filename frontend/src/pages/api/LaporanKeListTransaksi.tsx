@@ -31,15 +31,23 @@ const LaporanKeListTransaksi: React.FC = () => {
   }, [location.search, transaksiData])
 
   const filteredByContactName = useMemo(() => {
-    if (!searchText) return filteredData
+    if (!searchText) {
+      // Pastikan hanya memunculkan data yang bukan 'void'
+      return filteredData.filter(
+        (transaction) => transaction.reason_id !== 'void'
+      )
+    }
+
     const filteredContacts = contacts?.filter((contact) =>
       contact.name.toLowerCase().includes(searchText.toLowerCase())
     )
     const filteredContactIds = filteredContacts?.map((contact) => contact.id)
 
-    return filteredData.filter((transaction) =>
-      filteredContactIds?.includes(transaction.contact_id)
-    )
+    return filteredData
+      .filter((transaction) => transaction.reason_id !== 'void') // Tambahkan filter ini
+      .filter((transaction) =>
+        filteredContactIds?.includes(transaction.contact_id)
+      )
   }, [filteredData, contacts, searchText])
 
   const columns = [
