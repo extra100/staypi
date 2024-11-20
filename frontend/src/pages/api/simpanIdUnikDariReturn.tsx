@@ -2,25 +2,23 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Modal, Button } from 'antd'
 
-import { useIdMutation } from './takeSingleMutation'
-import { updateDenganIdUnikMutasiDariKledo } from '../../hooks/pindahHooks'
+import { useIdReturn } from './takeSingleReturn'
+import { updateDenganIdUnikReturnDariKledo } from '../../hooks/returnHooks'
 
-const SimpanIdUnikDariMutasi: React.FC = () => {
-  const { ref_number } = useParams<{ ref_number?: string }>()
+const SimpanIdUnikDariReturn: React.FC = () => {
+  const { memo } = useParams<{ memo?: string }>()
+  console.log('id sebagai parameter')
   const navigate = useNavigate()
 
   const [timeExceeded, setTimeExceeded] = useState(false)
 
-  const updateHanyaId = updateDenganIdUnikMutasiDariKledo()
-  const { loading, getIdAtMutation } = useIdMutation(ref_number as string)
+  const updateSomeProperty = updateDenganIdUnikReturnDariKledo()
+  const { loading, getIdAtReturn } = useIdReturn(memo)
+  console.log({ getIdAtReturn })
+  const invoiceId = getIdAtReturn?.id ?? null
+  console.log({ invoiceId })
 
-  const invoiceId = getIdAtMutation?.id ?? null
-  useEffect(() => {
-    console.log('State updated - invoiceId:', updateHanyaId)
-  }, [updateHanyaId])
-  // Log debugging
-  console.log('Data dari useIdMutation:', getIdAtMutation)
-  console.log('Invoice ID:', invoiceId)
+  useEffect(() => {}, [updateSomeProperty])
 
   useEffect(() => {
     if (invoiceId) {
@@ -33,10 +31,9 @@ const SimpanIdUnikDariMutasi: React.FC = () => {
   }, [invoiceId])
 
   const handleButtonClick = async () => {
-    if (ref_number && invoiceId) {
+    if (memo && invoiceId) {
       try {
-        const response = await updateHanyaId.mutateAsync({
-          ref_number,
+        const response = await updateSomeProperty.mutateAsync({
           id: invoiceId,
         })
         console.log('Invoice ID berhasil diperbarui:', response)
@@ -44,17 +41,16 @@ const SimpanIdUnikDariMutasi: React.FC = () => {
         console.error('Gagal memperbarui Invoice ID:', error)
       }
     } else {
-      console.warn('Data tidak lengkap:', { ref_number, invoiceId })
     }
 
-    navigate(`/sudah-validasi/${ref_number}`)
+    // navigate(`/sudah-validasi/${id}`)
   }
 
   return (
     <>
       {!loading && invoiceId && timeExceeded && (
         <Modal
-          title="Mutasi Berhasil Dibuat, Klik Lanjutkan"
+          title="Return Berhasil Dibuat, Klik Lanjutkan"
           footer={null}
           style={{ textAlign: 'center' }}
           bodyStyle={{
@@ -66,7 +62,7 @@ const SimpanIdUnikDariMutasi: React.FC = () => {
           open={true}
         >
           <Button type="primary" onClick={handleButtonClick}>
-            Lanjutkan Mutasi
+            Lanjutkan Return
           </Button>
         </Modal>
       )}
@@ -74,4 +70,4 @@ const SimpanIdUnikDariMutasi: React.FC = () => {
   )
 }
 
-export default SimpanIdUnikDariMutasi
+export default SimpanIdUnikDariReturn
