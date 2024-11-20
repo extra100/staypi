@@ -228,6 +228,7 @@ const StockSelectorTable = () => {
     { label: 'Toko 18%', percentage: 18 },
     { label: 'Nego 19%', percentage: 19 },
     { label: 'Khusus 21%', percentage: 20.5 },
+    { label: 'Istimewa SP 23%', percentage: 23 },
   ]
 
   const [discountedPrices, setDiscountedPrices] = useState<{
@@ -852,41 +853,77 @@ const StockSelectorTable = () => {
       dataIndex: 'satuan',
       key: 'satuan',
     },
+    {
+      title: 'Kategori',
+      dataIndex: 'pos_product_category_id',
+      key: 'pos_product_category_id',
+      render: (_: any, record: any) => {
+        const product = barangs?.find(
+          (item) => item.id === record.finance_account_id
+        )
+        const categoryId = product?.pos_product_category_id || 'Tidak Ditemukan'
+
+        return (
+          <span
+            style={{
+              fontSize: '14px',
+              color: categoryId === 'Tidak Ditemukan' ? 'red' : 'black',
+            }}
+          >
+            {categoryId}
+          </span>
+        )
+      },
+    },
 
     {
       title: 'Harga',
       dataIndex: 'price',
       key: 'price',
-      render: (text: number, record: any) => (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <div style={{ textAlign: 'right' }}>
-            {Math.floor(record.price).toLocaleString('id-ID')}
-          </div>
-          <Select
-            value={record.selectedDiscount}
+      render: (text: number, record: any) => {
+        const product = barangs?.find(
+          (item) => item.id === record.finance_account_id
+        )
+        const categoryId = product?.pos_product_category_id || 'Tidak Ditemukan'
+
+        // Filter discount rates to exclude 'Istimewa SP 23%' if categoryId is not 19
+        const availableDiscountRates =
+          categoryId === 19
+            ? discountRates
+            : discountRates.filter((rate) => rate.label !== 'Istimewa SP 23%')
+
+        return (
+          <div
             style={{
-              width: '120px',
-              fontSize: '12px',
-              marginLeft: '6px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
-            onChange={(value) => handleDiscountChange(value, record)}
-            bordered={false}
           >
-            {discountRates.map((rate) => (
-              <Select.Option key={rate.label} value={rate.label}>
-                {rate.label}
-              </Select.Option>
-            ))}
-          </Select>
-        </div>
-      ),
+            <div style={{ textAlign: 'right' }}>
+              {Math.floor(record.price).toLocaleString('id-ID')}
+            </div>
+            <Select
+              value={record.selectedDiscount}
+              style={{
+                width: '120px',
+                fontSize: '12px',
+                marginLeft: '6px',
+              }}
+              onChange={(value) => handleDiscountChange(value, record)}
+              bordered={false}
+            >
+              {availableDiscountRates.map((rate) => (
+                <Select.Option key={rate.label} value={rate.label}>
+                  {rate.label}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+        )
+      },
     },
+
     {
       title: 'Qty',
       dataIndex: 'qty',
@@ -1250,6 +1287,17 @@ const StockSelectorTable = () => {
                       ?.stock || 0
                   if (stockQuantity === 0) return null
 
+                  // Filter discount rates based on the condition
+                  const filteredDiscountRates = discountRates.map((rate) => {
+                    if (
+                      rate.label === 'Istimewa SP 23%' &&
+                      product.pos_product_category_id !== 19
+                    ) {
+                      return { ...rate, percentage: null } // Gunakan null untuk menandakan harga 0
+                    }
+                    return rate
+                  })
+
                   return (
                     <Select.Option
                       key={product.id}
@@ -1276,17 +1324,23 @@ const StockSelectorTable = () => {
                             minimumFractionDigits: 0,
                           })}
                         </span>
-
-                        {discountRates.map((rate) => {
-                          const discountedPrice = (
-                            product.price -
-                            (product.price * rate.percentage) / 100
-                          ).toFixed(2)
-                          const formattedPrice = Number(
-                            discountedPrice
-                          ).toLocaleString('id-ID', {
-                            minimumFractionDigits: 0,
-                          })
+                        {filteredDiscountRates.map((rate) => {
+                          const discountedPrice =
+                            rate.percentage !== null
+                              ? (
+                                  product.price -
+                                  (product.price * rate.percentage) / 100
+                                ).toFixed(2)
+                              : 0 // Harga menjadi 0 jika percentage null
+                          const formattedPrice =
+                            rate.percentage !== null
+                              ? Number(discountedPrice).toLocaleString(
+                                  'id-ID',
+                                  {
+                                    minimumFractionDigits: 0,
+                                  }
+                                )
+                              : '0'
 
                           return (
                             <span
