@@ -647,6 +647,8 @@ const StockSelectorTable = () => {
   const handleSetAmountPaid = () => {
     setAmountPaid(totalSubtotal)
   }
+  const [memo, setMemo] = useState('')
+
   const handleSave = () => {
     if (isSaveDisabled) return
 
@@ -681,10 +683,9 @@ const StockSelectorTable = () => {
     }, {})
     const simpanGudang = saveNamaGudang[selectedWarehouseId as any]
 
-    // Tentukan due_date sesuai dengan term_id
-    let dueDate = formatDate(selectedDates[1]) // default to selected due date
+    let dueDate = formatDate(selectedDates[1])
     if (termIdSimpan === 2) {
-      dueDate = formatDate(selectedDates[0]) // Jika term_id 2 (COD), due_date = trans_date
+      dueDate = formatDate(selectedDates[0])
     }
 
     const invoiceData = {
@@ -696,13 +697,12 @@ const StockSelectorTable = () => {
       unique_id: uniqueNumber,
       trans_date: formatDate(selectedDates[0]),
 
-      due_date: dueDate, // Gunakan due_date yang telah disesuaikan
+      due_date: dueDate,
       contact_id: selectedContact,
       sales_id: null,
       include_tax: 0,
       term_id: termIdSimpan || 2,
-      memo: '',
-      // amount: totalSubtotal,
+      memo: memo,
       amount: Math.ceil(totalSubtotal),
       amount_after_tax: 0,
       warehouse_id: selectedWarehouseId,
@@ -1130,7 +1130,7 @@ const StockSelectorTable = () => {
             </Col>
           </Row>
 
-          <Row gutter={16} style={{ marginBottom: '10px' }}>
+          {/* <Row gutter={16} style={{ marginBottom: '10px' }}>
             <Col span={12}>
               <span style={labelStyle}>Piutang/Pelanggan</span>
               <span style={labelColonStyle}>:</span>
@@ -1139,9 +1139,9 @@ const StockSelectorTable = () => {
                 value={formatRupiah(selectedReceivable)}
                 readOnly
               />
-            </Col>
+            </Col> */}
 
-            <Col span={12}>
+          {/* <Col span={12}>
               <span style={labelStyle}>Piutang/Outlet</span>
               <span style={labelColonStyle}>:</span>
               <Input
@@ -1150,9 +1150,9 @@ const StockSelectorTable = () => {
                 readOnly
               />
             </Col>
-          </Row>
+          </Row> */}
 
-          <Row gutter={16} style={{ marginBottom: '10px' }}>
+          {/* <Row gutter={16} style={{ marginBottom: '10px' }}>
             <Col span={12}>
               <span style={labelStyle}>Platform</span>
               <span style={labelColonStyle}>:</span>
@@ -1171,7 +1171,7 @@ const StockSelectorTable = () => {
                 readOnly
               />
             </Col>
-          </Row>
+          </Row> */}
           <Row gutter={16} style={{ marginBottom: '10px' }}>
             <Col span={12}>
               <span style={labelStyle}>No Invoice</span>
@@ -1530,6 +1530,17 @@ const StockSelectorTable = () => {
                     </Select.Option>
                   ))}
                 </Select>
+              </Col>
+            </Row>
+            <Row gutter={16} style={{ marginBottom: '10px' }}>
+              <Col span={12}>
+                <span style={labelStyle}>Keterangan</span>
+                <span style={labelColonStyle}>:</span>
+                <Input
+                  style={{ width: '70%' }}
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                />
               </Col>
             </Row>
             <Row>

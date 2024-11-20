@@ -48,6 +48,7 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
   )
   const alamatPelanggan = getPelangganDetil?.address ?? 0
   const telponPelanggan = getPelangganDetil?.phone ?? 0
+  const ketPelanggan = getPosDetail?.memo ?? 0
 
   //
   const { data: barangs } = useGetBarangByIdQuery(name as unknown)
@@ -140,10 +141,14 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
         <Col span={12} style={{ textAlign: 'right' }}>
           <span>{refNumber}</span>
         </Col>
-
         <Col span={12} style={{ textAlign: 'left' }}>
           <span>
-            {alamatPelanggan} - {telponPelanggan}
+            {alamatPelanggan &&
+            alamatPelanggan !== 'Mohon Lengkapi Alamat' &&
+            telponPelanggan &&
+            telponPelanggan !== 'Mohon Lengkapi No Tlpn'
+              ? `${alamatPelanggan} - ${telponPelanggan}`
+              : ketPelanggan}
           </span>
         </Col>
 

@@ -715,12 +715,15 @@ const DetailKledo: React.FC = () => {
               {formatDate(getPosDetail?.trans_date || '')}
             </Title>
           </Col>
-          <Col span={12}>
-            <div style={{ marginBottom: '0px' }}>
-              <Text strong>Tgl. Jatuh Tempo:</Text>
-            </div>
-            <Title level={5}>{formatDate(getPosDetail?.due_date || '')}</Title>
-          </Col>
+
+          {getPosDetail?.memo && (
+            <Col span={12}>
+              <div style={{ marginBottom: '0px' }}>
+                <Text strong>Ket:</Text>
+              </div>
+              <Text>{getPosDetail?.memo}</Text>
+            </Col>
+          )}
         </Row>
         <Row>
           <Col span={12}>

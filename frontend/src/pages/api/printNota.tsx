@@ -39,7 +39,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const refNumber = getPosDetail?.ref_number ?? 0
   const jumlahBayar = getPosDetail?.down_payment ?? 0
   const totalSemua = getPosDetail?.amount ?? 0
-  const piutang = getPosDetail?.due ?? 0
+  const ketPelanggan = getPosDetail?.memo ?? 0
   //
   const { data: gudang } = useGetWarehousesQuery()
 
@@ -199,7 +199,12 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
 
         <Col span={12} style={{ textAlign: 'left' }}>
           <span>
-            {alamatPelanggan} - {telponPelanggan}
+            {alamatPelanggan &&
+            alamatPelanggan !== 'Mohon Lengkapi Alamat' &&
+            telponPelanggan &&
+            telponPelanggan !== 'Mohon Lengkapi No Tlpn'
+              ? `${alamatPelanggan} - ${telponPelanggan}`
+              : ketPelanggan}
           </span>
         </Col>
 
