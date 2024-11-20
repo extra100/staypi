@@ -452,8 +452,8 @@ function App() {
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineBgColors size={20} style={iconStyle} />
-              <LinkContainer to="/mutasi" onClick={handleDataSupplierClick}>
-                <NavDropdown.Item>Data Mutasi</NavDropdown.Item>
+              <LinkContainer to="/listpindah" onClick={handleDataSupplierClick}>
+                <NavDropdown.Item>Mutasi Awal</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
             {/* Data Supplier */}

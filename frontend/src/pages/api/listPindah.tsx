@@ -36,10 +36,10 @@ const WarehouseTransferTable: React.FC = () => {
           const fromWarehouseId = String(transfer.from_warehouse_id || '')
 
           return (
-            (transfer.from_warehouse_id === idOutletLoggedIn ||
-              transfer.to_warehouse_id === idOutletLoggedIn) &&
-            (refNumber.includes(searchTerm as any) ||
-              fromWarehouseId.includes(searchTerm as any)) // Filter by ref_number or from_warehouse_id
+            transfer.code === 1 &&
+            transfer.from_warehouse_id === idOutletLoggedIn &&
+            (refNumber.includes(searchTerm || '') ||
+              fromWarehouseId.includes(searchTerm || ''))
           )
         })
         .sort(

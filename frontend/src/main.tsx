@@ -114,6 +114,7 @@ import NotaPage from './pages/api/NotPage'
 import EditMutasi from './pages/api/EditMutasi'
 import SimpanIdUnikDariReturn from './pages/api/simpanIdUnikDariReturn'
 import EditPembayaran from './pages/api/EditPembayaran'
+import ListSiapDiValdiasiOutletKhusus from './pages/api/ListSiapDiValdiasiOutletKhusus'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -234,6 +235,7 @@ const router = createBrowserRouter(
         element={<WarehouseTransferDetail />}
       />
       <Route path="/listsiapvalidasi" element={<ListSiapDiValidasi />} />
+      <Route path="/admin" element={<ListSiapDiValdiasiOutletKhusus />} />
       <Route
         path="/listsudahdivalidasikeluar"
         element={<ListSudahDivalidasi />}
