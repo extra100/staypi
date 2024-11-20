@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Button, Input, Table, Tag } from 'antd'
+import { Button, Col, DatePicker, Input, Row, Table, Tag } from 'antd'
 
 import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
 import { useIdInvoice } from './takeSingleInvoice'
@@ -34,19 +34,28 @@ const ListTransaksi: React.FC = () => {
 
   const [searchText, setSearchText] = useState<string>('')
 
-  // Gabungkan filter contact_id dengan filter yang sudah ada
   const getContactName = (contact_id: string | number) => {
     const contact = contacts?.find((c) => c.id === contact_id)
     return contact ? contact.name : 'Nama tidak ditemukan'
   }
+  const [startDate, setStartDate] = useState<string | null>(null)
+  const [endDate, setEndDate] = useState<string | null>(null)
+  const formatDateForBackend = (dateString: string) => {
+    const [day, month, year] = dateString.split('-')
+    return `${year}-${month}-${day}`
+  }
 
-  // Gabungkan filter contact_id dengan filter yang sudah ada
   const filteredData = data
     ?.filter((transaction) =>
       searchText
-        ? getContactName(transaction.contact_id)
+        ? transaction.ref_number
             .toLowerCase()
-            .includes(searchText.toLowerCase())
+            .includes(searchText.toLowerCase()) ||
+          getContactName(transaction.contact_id)
+            .toLowerCase()
+            .includes(searchText.toLowerCase()) ||
+          (transaction.memo &&
+            transaction.memo.toLowerCase().includes(searchText.toLowerCase()))
         : true
     )
     ?.filter(
@@ -56,6 +65,13 @@ const ListTransaksi: React.FC = () => {
         transaction.jalur === 'penjualan' &&
         transaction.reason_id !== 'void'
     )
+    ?.filter((transaction) => {
+      // Filter berdasarkan trans_date
+      const transDate = new Date(transaction.trans_date) // Konversi string ke Date
+      const start = startDate ? new Date(formatDateForBackend(startDate)) : null // Konversi startDate
+      const end = endDate ? new Date(formatDateForBackend(endDate)) : null // Konversi endDate
+      return (!start || transDate >= start) && (!end || transDate <= end)
+    })
     ?.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -83,7 +99,17 @@ const ListTransaksi: React.FC = () => {
       maximumFractionDigits: 0,
     }).format(value)
   }
+  const formatDate = (dateString: any) => {
+    const [day, month, year] = dateString.split('-')
+    return `${year}-${month}-${day}`
+  }
   const columns = [
+    {
+      title: 'No',
+      key: 'no',
+      render: (_: any, __: any, index: number) => index + 1,
+      width: 50,
+    },
     {
       title: 'No. Invoice',
       dataIndex: 'ref_number',
@@ -102,6 +128,17 @@ const ListTransaksi: React.FC = () => {
       dataIndex: ['contacts', 0, 'id'],
       key: 'contact_name',
       render: (contactId: string) => getContactName(contactId),
+    },
+    {
+      title: 'Ket',
+      dataIndex: 'memo',
+      key: 'memo',
+    },
+    {
+      title: 'Tgl. Trans',
+      dataIndex: 'trans_date',
+      key: 'trans_date',
+      render: (text: any) => formatDate(text), // Apply formatDate here
     },
     {
       title: 'Status',
@@ -222,17 +259,36 @@ const ListTransaksi: React.FC = () => {
       >
         <span>Return</span>
       </Button>
-      <Input
-        placeholder="Cari berdasarkan Nama Kontak"
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        style={{ marginBottom: 16, width: 300 }}
-      />
+
+      <Row gutter={16} style={{ marginBottom: 16, marginTop: 16 }}>
+        <Col>
+          <DatePicker
+            placeholder="Dari Tanggal"
+            format="DD-MM-YYYY"
+            onChange={(date, dateString) => setStartDate(dateString)}
+          />
+        </Col>
+        <Col>
+          <DatePicker
+            placeholder="Sampai Tanggal"
+            format="DD-MM-YYYY"
+            onChange={(date, dateString) => setEndDate(dateString)}
+          />
+        </Col>
+        <Col>
+          <Input
+            placeholder="Cari berdasarkan Ref, Nama Kontak, atau Memo"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            style={{ width: 300 }}
+          />
+        </Col>
+      </Row>
       <Table
         dataSource={filteredData}
         columns={columns as any}
         rowKey="_id"
-        pagination={false}
+        pagination={{ pageSize: 15 }}
       />
     </>
   )
