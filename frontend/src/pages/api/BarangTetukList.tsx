@@ -95,6 +95,11 @@ const BarangTetuk = () => {
       dataIndex: ['unit', 'name'], // menggunakan array untuk nested field
       key: 'unit.name',
     },
+    {
+      title: 'Kategory Barang',
+      dataIndex: 'pos_product_category_id',
+      key: 'pos_product_category_id',
+    },
   ]
 
   return (

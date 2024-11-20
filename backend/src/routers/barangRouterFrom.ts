@@ -17,6 +17,7 @@ type Bende = {
   price: number
   unit_id: number
   unit: Unit
+  pos_product_category_id: number
 }
 
 const barangRouter = express.Router()
@@ -47,6 +48,7 @@ const fetchTags = async (page: number, perPage: number) => {
         id: item.unit.id,
         name: item.unit.name,
       },
+      pos_product_category_id: item.pos_product_category_id,
     }))
     console.log({ filteredData })
     console.log({ rawData })

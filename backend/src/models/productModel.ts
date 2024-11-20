@@ -16,5 +16,7 @@ export class Product {
     id: number
     name: string
   }
+  @prop({ required: true, unique: true })
+  public pos_product_category_id!: number
 }
 export const ProductModel = getModelForClass(Product)

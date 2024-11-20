@@ -17,6 +17,7 @@ export interface Barang {
   name: string
   price: number
   unit?: Unit
+  pos_product_category_id: number
 }
 const barangTetukRouter = express.Router()
 
@@ -55,6 +56,7 @@ const fetchBarangs = async (page: number, perPage: number) => {
       id: item.id,
       name: item.name,
       price: item.price,
+      pos_product_category_id: item.pos_product_category_id,
       unit: item.unit
         ? {
             id: item.unit.id,
