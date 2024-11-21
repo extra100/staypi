@@ -66,7 +66,6 @@ const ListTransaksi: React.FC = () => {
         transaction.reason_id !== 'void'
     )
     ?.filter((transaction) => {
-      // Filter berdasarkan trans_date
       const transDate = new Date(transaction.trans_date) // Konversi string ke Date
       const start = startDate ? new Date(formatDateForBackend(startDate)) : null // Konversi startDate
       const end = endDate ? new Date(formatDateForBackend(endDate)) : null // Konversi endDate
@@ -262,10 +261,12 @@ const ListTransaksi: React.FC = () => {
 
       <Row gutter={16} style={{ marginBottom: 16, marginTop: 16 }}>
         <Col>
-          <DatePicker
-            placeholder="Dari Tanggal"
-            format="DD-MM-YYYY"
-            onChange={(date, dateString) => setStartDate(dateString)}
+          <DatePicker.RangePicker
+            onChange={(dates, dateStrings) => {
+              const [start, end] = dateStrings // Destructure the string array
+              setStartDate(start || null) // Use `null` if `start` is empty
+              setEndDate(end || null) // Use `null` if `end` is empty
+            }}
           />
         </Col>
         <Col>
