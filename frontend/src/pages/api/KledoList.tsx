@@ -38,14 +38,12 @@ const ListTransaksi: React.FC = () => {
     const contact = contacts?.find((c) => c.id === contact_id)
     return contact ? contact.name : 'Nama tidak ditemukan'
   }
-  const [startDate, setStartDate] = useState<string | null>(null)
-  const [endDate, setEndDate] = useState<string | null>(null)
-
-  const formatDateForBackend = (dateString: string | null): string => {
-    if (!dateString) return ''
-    const [day, month, year] = dateString.split('-')
-    return `${year}-${month}-${day}`
-  }
+  // const [startDate, setStartDate] = useState<string | null>(null)
+  // const [endDate, setEndDate] = useState<string | null>(null)
+  // const formatDateForBackend = (dateString: string) => {
+  //   const [day, month, year] = dateString.split('-')
+  //   return `${year}-${month}-${day}`
+  // }
 
   const filteredData = data
     ?.filter((transaction) =>
@@ -67,25 +65,16 @@ const ListTransaksi: React.FC = () => {
         transaction.jalur === 'penjualan' &&
         transaction.reason_id !== 'void'
     )
-    ?.filter((transaction) => {
-      const transDate = new Date(transaction.trans_date)
-      const start = startDate ? new Date(formatDateForBackend(startDate)) : null
-      const end = endDate ? new Date(formatDateForBackend(endDate)) : null
-      return (!start || transDate >= start) && (!end || transDate <= end)
-    })
+    // ?.filter((transaction) => {
+    //   const transDate = new Date(transaction.trans_date)
+    //   const start = startDate ? new Date(formatDateForBackend(startDate)) : null
+    //   const end = endDate ? new Date(formatDateForBackend(endDate)) : null
+    //   return (!start || transDate >= start) && (!end || transDate <= end)
+    // })
     ?.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
-
-  // Example of using RangePicker
-  ;<DatePicker.RangePicker
-    onChange={(dates, dateStrings) => {
-      const [start, end] = dateStrings
-      setStartDate(start || null)
-      setEndDate(end || null)
-    }}
-  />
 
   const [activeButton, setActiveButton] = useState('')
   const navigate = useNavigate()
@@ -271,13 +260,11 @@ const ListTransaksi: React.FC = () => {
       </Button>
 
       <Row gutter={16} style={{ marginBottom: 16, marginTop: 16 }}>
-        <Col>
-          <DatePicker.RangePicker
-            onChange={(dates, dateStrings) => {
-              const [start, end] = dateStrings // Destructure the string array
-              setStartDate(start || null) // Use `null` if `start` is empty
-              setEndDate(end || null) // Use `null` if `end` is empty
-            }}
+        {/* <Col>
+          <DatePicker
+            placeholder="Dari Tanggal"
+            format="DD-MM-YYYY"
+            onChange={(date, dateString) => setStartDate(dateString)}
           />
         </Col>
         <Col>
@@ -286,7 +273,7 @@ const ListTransaksi: React.FC = () => {
             format="DD-MM-YYYY"
             onChange={(date, dateString) => setEndDate(dateString)}
           />
-        </Col>
+        </Col> */}
         <Col>
           <Input
             placeholder="Cari berdasarkan Ref, Nama Kontak, atau Memo"
