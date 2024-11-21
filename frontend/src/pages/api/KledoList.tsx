@@ -264,16 +264,25 @@ const ListTransaksi: React.FC = () => {
           <DatePicker
             placeholder="Dari Tanggal"
             format="DD-MM-YYYY"
-            onChange={(date, dateString) => setStartDate(dateString)}
+            onChange={(date, dateString) => {
+              if (typeof dateString === 'string') {
+                setStartDate(dateString)
+              }
+            }}
           />
         </Col>
         <Col>
           <DatePicker
             placeholder="Sampai Tanggal"
             format="DD-MM-YYYY"
-            onChange={(date, dateString) => setEndDate(dateString)}
+            onChange={(date, dateString) => {
+              if (typeof dateString === 'string') {
+                setEndDate(dateString)
+              }
+            }}
           />
         </Col>
+
         <Col>
           <Input
             placeholder="Cari berdasarkan Ref, Nama Kontak, atau Memo"
