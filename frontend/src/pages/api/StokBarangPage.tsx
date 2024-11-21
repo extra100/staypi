@@ -171,7 +171,7 @@ const StockSelectorTable = () => {
     }
   }, [user])
   const [dataSource, setDataSource] = useState<any[]>([])
-
+  console.log({ dataSource })
   useEffect(() => {
     if (selectedFinanceAccountIds.length > 0 && selectedWarehouseId !== null) {
       selectedFinanceAccountIds.forEach((productId: any) => {
@@ -220,7 +220,8 @@ const StockSelectorTable = () => {
   const [selectedPrices, setSelectedPrices] = useState<{
     [key: string]: string
   }>({})
-
+  console.log({ selectedPrices })
+  //sen
   const discountRates = [
     { label: 'Harga Dasar', percentage: 0 },
     { label: 'Retail 10%', percentage: 10 },
@@ -228,7 +229,7 @@ const StockSelectorTable = () => {
     { label: 'Toko 18%', percentage: 18 },
     { label: 'Nego 19%', percentage: 19 },
     { label: 'Khusus 21%', percentage: 20.5 },
-    { label: 'Istimewa SP 23%', percentage: 23 },
+    // { label: 'Istimewa SP 23%', percentage: 23 },
   ]
 
   const [discountedPrices, setDiscountedPrices] = useState<{
@@ -242,6 +243,7 @@ const StockSelectorTable = () => {
   const [selectedDiscounts, setSelectedDiscounts] = useState<{
     [key: string]: number
   }>({})
+  console.log({ selectedDiscounts })
   const [selectedProductPrices, setSelectedProductPrices] = useState<
     Record<string, number>
   >({})
@@ -714,8 +716,9 @@ const StockSelectorTable = () => {
         return {
           id: 12345,
           amount: Math.ceil(item.subtotal),
-          discount_amount:
-            item.input_diskon_manual || item.gapPriceTotal || item.gapPrice,
+          // discount_amount:
+          //   item.input_diskon_manual || item.gapPriceTotal || item.gapPrice,
+          discount_amount: item.gapPrice,
           finance_account_id: item.finance_account_id,
           discount_percent: item.selectedDiscountValue || 0,
           name: item.finance_account_name,
@@ -723,7 +726,7 @@ const StockSelectorTable = () => {
           desc: '',
           qty: item.qty,
           qty_update: latest_stock || 0,
-          price: Math.ceil(item.harga_setelah_diskon || item.price),
+          price: item.price,
           unit_id: item.unit_id,
           satuan: item.name,
         }
@@ -773,22 +776,19 @@ const StockSelectorTable = () => {
 
     setLoadingSpinner(true)
 
-    // Simpan invoice data
     saveInvoiceData(invoiceData)
 
-    // Panggil mutasi untuk menambahkan transaksi
     addPosMutation.mutate(invoiceData as any, {
       onSuccess: () => {
-        message.success('Transaksi berhasil disimpan!') // Tampilkan pesan sukses
+        message.success('Transaksi berhasil disimpan!')
 
-        // Tambahkan timer 3 detik sebelum mengarahkan
         setTimeout(() => {
-          setLoadingSpinner(false) // Matikan spinner
+          setLoadingSpinner(false)
           navigate(`/simpanidunikdarikledopenjualan/${refNumber}`)
         }, 1500)
       },
       onError: (error: any) => {
-        message.error(`Terjadi kesalahan: ${error.message}`) // Tampilkan pesan error
+        message.error(`Terjadi kesalahan: ${error.message}`)
         setLoadingSpinner(true)
       },
     })
@@ -853,28 +853,6 @@ const StockSelectorTable = () => {
       dataIndex: 'satuan',
       key: 'satuan',
     },
-    {
-      title: 'Kategori',
-      dataIndex: 'pos_product_category_id',
-      key: 'pos_product_category_id',
-      render: (_: any, record: any) => {
-        const product = barangs?.find(
-          (item) => item.id === record.finance_account_id
-        )
-        const categoryId = product?.pos_product_category_id || 'Tidak Ditemukan'
-
-        return (
-          <span
-            style={{
-              fontSize: '14px',
-              color: categoryId === 'Tidak Ditemukan' ? 'red' : 'black',
-            }}
-          >
-            {categoryId}
-          </span>
-        )
-      },
-    },
 
     {
       title: 'Harga',
@@ -885,12 +863,12 @@ const StockSelectorTable = () => {
           (item) => item.id === record.finance_account_id
         )
         const categoryId = product?.pos_product_category_id || 'Tidak Ditemukan'
-
-        // Filter discount rates to exclude 'Istimewa SP 23%' if categoryId is not 19
+        console.log({ categoryId })
         const availableDiscountRates =
           categoryId === 19
             ? discountRates
             : discountRates.filter((rate) => rate.label !== 'Istimewa SP 23%')
+        console.log({ availableDiscountRates })
 
         return (
           <div
@@ -946,16 +924,16 @@ const StockSelectorTable = () => {
         </div>
       ),
     },
-    {
-      title: 'Harga Dasar',
-      dataIndex: 'finance_account_id',
-      key: 'base_price',
-      render: (id: any) => (
-        <div>
-          {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
-        </div>
-      ),
-    },
+    // {
+    //   title: 'Harga Dasar',
+    //   dataIndex: 'finance_account_id',
+    //   key: 'base_price',
+    //   render: (id: any) => (
+    //     <div>
+    //       {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
+    //     </div>
+    //   ),
+    // },
     {
       title: 'Harga Setelah Diskon',
       dataIndex: 'harga_setelah_diskon',
@@ -964,38 +942,38 @@ const StockSelectorTable = () => {
         <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
       ),
     },
-    {
-      title: 'Input Diskon Manual',
-      dataIndex: 'input_diskon_manual',
-      key: 'input_diskon_manual',
-      render: (text: any, record: any) => (
-        <div>
-          <Input
-            type="number"
-            defaultValue={text || 0}
-            onChange={(e) => {
-              const inputDiskonManual = parseFloat(e.target.value) || 0
-              const basePrice = hargaDasar[record.finance_account_id] || 0
-              const hargaSetelahDiskon = basePrice - inputDiskonManual
-              const newSubtotal = hargaSetelahDiskon * record.qty
+    // {
+    //   title: 'Input Diskon Manual',
+    //   dataIndex: 'input_diskon_manual',
+    //   key: 'input_diskon_manual',
+    //   render: (text: any, record: any) => (
+    //     <div>
+    //       <Input
+    //         type="number"
+    //         defaultValue={text || 0}
+    //         onChange={(e) => {
+    //           const inputDiskonManual = parseFloat(e.target.value) || 0
+    //           const basePrice = hargaDasar[record.finance_account_id] || 0
+    //           const hargaSetelahDiskon = basePrice - inputDiskonManual
+    //           const newSubtotal = hargaSetelahDiskon * record.qty
 
-              setDataSource((prev) =>
-                prev.map((item) =>
-                  item.finance_account_id === record.finance_account_id
-                    ? {
-                        ...item,
-                        input_diskon_manual: inputDiskonManual,
-                        harga_setelah_diskon: hargaSetelahDiskon,
-                        subtotal: newSubtotal,
-                      }
-                    : item
-                )
-              )
-            }}
-          />
-        </div>
-      ),
-    },
+    //           setDataSource((prev) =>
+    //             prev.map((item) =>
+    //               item.finance_account_id === record.finance_account_id
+    //                 ? {
+    //                     ...item,
+    //                     input_diskon_manual: inputDiskonManual,
+    //                     harga_setelah_diskon: hargaSetelahDiskon,
+    //                     subtotal: newSubtotal,
+    //                   }
+    //                 : item
+    //             )
+    //           )
+    //         }}
+    //       />
+    //     </div>
+    //   ),
+    // },
 
     {
       title: 'Subtotal',
