@@ -924,16 +924,16 @@ const StockSelectorTable = () => {
         </div>
       ),
     },
-    // {
-    //   title: 'Harga Dasar',
-    //   dataIndex: 'finance_account_id',
-    //   key: 'base_price',
-    //   render: (id: any) => (
-    //     <div>
-    //       {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
-    //     </div>
-    //   ),
-    // },
+    {
+      title: 'Harga Dasar',
+      dataIndex: 'finance_account_id',
+      key: 'base_price',
+      render: (id: any) => (
+        <div>
+          {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
+        </div>
+      ),
+    },
     {
       title: 'Harga Setelah Diskon',
       dataIndex: 'harga_setelah_diskon',
@@ -942,38 +942,38 @@ const StockSelectorTable = () => {
         <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
       ),
     },
-    // {
-    //   title: 'Input Diskon Manual',
-    //   dataIndex: 'input_diskon_manual',
-    //   key: 'input_diskon_manual',
-    //   render: (text: any, record: any) => (
-    //     <div>
-    //       <Input
-    //         type="number"
-    //         defaultValue={text || 0}
-    //         onChange={(e) => {
-    //           const inputDiskonManual = parseFloat(e.target.value) || 0
-    //           const basePrice = hargaDasar[record.finance_account_id] || 0
-    //           const hargaSetelahDiskon = basePrice - inputDiskonManual
-    //           const newSubtotal = hargaSetelahDiskon * record.qty
+    {
+      title: 'Input Diskon Manual',
+      dataIndex: 'input_diskon_manual',
+      key: 'input_diskon_manual',
+      render: (text: any, record: any) => (
+        <div>
+          <Input
+            type="number"
+            defaultValue={text || 0}
+            onChange={(e) => {
+              const inputDiskonManual = parseFloat(e.target.value) || 0
+              const basePrice = hargaDasar[record.finance_account_id] || 0
+              const hargaSetelahDiskon = basePrice - inputDiskonManual
+              const newSubtotal = hargaSetelahDiskon * record.qty
 
-    //           setDataSource((prev) =>
-    //             prev.map((item) =>
-    //               item.finance_account_id === record.finance_account_id
-    //                 ? {
-    //                     ...item,
-    //                     input_diskon_manual: inputDiskonManual,
-    //                     harga_setelah_diskon: hargaSetelahDiskon,
-    //                     subtotal: newSubtotal,
-    //                   }
-    //                 : item
-    //             )
-    //           )
-    //         }}
-    //       />
-    //     </div>
-    //   ),
-    // },
+              setDataSource((prev) =>
+                prev.map((item) =>
+                  item.finance_account_id === record.finance_account_id
+                    ? {
+                        ...item,
+                        input_diskon_manual: inputDiskonManual,
+                        harga_setelah_diskon: hargaSetelahDiskon,
+                        subtotal: newSubtotal,
+                      }
+                    : item
+                )
+              )
+            }}
+          />
+        </div>
+      ),
+    },
 
     {
       title: 'Subtotal',
