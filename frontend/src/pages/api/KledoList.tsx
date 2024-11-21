@@ -40,7 +40,9 @@ const ListTransaksi: React.FC = () => {
   }
   const [startDate, setStartDate] = useState<string | null>(null)
   const [endDate, setEndDate] = useState<string | null>(null)
-  const formatDateForBackend = (dateString: string) => {
+
+  const formatDateForBackend = (dateString: string | null): string => {
+    if (!dateString) return ''
     const [day, month, year] = dateString.split('-')
     return `${year}-${month}-${day}`
   }
@@ -66,15 +68,24 @@ const ListTransaksi: React.FC = () => {
         transaction.reason_id !== 'void'
     )
     ?.filter((transaction) => {
-      const transDate = new Date(transaction.trans_date) // Konversi string ke Date
-      const start = startDate ? new Date(formatDateForBackend(startDate)) : null // Konversi startDate
-      const end = endDate ? new Date(formatDateForBackend(endDate)) : null // Konversi endDate
+      const transDate = new Date(transaction.trans_date)
+      const start = startDate ? new Date(formatDateForBackend(startDate)) : null
+      const end = endDate ? new Date(formatDateForBackend(endDate)) : null
       return (!start || transDate >= start) && (!end || transDate <= end)
     })
     ?.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
+
+  // Example of using RangePicker
+  ;<DatePicker.RangePicker
+    onChange={(dates, dateStrings) => {
+      const [start, end] = dateStrings
+      setStartDate(start || null)
+      setEndDate(end || null)
+    }}
+  />
 
   const [activeButton, setActiveButton] = useState('')
   const navigate = useNavigate()
