@@ -137,7 +137,7 @@ const ListTransaksi: React.FC = () => {
       title: 'Tgl. Trans',
       dataIndex: 'trans_date',
       key: 'trans_date',
-      render: (text: any) => formatDate(text), // Apply formatDate here
+      render: (text: any) => formatDate(text),
     },
     {
       title: 'Status',
@@ -292,11 +292,56 @@ const ListTransaksi: React.FC = () => {
           />
         </Col>
       </Row>
-      <Table
+      {/* <Table
         dataSource={filteredData}
         columns={columns as any}
         rowKey="_id"
         pagination={{ pageSize: 100 }}
+      /> */}
+      <Table
+        dataSource={filteredData}
+        columns={columns as any}
+        rowKey="id"
+        pagination={{ pageSize: 100 }}
+        summary={(pageData) => {
+          let totalAmount = 0
+          let totalTerbayar = 0
+          let totalSisaTagihan = 0
+
+          pageData.forEach(({ amount, witholdings }) => {
+            totalAmount += amount
+            const totalDownPayment = witholdings
+              .filter((witholding: any) => witholding.status === 0)
+              .reduce(
+                (sum: number, witholding: any) =>
+                  sum + (witholding.down_payment || 0),
+                0
+              )
+            totalTerbayar += totalDownPayment
+            totalSisaTagihan += amount - totalDownPayment
+          })
+
+          return (
+            <Table.Summary.Row>
+              <Table.Summary.Cell index={0} colSpan={6}>
+                <strong>Total</strong>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={6} align="right">
+                <strong>{`Rp ${roundUpIndonesianNumber(totalAmount)}`}</strong>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={7} align="right">
+                <strong>{`Rp ${roundUpIndonesianNumber(
+                  totalTerbayar
+                )}`}</strong>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={8} align="right">
+                <strong>{`Rp ${roundUpIndonesianNumber(
+                  totalSisaTagihan
+                )}`}</strong>
+              </Table.Summary.Cell>
+            </Table.Summary.Row>
+          )
+        }}
       />
     </>
   )

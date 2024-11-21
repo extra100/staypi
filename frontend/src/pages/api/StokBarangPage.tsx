@@ -11,6 +11,7 @@ import {
   Typography,
   DatePicker,
   message,
+  Switch,
 } from 'antd'
 import { useStokBarang } from './StokBarang'
 import { useIdWarehouse } from './namaWarehouse'
@@ -41,6 +42,11 @@ import { useGetTagsQueryDb } from '../../hooks/tagHooks'
 import { AnyRecord } from 'dns'
 import { useGetAkunBanksQueryDb } from '../../hooks/akunBankHooks'
 import { DeleteOutlined } from '@ant-design/icons'
+import { useGetoutletsQuery } from '../../hooks/outletHooks'
+import {
+  useGetControlQuery,
+  useUpdateControlMutation,
+} from '../../hooks/controlHooks'
 
 const { Option } = Select
 const { Title, Text } = Typography
@@ -79,6 +85,7 @@ const StockSelectorTable = () => {
   const { idContact } = useIdContact('')
 
   const { data: contacts } = useGetContactsQuery()
+  const { data: controllings } = useGetControlQuery()
 
   const { saveInvoiceData } = SaveApi()
   //
@@ -229,7 +236,7 @@ const StockSelectorTable = () => {
     { label: 'Toko 18%', percentage: 18 },
     { label: 'Nego 19%', percentage: 19 },
     { label: 'Khusus 21%', percentage: 20.5 },
-    // { label: 'Istimewa SP 23%', percentage: 23 },
+    { label: 'Istimewa SP 23%', percentage: 23 },
   ]
 
   const [discountedPrices, setDiscountedPrices] = useState<{
@@ -305,7 +312,8 @@ const StockSelectorTable = () => {
 
     if (selectedDiscount) {
       const newPrice = calculateDiscount(basePrice, selectedDiscount.percentage)
-      const gapPrice = Number(basePrice) - Number(newPrice)
+      // const gapPrice = Number(basePrice) - Number(newPrice)
+      const gapPrice = Number(basePrice)
       const gapPriceTotal = gapPrice * record.qty
 
       setDataSource((prev) =>
@@ -718,7 +726,7 @@ const StockSelectorTable = () => {
           amount: Math.ceil(item.subtotal),
           // discount_amount:
           //   item.input_diskon_manual || item.gapPriceTotal || item.gapPrice,
-          discount_amount: item.gapPrice,
+          discount_amount: Math.ceil(item.gapPrice),
           finance_account_id: item.finance_account_id,
           discount_percent: item.selectedDiscountValue || 0,
           name: item.finance_account_name,
@@ -726,7 +734,7 @@ const StockSelectorTable = () => {
           desc: '',
           qty: item.qty,
           qty_update: latest_stock || 0,
-          price: item.price,
+          price: Math.ceil(item.price),
           unit_id: item.unit_id,
           satuan: item.name,
         }
@@ -934,16 +942,16 @@ const StockSelectorTable = () => {
         </div>
       ),
     },
+    // {
+    //   title: 'Harga Setelah Diskon',
+    //   dataIndex: 'harga_setelah_diskon',
+    //   key: 'harga_setelah_diskon',
+    //   render: (text: any) => (
+    //     <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
+    //   ),
+    // },
     {
-      title: 'Harga Setelah Diskon',
-      dataIndex: 'harga_setelah_diskon',
-      key: 'harga_setelah_diskon',
-      render: (text: any) => (
-        <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
-      ),
-    },
-    {
-      title: 'Input Diskon Manual',
+      title: 'Diskon',
       dataIndex: 'input_diskon_manual',
       key: 'input_diskon_manual',
       render: (text: any, record: any) => (
@@ -1016,12 +1024,42 @@ const StockSelectorTable = () => {
     textAlign: 'left' as const,
   }
 
-  const isColumnsVisible = false // Set this flag based on your needs
-  const filteredColumns = isColumnsVisible
+  const updateOutletMutation = useUpdateControlMutation()
+
+  const primaryControl = controllings?.[0] // Ambil data kontrol pertama
+
+  // Inisialisasi state dengan nilai default berdasarkan 'name' dari primaryControl
+  const [showDiskonColumn, setShowDiskonColumn] = useState(false)
+
+  // Sinkronkan state dengan data primaryControl setelah render pertama
+  useEffect(() => {
+    if (primaryControl) {
+      setShowDiskonColumn(primaryControl.name === 'buka')
+    }
+  }, [primaryControl]) // Memastikan bahwa state diperbarui jika primaryControl berubah
+
+  const filteredColumns = showDiskonColumn
     ? columns
-    : columns.filter(
-        (col) => col.key !== 'base_price' && col.key !== 'harga_setelah_diskon'
-      )
+    : columns.filter((col) => col.key !== 'input_diskon_manual')
+
+  const handleSwitchChange = (checked: boolean, controlId: string) => {
+    const updatedName = checked ? 'buka' : 'tutup'
+
+    // Mutasi untuk mengupdate data di server
+    updateOutletMutation.mutate(
+      { _id: controlId, name: updatedName },
+      {
+        onSuccess: () => {
+          message.success(`Berhasil mengubah status menjadi ${updatedName}`)
+          setShowDiskonColumn(checked) // Update state lokal setelah berhasil
+        },
+        onError: () => {
+          message.error('Gagal mengubah status')
+        },
+      }
+    )
+  }
+
   return (
     <>
       <div
@@ -1036,6 +1074,7 @@ const StockSelectorTable = () => {
       >
         Tambah Tagihan
       </div>
+
       <div
         style={{
           background: 'white',
@@ -1200,13 +1239,34 @@ const StockSelectorTable = () => {
           />
         </Form.Item>
         <div>
-          <Button
-            type="primary"
-            onClick={handleOkClick}
-            style={{ marginRight: '20px', width: '120px' }}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '16px',
+            }}
           >
-            Pilih Barang
-          </Button>
+            {/* Button di sebelah kiri */}
+            <Button
+              type="primary"
+              onClick={() => console.log('Tambah Barang')} // Sesuaikan logika onClick
+              style={{ marginRight: '20px', width: '120px' }}
+            >
+              Tambah Barang
+            </Button>
+
+            {user?.isAdmin && primaryControl && (
+              <Switch
+                checked={showDiskonColumn} // Menggunakan state yang sudah disinkronkan
+                onChange={(checked) =>
+                  handleSwitchChange(checked, primaryControl._id)
+                }
+                checkedChildren="Buka dan Sembunyikan Diskon"
+                unCheckedChildren="Tutup dan Tampilkan Diskon"
+              />
+            )}
+          </div>
           <Select
             mode="multiple"
             placeholder="Pilih Barang"
@@ -1265,13 +1325,12 @@ const StockSelectorTable = () => {
                       ?.stock || 0
                   if (stockQuantity === 0) return null
 
-                  // Filter discount rates based on the condition
                   const filteredDiscountRates = discountRates.map((rate) => {
                     if (
                       rate.label === 'Istimewa SP 23%' &&
                       product.pos_product_category_id !== 19
                     ) {
-                      return { ...rate, percentage: null } // Gunakan null untuk menandakan harga 0
+                      return { ...rate, percentage: null }
                     }
                     return rate
                   })
@@ -1360,6 +1419,7 @@ const StockSelectorTable = () => {
             <p>No stock data available</p>
           )}
         </div> */}
+
           <Table
             dataSource={dataSource}
             columns={filteredColumns}
