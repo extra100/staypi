@@ -115,6 +115,7 @@ import EditMutasi from './pages/api/EditMutasi'
 import SimpanIdUnikDariReturn from './pages/api/simpanIdUnikDariReturn'
 import EditPembayaran from './pages/api/EditPembayaran'
 import ListSiapDiValdiasiOutletKhusus from './pages/api/ListSiapDiValdiasiOutletKhusus'
+import SuitExApiWithOwnDbBasedDate from './pages/api/suitExApiWithOwnDatabase'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -171,6 +172,10 @@ const router = createBrowserRouter(
         element={<FilterContactBasedIdAndGroupid />}
       />
       <Route path="/detailpiutangperkontak" element={<DetailPiutangKontak />} />
+      <Route
+        path="/getinvbasedondate"
+        element={<SuitExApiWithOwnDbBasedDate />}
+      />
       <Route path="/laporanstok" element={<LaporanStock />} />
       <Route path="/laporankeuangan" element={<LaporanKeuangan />} />
       <Route path="/product-history/:id" element={<ProductHistory />} />
