@@ -4,6 +4,34 @@ import asyncHandler from 'express-async-handler'
 import { TransactionModel } from '../models/transactionModel'
 
 export const transactionRouter = express.Router()
+
+transactionRouter.get(
+  '/',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { date_from, date_to, warehouse_id } = req.query
+
+    const conditions: any = {}
+
+    if (date_from && date_to) {
+      conditions.trans_date = date_from
+      console.log('Date condition:', conditions.trans_date)
+    }
+
+    if (warehouse_id) {
+      conditions.warehouse_id = Number(warehouse_id)
+      console.log('Warehouse condition:', conditions.warehouse_id)
+    }
+
+    console.log('Final query conditions:', conditions)
+
+    const transactions = await TransactionModel.find(conditions)
+
+    console.log('Transactions found:', transactions)
+
+    res.json(transactions)
+  })
+)
+
 transactionRouter.post(
   '/',
   asyncHandler(async (req, res) => {

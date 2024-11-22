@@ -10,9 +10,21 @@
     Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   margin-bottom: 1px;
 }
+/* CSS untuk memberi warna merah pada baris yang ID-nya tidak cocok */
+/* Pastikan warna merah tetap ada pada baris yang ID-nya tidak cocok */
+.red-row {
+  background-color: red !important;
+  color: white !important;
+}
+
+/* Hapus efek hover atau focus pada baris dengan kelas red-row */
+.red-row:hover {
+  background-color: red !important;
+  color: blue !important;
+}
 
 .negative-stock-row {
-  background-color: #ffcccc !important; /* Warna merah muda */
+  background-color: #ffcccc !important;
 }
 
 /* Container untuk memusatkan elemen */

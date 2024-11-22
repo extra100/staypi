@@ -1,6 +1,37 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../apiClient'
 import { Transaction } from '../types/Transaction'
+
+interface UseTransactionsParams {
+  transDateFrom?: string | null
+  transDateTo?: string | null
+  selectedWarehouse?: string | null
+}
+
+export const useGetFilteredTransaksisQuery = ({
+  transDateFrom,
+  transDateTo,
+  selectedWarehouse,
+}: UseTransactionsParams) =>
+  useQuery({
+    queryKey: [
+      'transactions',
+      { transDateFrom, transDateTo, selectedWarehouse },
+    ],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (transDateFrom) params.append('date_from', transDateFrom)
+      if (transDateTo) params.append('date_to', transDateTo)
+      if (selectedWarehouse) params.append('warehouse_id', selectedWarehouse)
+
+      const response = await apiClient.get<Transaction[]>(
+        `/api/transactions?${params.toString()}`
+      )
+      return response.data
+    },
+    enabled: Boolean(transDateFrom && transDateTo),
+  })
+
 export const useUpdateWitholdingMutation = () => {
   return useMutation(
     async ({
@@ -21,7 +52,6 @@ export const useUpdateWitholdingMutation = () => {
       )
   )
 }
-
 export const useUpdateTransactionMutationsss = () => {
   return useMutation(
     async (updateData: {
