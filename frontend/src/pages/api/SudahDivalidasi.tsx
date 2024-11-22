@@ -189,7 +189,6 @@ const SudahDivalidasi: React.FC = () => {
   )
   console.log({ getDetailMutasiQuery })
 
-  //delete
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(
     null
   )
@@ -201,19 +200,12 @@ const SudahDivalidasi: React.FC = () => {
 
   const handleDelete = () => {
     if (IdYangAkanDiDelete) {
-      // First, handle external API deletion
       setSelectedInvoiceId(IdYangAkanDiDelete)
-      message.loading('Deleting invoice...')
 
-      // Then, trigger internal API deletion
       if (ref_number) {
         deleteMutasiMutation.mutate(ref_number as any, {
-          onSuccess: () => {
-            console.log('Data deleted successfully via internal API')
-          },
-          onError: (error) => {
-            console.error('Delete failed via internal API:', error)
-          },
+          onSuccess: () => {},
+          onError: (error) => {},
         })
       }
     }
@@ -221,7 +213,6 @@ const SudahDivalidasi: React.FC = () => {
 
   useEffect(() => {
     if (anjing) {
-      message.success('Invoice deleted successfully via external API')
       setSelectedInvoiceId(null)
     }
   }, [anjing])
@@ -233,12 +224,12 @@ const SudahDivalidasi: React.FC = () => {
 
   const columns = [
     {
-      title: 'No',
+      title: 'Nomor',
       key: 'stok_terakhir',
       render: (text: any, record: any) => (
         <>
           <div>
-            {record.before_qty_tujuan} **{record.before_qty_dari}
+            IPO{record.before_qty_tujuan}/{record.before_qty_dari}
           </div>
         </>
       ),
@@ -248,22 +239,18 @@ const SudahDivalidasi: React.FC = () => {
       dataIndex: 'product_name',
       key: 'product_name',
     },
+
     {
-      title: 'Order',
-      dataIndex: 'qty_minta',
-      key: 'qty_minta',
-    },
-    {
-      title: 'Terima',
+      title: 'Qty',
       dataIndex: 'qty',
       key: 'qty',
     },
 
-    {
-      title: 'Sat',
-      dataIndex: 'unit_name',
-      key: 'unit_name',
-    },
+    // {
+    //   title: 'Sat',
+    //   dataIndex: 'unit_name',
+    //   key: 'unit_name',
+    // },
   ]
 
   const componentRef = useRef<HTMLDivElement>(null)
@@ -274,7 +261,13 @@ const SudahDivalidasi: React.FC = () => {
     <div
       ref={componentRef}
       className="printable-component"
-      style={{ padding: '40px', fontFamily: 'Arial, sans-serif' }}
+      // style={{ padding: '40px', fontFamily: 'Arial, sans-serif' }}
+      style={{
+        padding: '40px',
+        fontFamily: 'Arial, sans-serif',
+        width: '800px',
+        margin: '0 auto',
+      }}
     >
       <div ref={componentRef} className="print-container">
         <Title level={3} style={{ textAlign: 'center' }}>
@@ -305,7 +298,7 @@ const SudahDivalidasi: React.FC = () => {
 
                 <Row>
                   <Col span={6}>
-                    <Text>Tanggal Validasi</Text>
+                    <Text>Tanggal PO</Text>
                   </Col>
                   <Col span={12}>
                     <Text strong>: {formattedTransDate}</Text>
@@ -450,31 +443,7 @@ const SudahDivalidasi: React.FC = () => {
         )}
       </div>
       <br />
-      {/* <Button
-        key="hapus"
-        // icon={<CloseCircleOutlined />}
-        onClick={() => {
-          handleDelete()
-          // handleVoid(null)
-        }}
-        // disabled={hapusLoading}
-      >
-        {hapusLoading ? 'Proses Penghapusan...' : 'hapus'}
-      </Button> */}
-      <div>
-        {/* Display your data or any other content here */}
-        <Button
-          danger // Use the 'danger' prop directly, no need for 'type="danger"'
-          onClick={handleDelete}
-          loading={deleteMutasiMutation.isLoading}
-        >
-          Delete
-        </Button>
-        <br />
-        <Button type="primary" onClick={handleEditClick}>
-          Edit Mutasi
-        </Button>
-      </div>
+
       <div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
@@ -485,6 +454,29 @@ const SudahDivalidasi: React.FC = () => {
             Print Surat Jalan Mutasi
           </Button>
         </div>
+      </div>
+      <br />
+      <br />
+      <div
+        style={{
+          display: 'flex',
+
+          marginTop: '20px',
+          marginRight: '10px',
+        }}
+      >
+        <Button
+          style={{ marginRight: '20px' }}
+          className="no-print"
+          danger
+          onClick={handleDelete}
+          loading={deleteMutasiMutation.isLoading}
+        >
+          Delete
+        </Button>
+        <Button type="primary" onClick={handleEditClick} className="no-print">
+          Edit Mutasi
+        </Button>
       </div>
     </div>
   )
