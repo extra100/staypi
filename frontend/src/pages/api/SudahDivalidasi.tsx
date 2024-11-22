@@ -229,7 +229,7 @@ const SudahDivalidasi: React.FC = () => {
       render: (text: any, record: any) => (
         <>
           <div>
-            IPO{record.before_qty_tujuan}/{record.before_qty_dari}
+            D{record.before_qty_tujuan}K{record.before_qty_dari}
           </div>
         </>
       ),
@@ -404,6 +404,8 @@ const SudahDivalidasi: React.FC = () => {
                 },
               }}
             />
+            <br />
+
             <div className="print-message">
               <Row style={{ marginTop: '0px', paddingTop: '1px' }}>
                 <Col span={24}>
