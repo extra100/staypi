@@ -1250,10 +1250,10 @@ const StockSelectorTable = () => {
             {/* Button di sebelah kiri */}
             <Button
               type="primary"
-              onClick={() => console.log('Tambah Barang')} // Sesuaikan logika onClick
+              onClick={handleOkClick}
               style={{ marginRight: '20px', width: '120px' }}
             >
-              Tambah Barang
+              Pilih Barang
             </Button>
 
             {user?.isAdmin && primaryControl && (
