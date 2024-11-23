@@ -414,6 +414,15 @@ function App() {
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineBgColors size={20} style={iconStyle} />
               <LinkContainer
+                to="/getinvbasedondate"
+                onClick={handleDataSupplierClick}
+              >
+                <NavDropdown.Item>CEK SINKRON KLEDO WAKANDA</NavDropdown.Item>
+              </LinkContainer>
+            </ListGroup.Item>
+            <ListGroup.Item style={listItemStyle}>
+              <AiOutlineBgColors size={20} style={iconStyle} />
+              <LinkContainer
                 to="/ambildetailbarangdarikledo"
                 onClick={handleDataSupplierClick}
               >
