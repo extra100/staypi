@@ -120,7 +120,11 @@ const ValidatePindah: React.FC = () => {
   const [toQtyState, setToQtyState] = useState<{ [key: number]: number }>({})
 
   const navigate = useNavigate()
+  const [ketValue, setKetValue] = useState<string>('')
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setKetValue(e.target.value)
+  }
   useEffect(() => {
     if (transferData) {
       const initialDataSource = sumberData.map((item: any, index: number) => {
@@ -154,7 +158,7 @@ const ValidatePindah: React.FC = () => {
       to_warehouse_id: fromWarehouseId,
       trans_date: selectedDates,
       ref_number: validRefNumber,
-      memo: '',
+      memo: ketValue,
       code: 2,
       id: 14,
 
@@ -386,8 +390,12 @@ const ValidatePindah: React.FC = () => {
                   <Col span={6}>
                     <Text>Ket</Text>
                   </Col>
-                  <Col span={12}>
-                    <Text>: -</Text>
+                  <Col span={6}>
+                    <Input
+                      placeholder="Masukkan keterangan"
+                      value={ketValue}
+                      onChange={handleInputChange}
+                    />
                   </Col>
                   <Col span={6} style={{ textAlign: 'center' }}>
                     <Text strong>{fromWarehouseName}</Text>

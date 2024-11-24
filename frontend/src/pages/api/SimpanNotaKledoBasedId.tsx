@@ -21,7 +21,7 @@ export function SimpanNotaKledoBasedId(id: number) {
           )
 
           if (matchedInvoice) {
-            console.log('Found in session storage:', matchedInvoice)
+            // console.log('Found in session storage:', matchedInvoice)
             setBasedId(matchedInvoice)
             setLoading(false)
             return
@@ -55,7 +55,7 @@ export function SimpanNotaKledoBasedId(id: number) {
 
           // Log the matched invoice if found
           if (matchedInvoice) {
-            console.log('Matched invoice found:', matchedInvoice)
+            // console.log('Matched invoice found:', matchedInvoice)
             setBasedId(matchedInvoice)
             setLoading(false)
 

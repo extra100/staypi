@@ -27,7 +27,12 @@ export const useGetFilteredTransaksisQuery = ({
       const response = await apiClient.get<Transaction[]>(
         `/api/transactions?${params.toString()}`
       )
-      return response.data
+
+      const filteredData = response.data.filter(
+        (transaction) => transaction.reason_id === 'unvoid'
+      )
+
+      return filteredData
     },
     enabled: Boolean(transDateFrom && transDateTo),
   })
@@ -129,7 +134,7 @@ export const updateDenganIdUnikDariKledo = () => {
     ({ ref_number, id, items }: any) => {
       return apiClient.put(`/api/transactions/by-id/${ref_number}`, {
         id,
-        items, // Sertakan items di dalam body request
+        items,
       })
     },
     {
@@ -143,6 +148,26 @@ export const updateDenganIdUnikDariKledo = () => {
   )
 }
 
+export const updateDenganMemoDariKledo = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    ({ memo, id, items }: { memo: string; id: string; items: any[] }) => {
+      return apiClient.put(`/api/transactions/by-memo/${memo}`, {
+        id,
+        items,
+      })
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['transactions']) // Refresh data setelah berhasil
+      },
+      onError: (error: any) => {
+        console.error('Error updating data by memo:', error)
+      },
+    }
+  )
+}
 export const useUpdateTransactionMutation = () => {
   const queryClient = useQueryClient()
 

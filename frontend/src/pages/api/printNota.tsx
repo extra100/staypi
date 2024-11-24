@@ -39,7 +39,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const refNumber = getPosDetail?.ref_number ?? 0
   const jumlahBayar = getPosDetail?.down_payment ?? 0
   const totalSemua = getPosDetail?.amount ?? 0
-  const ketPelanggan = getPosDetail?.memo ?? 0
+  const ketPelanggan = getPosDetail?.message ?? 0
   //
   const { data: gudang } = useGetWarehousesQuery()
 

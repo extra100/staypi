@@ -11,19 +11,17 @@ export interface Invoice {
   due: number
   amount: number
   trans_date: string
+  memo: string
   items: {
     finance_account_id: number
     id: number
-    name: string
+    tran_id: number
+    trans_type_id: number
     qty: number
     price: number
     amount: number
     price_after_tax: number
     amount_after_tax: number
-    down_payment: number
-    discount_percent: number
-    discount_amount: number
-    unit_id: number
   }[]
 }
 
@@ -44,11 +42,10 @@ export function TakeInvoicesFromKledoBasedOnDate(
         let allInvoices: Invoice[] = []
         let page = 1
         let hasMoreData = true
-
         while (hasMoreData) {
           const url = `${HOST}/finance/invoices?per_page=500&page=${page}&date_from=${dateFrom}&date_to=${dateTo}${
             warehouseId ? `&warehouse_id=${warehouseId}` : ''
-          }`
+          }&include_items=1`
 
           const response = await fetch(url, {
             headers: {
@@ -67,25 +64,24 @@ export function TakeInvoicesFromKledoBasedOnDate(
             ref_number: inv.ref_number,
             contact_id: inv.contact_id,
             warehouse_id: inv.warehouse_id,
-            name: inv.contact.name,
+            name: inv.contact?.name || 'Unknown Contact',
             due: inv.due,
             amount: inv.amount,
+            memo: inv.memo,
             trans_date: inv.trans_date,
-            items:
-              inv.items?.map((item: any) => ({
-                finance_account_id: item.finance_account_id,
-                id: item.id,
-                name: item.name,
-                qty: item.qty,
-                price: item.price,
-                amount: item.amount,
-                price_after_tax: item.price_after_tax,
-                amount_after_tax: item.amount_after_tax,
-                down_payment: item.down_payment,
-                discount_percent: item.discount_percent,
-                discount_amount: item.discount_amount,
-                unit_id: item.unit_id,
-              })) || [],
+            items: Array.isArray(inv.items)
+              ? inv.items.map((item: any) => ({
+                  finance_account_id: item.finance_account_id,
+                  id: item.id,
+                  tran_id: item.tran_id,
+                  trans_type_id: item.trans_type_id,
+                  qty: item.qty,
+                  price: item.price,
+                  amount: item.amount,
+                  price_after_tax: item.price_after_tax,
+                  amount_after_tax: item.amount_after_tax,
+                }))
+              : [],
           }))
 
           allInvoices = [...allInvoices, ...formattedData]

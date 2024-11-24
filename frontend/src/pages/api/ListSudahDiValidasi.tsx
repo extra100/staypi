@@ -36,12 +36,10 @@ const ListSudahDivalidasi: React.FC = () => {
             (String(transfer.ref_number || '').includes(searchTerm) ||
               String(transfer.from_warehouse_id || '').includes(searchTerm))
 
-          // Admin
           if (user?.isAdmin) {
             return isCommonCriteriaMet
           }
 
-          // Non-admin
           const isNonAdminCriteriaMet =
             transfer.code === 2 &&
             transfer.from_warehouse_id === idOutletLoggedIn

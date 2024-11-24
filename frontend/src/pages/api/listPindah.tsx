@@ -55,14 +55,14 @@ const WarehouseTransferTable: React.FC = () => {
   const columns = [
     {
       title: 'Dari',
-      dataIndex: 'to_warehouse_id',
-      key: 'to_warehouse_id',
+      dataIndex: 'from_warehouse_id',
+      key: 'from_warehouse_id',
       render: (id: number) => warehouseMap[id] || id,
     },
     {
       title: 'Tujuan',
-      dataIndex: 'from_warehouse_id',
-      key: 'from_warehouse_id',
+      dataIndex: 'to_warehouse_id',
+      key: 'to_warehouse_id',
       render: (id: number) => warehouseMap[id] || id,
     },
     {
@@ -88,8 +88,8 @@ const WarehouseTransferTable: React.FC = () => {
 
     if (value === '1') {
       navigate('/listsiapvalidasi')
-      // } else if (value === '2') {
-      //   navigate('/listpindah')
+    } else if (value === '2') {
+      navigate('/listpindah')
     } else if (value === '3') {
       navigate('/listsudahdivalidasikeluar')
     } else if (value === '4') {
@@ -99,7 +99,7 @@ const WarehouseTransferTable: React.FC = () => {
 
   return (
     <>
-      {/* <div id="btn-filter-status-container" style={{ display: 'inline-flex' }}>
+      <div id="btn-filter-status-container" style={{ display: 'inline-flex' }}>
         <Button
           id="btn-filter-2"
           value="2"
@@ -110,13 +110,13 @@ const WarehouseTransferTable: React.FC = () => {
         >
           <span>List Permintaan</span>
         </Button>
-      </div> */}
+      </div>
       <div style={{ marginBottom: '16px' }}>
         <Input
           placeholder="Pencarian No"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: '300px' }} // Adjust width as needed
+          style={{ width: '300px' }}
         />
       </div>
       <Button

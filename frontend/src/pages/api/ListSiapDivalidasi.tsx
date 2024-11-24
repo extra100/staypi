@@ -30,39 +30,22 @@ const ListSiapDiValidasi: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('')
 
-  // const userContext = useContext(UserContext)
-  // const { user } = userContext || {}
-  // let idOutletLoggedIn = 0
-  // if (user) {
-  //   idOutletLoggedIn = Number(user.id_outlet)
-  // }
-
   const dataSource = Array.isArray(transfers)
     ? transfers
         .filter((transfer: any) => {
-          // Debug awal, pastikan code bernilai angka
-          console.log('Debug: transfer.code:', transfer.code)
-          console.log('Debug: typeof transfer.code:', typeof transfer.code)
-
-          // Kriteria Umum
           const isCommonCriteriaMet =
-            transfer.code === 1 && // Harus hanya code === 1
+            transfer.code === 1 &&
             transfer.to_warehouse_id !== user?.isAdmin &&
             (String(transfer.ref_number || '').includes(searchTerm) ||
               String(transfer.from_warehouse_id || '').includes(searchTerm))
 
-          // Admin
           if (user?.isAdmin) {
-            console.log('Admin Filter Check:', isCommonCriteriaMet)
             return isCommonCriteriaMet
           }
 
-          // Non-admin
           const isNonAdminCriteriaMet =
-            transfer.code === 1 && // Tetap pastikan hanya code === 1
-            transfer.to_warehouse_id === idOutletLoggedIn
+            transfer.code === 1 && transfer.to_warehouse_id === idOutletLoggedIn
 
-          console.log('Non-Admin Filter Check:', isNonAdminCriteriaMet)
           return isNonAdminCriteriaMet
         })
         .sort(
@@ -88,12 +71,6 @@ const ListSiapDiValidasi: React.FC = () => {
     }
   }
   const columns = [
-    // {
-    //   title: 'Dari',
-    //   dataIndex: 'to_warehouse_id',
-    //   key: 'to_warehouse_id',
-    //   render: (id: number) => warehouseMap[id] || id,
-    // },
     {
       title: 'Tujuan',
       dataIndex: 'from_warehouse_id',
@@ -130,7 +107,7 @@ const ListSiapDiValidasi: React.FC = () => {
           placeholder="Pencarian No"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: '300px' }} // Adjust width as needed
+          style={{ width: '300px' }}
         />
       </div>
 

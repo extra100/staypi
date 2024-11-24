@@ -10,6 +10,7 @@ export class Transaction {
   public jalur?: string
   @prop({ required: true })
   public due_date?: string
+
   @prop({ required: true })
   public unique_id!: number
   @prop({ required: true })
@@ -60,7 +61,7 @@ export class Transaction {
   @prop({ required: true })
   public warehouse_id?: number
 
-  @prop()
+  @prop({ required: false })
   public message?: string
 
   @prop({ type: () => [Tages], required: true })

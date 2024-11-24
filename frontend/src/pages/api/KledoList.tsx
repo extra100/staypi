@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Button, Col, DatePicker, Input, Row, Table, Tag } from 'antd'
+import { Button, Col, DatePicker, Input, Row, Select, Table, Tag } from 'antd'
 
 import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
 import { useIdInvoice } from './takeSingleInvoice'
 import UserContext from '../../contexts/UserContext'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useGetoutletsQuery } from '../../hooks/outletHooks'
 
 const ListTransaksi: React.FC = () => {
   const { data } = useGetTransaksisQuery()
@@ -17,6 +18,7 @@ const ListTransaksi: React.FC = () => {
     null
   )
   const { data: contacts } = useGetContactsQuery()
+  const { data: gudangs } = useGetoutletsQuery()
 
   useEffect(() => {
     if (user) {
@@ -33,43 +35,89 @@ const ListTransaksi: React.FC = () => {
   }
 
   const [searchText, setSearchText] = useState<string>('')
-
+  //aneh
   const getContactName = (contact_id: string | number) => {
     const contact = contacts?.find((c) => c.id === contact_id)
     return contact ? contact.name : 'Nama tidak ditemukan'
   }
+  const getWarehouseName = (warehouse_id: string | number) => {
+    const warehouse = gudangs?.find(
+      (gudang) => String(gudang.id_outlet) === String(warehouse_id)
+    )
+    return warehouse ? warehouse.nama_outlet : 'Nama tidak ditemukan'
+  }
+
   const [startDate, setStartDate] = useState<string | null>(null)
   const [endDate, setEndDate] = useState<string | null>(null)
   const formatDateForBackend = (dateString: string) => {
     const [day, month, year] = dateString.split('-')
     return `${year}-${month}-${day}`
   }
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
 
+  const getStatus = (transaction: any) => {
+    const totalDownPayment = transaction.witholdings.reduce(
+      (sum: number, witholding: any) => sum + (witholding.down_payment || 0),
+      0
+    )
+
+    const due = transaction.amount - totalDownPayment
+
+    if (due === 0 || due <= 0) {
+      return 'Lunas'
+    } else if (totalDownPayment > 0 && due > 0) {
+      return 'Dibayar Sebagian'
+    } else {
+      return 'Belum Dibayar'
+    }
+  }
+  const [searchRef, setSearchRef] = useState('')
+  const [searchContact, setSearchContact] = useState<number | undefined>()
+  const [searchWarehouse, setSearchWarehouse] = useState<number | undefined>()
+  const [searchStatus, setSearchStatus] = useState<string | undefined>()
   const filteredData = data
-    ?.filter((transaction) =>
-      searchText
-        ? transaction.ref_number
-            .toLowerCase()
-            .includes(searchText.toLowerCase()) ||
-          getContactName(transaction.contact_id)
-            .toLowerCase()
-            .includes(searchText.toLowerCase()) ||
-          (transaction.memo &&
-            transaction.memo.toLowerCase().includes(searchText.toLowerCase()))
-        : true
-    )
-    ?.filter(
-      (transaction) =>
-        (transaction.warehouse_id === Number(user?.id_outlet) ||
-          user?.isAdmin) &&
-        transaction.jalur === 'penjualan' &&
-        transaction.reason_id !== 'void'
-    )
+    ?.filter((transaction) => {
+      // Filter berdasarkan Ref Number
+      if (searchRef) {
+        return transaction.ref_number
+          .toLowerCase()
+          .includes(searchRef.toLowerCase())
+      }
+      return true
+    })
+    ?.filter((transaction) => {
+      // Filter berdasarkan Nama Kontak
+      if (searchContact) {
+        return transaction.contact_id === searchContact
+      }
+      return true
+    })
+    ?.filter((transaction) => {
+      // Filter berdasarkan Nama Gudang
+      if (searchWarehouse) {
+        return transaction.warehouse_id === searchWarehouse
+      }
+      return true
+    })
+    ?.filter((transaction) => {
+      if (searchStatus) {
+        const statusText = getStatus(transaction)
+        return statusText.toLowerCase() === searchStatus.toLowerCase()
+      }
+      return true
+    })
     ?.filter((transaction) => {
       const transDate = new Date(transaction.trans_date)
       const start = startDate ? new Date(formatDateForBackend(startDate)) : null
       const end = endDate ? new Date(formatDateForBackend(endDate)) : null
-      return (!start || transDate >= start) && (!end || transDate <= end)
+      return (
+        (!start || transDate >= start) &&
+        (!end || transDate <= end) &&
+        (transaction.warehouse_id === Number(user?.id_outlet) ||
+          user?.isAdmin) &&
+        transaction.jalur === 'penjualan' &&
+        transaction.reason_id !== 'void'
+      )
     })
     ?.sort(
       (a, b) =>
@@ -129,9 +177,16 @@ const ListTransaksi: React.FC = () => {
       render: (contactId: string) => getContactName(contactId),
     },
     {
+      title: 'Warehouse',
+      dataIndex: 'warehouse_id',
+      key: 'warehouse_name',
+      render: (warehouseId: number) => getWarehouseName(warehouseId),
+    },
+
+    {
       title: 'Ket',
-      dataIndex: 'memo',
-      key: 'memo',
+      dataIndex: 'message',
+      key: 'message',
     },
     {
       title: 'Tgl. Trans',
@@ -220,6 +275,11 @@ const ListTransaksi: React.FC = () => {
         )
       },
     },
+    {
+      title: 'Ket',
+      dataIndex: 'id',
+      key: 'id',
+    },
   ]
 
   return (
@@ -283,14 +343,78 @@ const ListTransaksi: React.FC = () => {
           />
         </Col>
 
-        <Col>
-          <Input
-            placeholder="Cari berdasarkan Ref, Nama Kontak, atau Memo"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 300 }}
-          />
-        </Col>
+        <Row gutter={16} style={{ marginBottom: 16 }}>
+          <Col>
+            <Input
+              placeholder="Cari Ref Number"
+              value={searchRef}
+              onChange={(e) => setSearchRef(e.target.value)}
+              style={{ width: 200 }}
+            />
+          </Col>
+
+          {/* Filter berdasarkan Nama Kontak */}
+          <Col>
+            <Select
+              placeholder="Pilih Nama Kontak"
+              value={searchContact}
+              onChange={(value) => setSearchContact(value)}
+              style={{ width: 200 }}
+              allowClear
+              showSearch
+              optionFilterProp="children" // Enable filtering by the displayed option text
+              filterOption={
+                (input, option) =>
+                  (option?.children as any)
+                    .toLowerCase()
+                    .includes(input.toLowerCase()) // Custom filter logic
+              }
+            >
+              {contacts?.map((contact) => (
+                <Select.Option key={contact.id} value={contact.id}>
+                  {contact.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Col>
+
+          {/* Filter berdasarkan Nama Gudang */}
+          <Col>
+            <Select
+              placeholder="Pilih Nama Gudang"
+              value={searchWarehouse}
+              onChange={(value) => setSearchWarehouse(value)}
+              style={{ width: 200 }}
+              allowClear
+            >
+              {gudangs?.map((warehouse) => (
+                <Select.Option
+                  key={warehouse.id_outlet}
+                  value={warehouse.id_outlet}
+                >
+                  {warehouse.nama_outlet}
+                </Select.Option>
+              ))}
+            </Select>
+          </Col>
+
+          {/* Filter berdasarkan Status */}
+          <Col>
+            <Select
+              placeholder="Pilih Status"
+              value={searchStatus}
+              onChange={(value) => setSearchStatus(value)}
+              style={{ width: 200 }}
+              allowClear
+            >
+              <Select.Option value="Lunas">Lunas</Select.Option>
+              <Select.Option value="Dibayar Sebagian">
+                Dibayar Sebagian
+              </Select.Option>
+              <Select.Option value="Belum Dibayar">Belum Dibayar</Select.Option>
+            </Select>
+          </Col>
+        </Row>
       </Row>
       {/* <Table
         dataSource={filteredData}
@@ -326,15 +450,15 @@ const ListTransaksi: React.FC = () => {
               <Table.Summary.Cell index={0} colSpan={6}>
                 <strong>Total</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={6} align="right">
+              <Table.Summary.Cell index={8} align="right">
                 <strong>{`Rp ${roundUpIndonesianNumber(totalAmount)}`}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={7} align="right">
+              <Table.Summary.Cell index={9} align="right">
                 <strong>{`Rp ${roundUpIndonesianNumber(
                   totalTerbayar
                 )}`}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={8} align="right">
+              <Table.Summary.Cell index={10} align="right">
                 <strong>{`Rp ${roundUpIndonesianNumber(
                   totalSisaTagihan
                 )}`}</strong>

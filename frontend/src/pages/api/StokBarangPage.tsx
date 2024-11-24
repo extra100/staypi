@@ -217,6 +217,7 @@ const StockSelectorTable = () => {
   const handleProductChange = (values: any[]) => {
     setSelectedFinanceAccountIds(values)
   }
+  // console.log({ selectedFinanceAccountIds })
   const [searchValue, setSearchValue] = useState('')
 
   const handleSearch = (value: any) => {
@@ -227,7 +228,7 @@ const StockSelectorTable = () => {
   const [selectedPrices, setSelectedPrices] = useState<{
     [key: string]: string
   }>({})
-  console.log({ selectedPrices })
+  // console.log({ selectedPrices })
   //sen
   const discountRates = [
     { label: 'Harga Dasar', percentage: 0 },
@@ -250,7 +251,7 @@ const StockSelectorTable = () => {
   const [selectedDiscounts, setSelectedDiscounts] = useState<{
     [key: string]: number
   }>({})
-  console.log({ selectedDiscounts })
+  // console.log({ selectedDiscounts })
   const [selectedProductPrices, setSelectedProductPrices] = useState<
     Record<string, number>
   >({})
@@ -298,6 +299,8 @@ const StockSelectorTable = () => {
   }
 
   const calculateSubtotal = (price: number, qty: number) => {
+    console.log({ price })
+
     return price * qty
   }
   const calculateGapPrice = (gapPrice: number, qty: number) => {
@@ -413,6 +416,7 @@ const StockSelectorTable = () => {
   const retailDiscount =
     discountRates.find((rate) => rate.label === 'Harga Dasar')?.percentage || 0
   //oceoce
+  //harga dasar
 
   const [hargaDasar, setHargaDasar] = useState<{ [key: string]: number }>({})
   console.log({ hargaDasar })
@@ -472,7 +476,6 @@ const StockSelectorTable = () => {
   }
 
   const handleQtyChange = (value: number, record: any) => {
-    // Determine whether we are using the base price or discounted price
     const basePrice =
       selectedProductPrices[record.finance_account_id] || record.basePrice
     const newPrice = calculateDiscount(
@@ -480,8 +483,9 @@ const StockSelectorTable = () => {
       record.selectedDiscountValue || 0
     )
 
+    // const priceToUse = record.harga_setelah_diskon || newPrice
     const priceToUse = record.harga_setelah_diskon || newPrice
-    const newSubtotal = priceToUse * value // This handles subtotal update based on the correct price
+    const newSubtotal = basePrice * value
 
     setDataSource((prev) =>
       prev.map((item) =>
@@ -559,7 +563,7 @@ const StockSelectorTable = () => {
     }, 0)
   const limitizeTrans = totalReceivable > 3800
   const [totalSubtotal, setTotalSubtotal] = useState<number>(0)
-  console.log({ totalSubtotal })
+  // console.log({ totalSubtotal })
   const [formattedTotalSubtotal, setFormattedTotalSubtotal] =
     useState<string>('')
 
@@ -620,11 +624,17 @@ const StockSelectorTable = () => {
     const [day, month, year] = dateString.split('-')
     return `${year}-${month}-${day}`
   }
+
   const generateShortInvoiceId = (idOutlet: string): string => {
     const uuid = uuidv4()
+    const timestamp = Date.now()
     const last4OfUUID = uuid.substr(uuid.length - 4)
     const shortNumber = parseInt(last4OfUUID, 16) % 10000
-    return `IBO-${idOutlet}-${String(shortNumber).padStart(5, '0')}`
+
+    return `IBO-${idOutlet}-${timestamp}-${String(shortNumber).padStart(
+      5,
+      '0'
+    )}`
   }
 
   const [refNumber, setRefNumber] = useState<string>('')
@@ -644,7 +654,7 @@ const StockSelectorTable = () => {
     return shortNumber
   }
   const [uniqueNumber, setUniqueNumber] = useState('')
-  console.log({ uniqueNumber })
+  // console.log({ uniqueNumber })
   useEffect(() => {
     const generatedNumber = generateUnique()
     setUniqueNumber(generatedNumber as any)
@@ -712,12 +722,13 @@ const StockSelectorTable = () => {
       sales_id: null,
       include_tax: 0,
       term_id: termIdSimpan || 2,
-      memo: memo,
+      memo: refNumber,
       amount: Math.ceil(totalSubtotal),
       amount_after_tax: 0,
       warehouse_id: selectedWarehouseId,
       attachment: [],
       reason_id: 'unvoid',
+      message: memo || '',
       items: dataSource.map((item) => {
         const matchingStock = productQuantities[item.finance_account_id]
         const latest_stock = matchingStock - item.qty
@@ -773,7 +784,7 @@ const StockSelectorTable = () => {
       down_payment_bank_account_id: accountId || bankAccountId,
       witholding_account_id: accountId || bankAccountId,
 
-      message: catatan,
+      // message: catatan,
       tags: selectTag || tagId,
 
       witholding_amount: 0,
@@ -790,17 +801,28 @@ const StockSelectorTable = () => {
       onSuccess: () => {
         message.success('Transaksi berhasil disimpan!')
 
-        setTimeout(() => {
-          setLoadingSpinner(false)
-          navigate(`/simpanidunikdarikledopenjualan/${refNumber}`)
-        }, 1500)
+        // navigate(`/simpanidunikdarikledopenjualan/${refNumber}`)
+        navigate(`/getinvbasedondate`)
       },
       onError: (error: any) => {
         message.error(`Terjadi kesalahan: ${error.message}`)
-        setLoadingSpinner(true)
       },
     })
   }
+
+  const [stockQuantities, setStockQuantities] = useState<
+    Record<string, number>
+  >({})
+
+  useEffect(() => {
+    const newStockQuantities: Record<string, number> = {}
+    barangs?.forEach((product) => {
+      const stockQuantity =
+        warehouseStock.find((stock: any) => stock.id === product.id)?.stock || 0
+      newStockQuantities[product.id] = stockQuantity
+    })
+    setStockQuantities(newStockQuantities)
+  }, [barangs, warehouseStock])
 
   const columns = [
     {
@@ -871,12 +893,12 @@ const StockSelectorTable = () => {
           (item) => item.id === record.finance_account_id
         )
         const categoryId = product?.pos_product_category_id || 'Tidak Ditemukan'
-        console.log({ categoryId })
+        // console.log({ categoryId })
         const availableDiscountRates =
           categoryId === 19
             ? discountRates
             : discountRates.filter((rate) => rate.label !== 'Istimewa SP 23%')
-        console.log({ availableDiscountRates })
+        // console.log({ availableDiscountRates })
 
         return (
           <div
@@ -932,16 +954,16 @@ const StockSelectorTable = () => {
         </div>
       ),
     },
-    {
-      title: 'Harga Dasar',
-      dataIndex: 'finance_account_id',
-      key: 'base_price',
-      render: (id: any) => (
-        <div>
-          {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
-        </div>
-      ),
-    },
+    // {
+    //   title: 'Harga Dasar',
+    //   dataIndex: 'finance_account_id',
+    //   key: 'base_price',
+    //   render: (id: any) => (
+    //     <div>
+    //       {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
+    //     </div>
+    //   ),
+    // },
     // {
     //   title: 'Harga Setelah Diskon',
     //   dataIndex: 'harga_setelah_diskon',

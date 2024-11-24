@@ -206,14 +206,7 @@ const ProductStocksPage: React.FC = () => {
         </Select>
       ),
     },
-    {
-      title: 'Unit',
-      dataIndex: 'unit',
-      key: 'unit',
-      render: (_: any, record: any) => (
-        <span>{record.unit ? record.unit : 'N/A'}</span>
-      ),
-    },
+
     {
       title: 'Name Outlet',
       dataIndex: 'stok_terkini',
@@ -259,7 +252,7 @@ const ProductStocksPage: React.FC = () => {
       },
     },
     {
-      title: 'jumlah TF',
+      title: 'Qty',
       dataIndex: 'transferQty',
       key: 'transferQty',
       render: (_: any, record: any) => (
@@ -341,7 +334,8 @@ const ProductStocksPage: React.FC = () => {
     try {
       await addWarehouseTransfer(transferData as any)
       message.success('Data transfer berhasil disimpan!')
-      navigate(`/listpindah`)
+      // navigate(`/listpindah`)
+      navigate(`/transfer-detail/${refNumber}`)
     } catch (error) {
       message.error('Terjadi kesalahan saat menyimpan data transfer')
       console.error('Error:', error)

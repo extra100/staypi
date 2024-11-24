@@ -293,13 +293,13 @@ const EditMutasi: React.FC = () => {
         const qtyDariValue = product?.stocks?.[fromWarehouseId]?.qty || 0
         const qtyTujuanValue = product?.stocks?.[toWarehouseId]?.qty || 0
 
-        const transferAmount = transferQty[index] || 0 // Gunakan index
+        const transferAmount = transferQty[index] || 0
         const updatedQtyDariValue = qtyDariValue + transferAmount
         const updatedQtyTujuanValue = qtyTujuanValue - transferAmount
 
         return (
           <div>
-            <span>{`${updatedQtyDariValue} / ${updatedQtyTujuanValue}`}</span>
+            <span>{`${updatedQtyTujuanValue} / ${updatedQtyDariValue}`}</span>
           </div>
         )
       },

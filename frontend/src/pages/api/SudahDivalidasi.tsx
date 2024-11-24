@@ -41,11 +41,11 @@ const SudahDivalidasi: React.FC = () => {
   const { data: idWarehouseMonggo } = useGetWarehousesQuery()
 
   const { data: transferData } = useGetWarehouseTransferByRefQuery(ref_number!)
-  console.log({ transferData })
+
   const transferArray = Array.isArray(transferData) ? transferData : []
   const transfer = transferArray[0] || {}
   const sumberData = transfer.items || []
-  console.log({ transfer })
+
   const warehouseMap: Record<any, any> = {}
   const formattedTransDate = new Date(transfer.trans_date).toLocaleString(
     'id-ID',
@@ -113,7 +113,7 @@ const SudahDivalidasi: React.FC = () => {
   // }
 
   const [dataSource, setDataSource] = useState<any[]>([])
-  console.log({ dataSource })
+
   const combinedWarehouseIds = `${fromWarehouseId},${toWarehouseId}`
   const { stocks, loading } = useProductStocks(
     dataSource
@@ -193,7 +193,8 @@ const SudahDivalidasi: React.FC = () => {
     null
   )
   const IdYangAkanDiDelete = getDetailMutasiQuery?.id
-  console.log({ IdYangAkanDiDelete })
+  const memo = getDetailMutasiQuery?.memo
+  console.log({ memo })
 
   const anjing = useDeleteMutation(selectedInvoiceId ?? 0)
   const deleteMutasiMutation = useDeleteMutasiMutation()
@@ -337,7 +338,7 @@ const SudahDivalidasi: React.FC = () => {
                     <Text>Ket</Text>
                   </Col>
                   <Col span={12}>
-                    <Text>: -</Text>
+                    <Text>: {memo}</Text>
                   </Col>
                   <Col span={6} style={{ textAlign: 'center' }}>
                     <Text strong>{toWarehouseName}</Text>

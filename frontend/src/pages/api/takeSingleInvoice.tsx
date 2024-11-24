@@ -59,7 +59,7 @@ export function useIdInvoice(ref_number: any) {
           }
 
           const dataGudang = await responGudang.json()
-          console.log('Response dari Gudang:', dataGudang)
+          // console.log('Response dari Gudang:', dataGudang)
 
           if (dataGudang.data && dataGudang.data.data.length > 0) {
             allInvoices = allInvoices.concat(dataGudang.data.data)

@@ -45,6 +45,7 @@ import {
   useGetTransactionByIdQuery,
 } from '../../hooks/transactionHooks'
 import { useIdInvoice } from './takeSingleInvoice'
+import { useIdPembayaranBank } from './takeSinglePembayaranBank'
 
 const { Title, Text } = Typography
 const { Option } = Select
@@ -64,13 +65,15 @@ const SimpanIdUnikDariKledoPenjualan: React.FC = () => {
 
   const { ref_number } = useParams<{ ref_number?: string }>()
 
+  const { ids } = useParams<{ ids?: any }>()
+
   const updateHanyaId = updateDenganIdUnikDariKledo()
-  console.log({ updateHanyaId })
 
   const { getIdAtInvoice } = useIdInvoice(ref_number as string)
-  console.log({ getIdAtInvoice })
-
   const justPutId = getIdAtInvoice?.id ?? null
+
+  const { getIdAtPembayaranBank } = useIdPembayaranBank(ids as any)
+  console.log({ getIdAtPembayaranBank })
 
   const idPadaItems =
     getIdAtInvoice?.items?.map((item: any) => ({
@@ -103,28 +106,7 @@ const SimpanIdUnikDariKledoPenjualan: React.FC = () => {
       console.error('Gagal memperbarui Invoice ID dan items:', error)
     }
   }
-  // const updateInvoiceId = async () => {
-  //   if (!ref_number || !invoiceId || idPadaItems.length === 0) {
-  //     console.warn('Missing required data for update:', {
-  //       ref_number,
-  //       invoiceId,
-  //       idPadaItems,
-  //     })
-  //     return
-  //   }
 
-  //   try {
-  //     const response = await updateHanyaId.mutateAsync({
-  //       ref_number,
-  //       id: invoiceId,
-  //       items: idPadaItems, // Kirim items ke server
-  //     })
-
-  //     console.log('Invoice ID and items updated successfully:', response)
-  //   } catch (error) {
-  //     console.error('Failed to update Invoice ID and items:', error)
-  //   }
-  // }
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
   )
@@ -132,10 +114,6 @@ const SimpanIdUnikDariKledoPenjualan: React.FC = () => {
   const { data: akunBanks } = useGetAkunBanksQueryDb()
 
   const invoiceId = getIdAtInvoice?.id ?? null
-  // console.log('ref_number dari database keldo', refNumber)
-
-  const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
-  console.log('ref_number dari database keldo', invoiceId)
 
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
@@ -186,9 +164,6 @@ const SimpanIdUnikDariKledoPenjualan: React.FC = () => {
   const [selectedBank, setSelectedBank] = useState<any | null>(null)
 
   const today = dayjs().format('DD-MM-YYYY')
-
-  const [loadingSpinner, setLoadingSpinner] = useState(false) //
-  // const [loading, setLoading] = useState(false) // State to manage loading
 
   const handleButtonClick = () => {
     setLoading(true)
@@ -279,11 +254,7 @@ const SimpanIdUnikDariKledoPenjualan: React.FC = () => {
   }, [warehouseName, akunBanks])
 
   const [refNumbers, setRefNumber] = useState('')
-  // const { voidInvoice, voidLoading, voidError, voidSuccess } = useVoidInvoice(
-  //   refNumber as any
-  // )
-  // const { unvoidInvoice, unvoidLoading, unvoidError, unvoidSuccess } =
-  //   useUnvoidInvoice(refNumber as any)
+
   const [selectedDates, setSelectedDates] = useState<string>()
 
   const handleDateRangeSave = (startDate: string) => {

@@ -116,6 +116,7 @@ import SimpanIdUnikDariReturn from './pages/api/simpanIdUnikDariReturn'
 import EditPembayaran from './pages/api/EditPembayaran'
 import ListSiapDiValdiasiOutletKhusus from './pages/api/ListSiapDiValdiasiOutletKhusus'
 import SuitExApiWithOwnDbBasedDate from './pages/api/suitExApiWithOwnDatabase'
+import BagdePenjualan from './badgePenjualan'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -176,6 +177,7 @@ const router = createBrowserRouter(
         path="/getinvbasedondate"
         element={<SuitExApiWithOwnDbBasedDate />}
       />
+      <Route path="/cekmasalah" element={<BagdePenjualan />} />
       <Route path="/laporanstok" element={<LaporanStock />} />
       <Route path="/laporankeuangan" element={<LaporanKeuangan />} />
       <Route path="/product-history/:id" element={<ProductHistory />} />

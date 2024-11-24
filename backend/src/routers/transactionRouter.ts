@@ -22,11 +22,7 @@ transactionRouter.get(
       console.log('Warehouse condition:', conditions.warehouse_id)
     }
 
-    console.log('Final query conditions:', conditions)
-
     const transactions = await TransactionModel.find(conditions)
-
-    console.log('Transactions found:', transactions)
 
     res.json(transactions)
   })
@@ -104,6 +100,43 @@ transactionRouter.put(
 
       res.json(updatedTransaction)
     }
+  })
+)
+transactionRouter.put(
+  '/by-memo/:memo',
+  asyncHandler(async (req: any, res: any) => {
+    const transaction = await TransactionModel.findOne({
+      memo: req.params.memo, // Cari berdasarkan memo
+    })
+
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction not found' })
+    }
+
+    if (req.body.id) {
+      transaction.id = req.body.id
+    }
+
+    if (Array.isArray(req.body.items) && req.body.items.length > 0) {
+      transaction.items = transaction.items.map((item) => {
+        // Cocokan payload dengan database
+        const updatedItem = req.body.items.find(
+          (i: any) => i.finance_account_id === item.finance_account_id
+        )
+
+        if (updatedItem) {
+          // Update isi items dengan data baru
+          return { ...item, id: updatedItem.id }
+        }
+
+        return item
+      })
+    }
+
+    // Simpan ke database
+    const updatedTransaction = await transaction.save()
+
+    res.json(updatedTransaction)
   })
 )
 

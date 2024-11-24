@@ -36,9 +36,13 @@ import UserContext from './contexts/UserContext'
 import { UserInfoContextType } from './types/UserInfoContext'
 
 import axios from 'axios'
-import { Table } from 'antd'
+import { Badge, Table } from 'antd'
+import { useRedData } from './badgeMessage'
+import BagdePenjualan from './badgePenjualan'
 
 function App() {
+  const { hasRedData } = useRedData()
+
   const [user, setUser] = useState<UserInfo | null>(null)
   const userContext = React.createContext<UserInfoContextType | undefined>(
     undefined
@@ -243,6 +247,12 @@ function App() {
                   >
                     List Pemesanan Penjualan
                   </Link>
+                  <Link
+                    className="nav-link header-link p-1 px-3"
+                    to={`/getinvbasedondate`}
+                  >
+                    <BagdePenjualan />
+                  </Link>
                   {/* <Link className="nav-link header-link p-1 px-3" to={`/ibo`}>
                     POS
                   </Link>
@@ -300,6 +310,7 @@ function App() {
                           <LinkContainer to="/orderhistory">
                             <NavDropdown.Item>Order History</NavDropdown.Item>
                           </LinkContainer>
+
                           <NavDropdown.Divider />
                           <Link
                             className="dropdown-item"
@@ -529,6 +540,7 @@ function App() {
           </ListGroup>
         </div>
         {/* Main Content */}
+
         <main style={{ background: '#f2f4f8' }}>
           <Container className="mt-6">
             <Outlet />

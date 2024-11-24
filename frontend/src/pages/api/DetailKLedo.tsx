@@ -17,6 +17,7 @@ import {
   Divider,
   message,
   Spin,
+  Badge,
 } from 'antd'
 import {
   useAddTransactionMutation,
@@ -59,6 +60,7 @@ import {
   CarOutlined,
 } from '@ant-design/icons'
 import { useDeleteInvoice } from './DeleteInvoicePenjualan'
+import { useRedData } from '../../badgeMessage'
 
 const { Title, Text } = Typography
 const { Option } = Select
@@ -92,7 +94,7 @@ const DetailKledo: React.FC = () => {
   const { data: akunBanks } = useGetAkunBanksQueryDb()
 
   const { getIdAtInvoice } = useIdInvoice(ref_number || '')
-  console.log({ getIdAtInvoice })
+
   const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
 
   const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
@@ -106,6 +108,7 @@ const DetailKledo: React.FC = () => {
     null
   )
   const IdYangAkanDiDelete = getPosDetail?.id
+  const pesan = getPosDetail?.message
   const { hapusLoading, isDeleted } = useDeleteInvoice(selectedInvoiceId ?? 0)
 
   const handleDelete = () => {
@@ -124,7 +127,7 @@ const DetailKledo: React.FC = () => {
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
   const idididid = getPosDetail?.items?.[0]?.id
-  console.log({ idididid })
+
   const langka = getPosDetail?.id
 
   const tagName = getPosDetail?.tages?.map((tag: any) => tag.name) || []
@@ -154,7 +157,6 @@ const DetailKledo: React.FC = () => {
     console.log({ due, amountPaid })
   }, [due, amountPaid])
 
-  console.log({ amountPaid })
   const roundUpIndonesianNumber = (value: number | null): string => {
     if (value === null) return ''
     return new Intl.NumberFormat('id-ID', {
@@ -174,7 +176,7 @@ const DetailKledo: React.FC = () => {
     }
   }
   const handleSetAmountPaid = () => {
-    setAmountPaid(Math.round(due)) // Bulatkan nilai 'due' jika diperlukan
+    setAmountPaid(Math.round(due))
   }
 
   const [contactName, setContactName] = useState<string>('Unknown Contact')
@@ -201,16 +203,13 @@ const DetailKledo: React.FC = () => {
       )
 
       if (existingInvoice) {
-        // Panggil voidInvoice terlebih dahulu
         voidInvoice(langka as any)
           .then(() => {
-            // Jika void berhasil, buat objek updatedInvoice
             const updatedInvoice: Transaction = {
               ...existingInvoice,
               reason_id: 'void',
             }
 
-            // Lanjutkan dengan mutasi untuk memperbarui database
             updatePosMutation.mutate(updatedInvoice, {
               onSuccess: () => {
                 message.success('Transaksi berhasil dibatalkan dan diperbarui!')
@@ -241,7 +240,7 @@ const DetailKledo: React.FC = () => {
     }
   }
 
-  const [loadingSpinner, setLoadingSpinner] = useState(false) // State untuk mengontrol spinner
+  const [loadingSpinner, setLoadingSpinner] = useState(false)
 
   const handleUnVoid = (values: any) => {
     if (langka) {
@@ -250,10 +249,8 @@ const DetailKledo: React.FC = () => {
       )
 
       if (existingInvoice) {
-        // Panggil voidInvoice terlebih dahulu
         unvoidInvoice(langka as any)
           .then(() => {
-            // Jika void berhasil, buat objek updatedInvoice
             const updatedInvoice: Transaction = {
               ...existingInvoice,
               reason_id: 'unvoid',
@@ -312,25 +309,21 @@ const DetailKledo: React.FC = () => {
         ],
       }
 
-      // Mencari invoice yang sesuai berdasarkan `ref_number`
       const existingInvoice = allTransactions?.find(
         (transaction) => transaction.id === langka
       )
 
       if (existingInvoice) {
-        // Menggabungkan `witholdings` yang sudah ada dengan data baru
         const updatedWithholdings = [
           ...existingInvoice.witholdings,
           ...invoiceData.witholdings,
         ]
 
-        // Membuat objek invoice yang diperbarui
         const updatedInvoice = {
           ...existingInvoice,
           witholdings: updatedWithholdings,
         }
 
-        // Mutate untuk mengirim pembaruan ke server
         updatePosMutation.mutate(updatedInvoice as any)
       } else {
         console.error('Invoice with ref_number not found:', refNumber)
@@ -345,14 +338,13 @@ const DetailKledo: React.FC = () => {
       attachment: [],
       bank_account_id: accountId || bankAccountId,
       business_tran_id: langka,
-      // 199588
+
       witholding_amount: amountPaid,
       memo: values.catatan || null,
       trans_date: selectedDates,
-      witholdings: [], // Kosongkan dengan sengaja atau tambahkan data lain jika diperlukan
+      witholdings: [],
     }
 
-    // Simpan pembayaran baru ke server (implementasi saveNextPayment diharapkan sudah tersedia)
     saveNextPayment(payload)
       .then((response: any) => {
         console.log('Payment saved successfully:', response)
@@ -520,6 +512,9 @@ const DetailKledo: React.FC = () => {
       </Menu.Item>
     </Menu>
   )
+
+  const { hasRedData } = useRedData()
+  console.log({ hasRedData })
   const columns = [
     {
       title: 'No',
@@ -721,7 +716,7 @@ const DetailKledo: React.FC = () => {
               <div style={{ marginBottom: '0px' }}>
                 <Text strong>Ket:</Text>
               </div>
-              <Text>{getPosDetail?.memo}</Text>
+              <Text>{getPosDetail?.message}</Text>
             </Col>
           )}
         </Row>

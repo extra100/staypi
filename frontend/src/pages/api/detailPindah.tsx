@@ -155,87 +155,42 @@ const WarehouseTransferDetail: React.FC = () => {
 
   const { mutate: addWarehouseTransfer } = useAddWarehouseTransferMutation()
 
-  // const handleSaveTransfer = async () => {
-  //   const validRefNumber = ref_number || ''
-
-  //   const transferData = {
-  //     from_warehouse_id: fromWarehouseId,
-
-  //     to_warehouse_id: toWarehouseId,
-  //     trans_date: '2024-10-27',
-  //     ref_number: validRefNumber,
-  //     memo: '',
-  //     code: 2,
-  //     items: dataSource.map((row, index) => ({
-  //       qty_minta: row.qty_minta,
-  //       code: row.code,
-  //       product_id: row.product_id,
-  //       finance_account_id: row.id,
-
-  //       product_name: row.product_name,
-  //       qty: transferQty[index] || 0,
-  //       unit_name: row.unit_name,
-  //       before_qty_dari: fromQtyState[row.product_id] || 0,
-  //       before_qty_tujuan: toQtyState[row.product_id] || 0,
-  //     })),
-  //   }
-  //   handlePrint()
-  //   saveInvoiceMutasi(transferData)
-
-  //   try {
-  //     message.success('Data transfer berhasil disimpan!')
-
-  //     updateWarehouseTransfer(
-  //       { ref_number: validRefNumber, updatedData: transferData },
-  //       {
-  //         onSuccess: () => {
-  //           message.success(
-  //             'Data transfer berhasil diupdate berdasarkan ref_number!'
-  //           )
-  //         },
-  //         onError: (error) => {
-  //           message.error('Terjadi kesalahan saat mengupdate data transfer')
-  //           console.error('Error:', error)
-  //         },
-  //       }
-  //     )
-  //   } catch (error) {
-  //     message.error('Terjadi kesalahan saat menyimpan data transfer')
-  //     console.error('Error:', error)
-  //   }
-  // }
   const generateSerialNumber = (productId: number): string => {
     const fromQty = fromQtyState[productId] || 0
     const toQty = toQtyState[productId] || 0
 
-    return `IPO${fromQty}**${toQty}`
+    return `D${fromQty}K${toQty}`
   }
   const columns = [
     {
       title: 'Nomor',
       dataIndex: 'serial_number',
       key: 'serial_number',
+      align: 'center',
       render: (_: any, record: any) => {
         const serialNumber = generateSerialNumber(record.product_id)
-        return serialNumber
+        return <div style={{ textAlign: 'center' }}>{serialNumber}</div>
       },
     },
     {
-      title: 'Item',
+      title: 'Product',
       dataIndex: 'product_name',
       key: 'product_name',
+      align: 'center',
+      render: (text: string) => (
+        <div style={{ textAlign: 'center' }}>{text}</div>
+      ),
     },
     {
       title: 'Qty',
       dataIndex: 'qty_minta',
       key: 'qty_minta',
+      align: 'center',
+      render: (text: number) => (
+        <div style={{ textAlign: 'center' }}>{text}</div>
+      ),
     },
 
-    {
-      title: 'Satuan',
-      dataIndex: 'unit_name',
-      key: 'unit_name',
-    },
     idOutletLoggedIn === fromWarehouseName
       ? {
           title: 'Jumlah TF',
@@ -259,7 +214,14 @@ const WarehouseTransferDetail: React.FC = () => {
     content: () => componentRef.current,
   })
   return (
-    <div style={{ padding: '24px', fontFamily: 'Arial, sans-serif' }}>
+    <div
+      style={{
+        padding: '40px',
+        fontFamily: 'Arial, sans-serif',
+        width: '800px',
+        margin: '0 auto',
+      }}
+    >
       <div ref={componentRef} className="print-container">
         <Title level={3} style={{ textAlign: 'center' }}>
           <span style={{ color: '#AF8700', fontSize: '20px' }}>{title}</span>
@@ -277,7 +239,7 @@ const WarehouseTransferDetail: React.FC = () => {
               <Col span={24}>
                 <Row>
                   <Col span={6}>
-                    <Text>Referensi dasfsg</Text>
+                    <Text>No</Text>
                   </Col>
                   <Col span={12}>
                     <Text strong>: {transfer.ref_number}</Text>
@@ -332,6 +294,56 @@ const WarehouseTransferDetail: React.FC = () => {
               rowKey="_id"
               pagination={false}
               style={{ marginBottom: '0px' }}
+              components={{
+                header: {
+                  cell: ({
+                    children,
+                    ...restProps
+                  }: React.ThHTMLAttributes<HTMLTableHeaderCellElement> & {
+                    children: React.ReactNode
+                  }) => (
+                    <th
+                      {...restProps}
+                      style={{
+                        padding: '4px 8px',
+                        fontSize: '16px',
+                        lineHeight: '1.2',
+                        textAlign: 'center',
+                      }}
+                    >
+                      {children}
+                    </th>
+                  ),
+                },
+                body: {
+                  row: ({
+                    children,
+                    ...restProps
+                  }: React.HTMLAttributes<HTMLTableRowElement> & {
+                    children: React.ReactNode
+                  }) => (
+                    <tr
+                      {...restProps}
+                      style={{ lineHeight: '1.2', padding: '4px 8px' }}
+                    >
+                      {children}
+                    </tr>
+                  ),
+                  cell: ({
+                    children,
+                    ...restProps
+                  }: React.TdHTMLAttributes<HTMLTableDataCellElement> & {
+                    children: React.ReactNode
+                  }) => (
+                    <td
+                      {...restProps}
+                      style={{ padding: '4px 8px', fontSize: '14px' }}
+                    >
+                      {children}
+                    </td>
+                  ),
+                },
+              }}
             />
 
             {idOutletLoggedIn === fromWarehouseName && (
