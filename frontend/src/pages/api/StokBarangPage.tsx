@@ -954,16 +954,16 @@ const StockSelectorTable = () => {
         </div>
       ),
     },
-    // {
-    //   title: 'Harga Dasar',
-    //   dataIndex: 'finance_account_id',
-    //   key: 'base_price',
-    //   render: (id: any) => (
-    //     <div>
-    //       {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
-    //     </div>
-    //   ),
-    // },
+    {
+      title: 'Harga Dasar',
+      dataIndex: 'finance_account_id',
+      key: 'base_price',
+      render: (id: any) => (
+        <div>
+          {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
+        </div>
+      ),
+    },
     // {
     //   title: 'Harga Setelah Diskon',
     //   dataIndex: 'harga_setelah_diskon',
