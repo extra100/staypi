@@ -78,7 +78,7 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
         const item = inv?.items.find(
           (item: any) => item.finance_account_id === record.finance_account_id
         )
-        return inv && item ? `inv-${item.qty_update}` : 'inv -'
+        return inv && item ? `Qt${item.qty_update}` : 'Qt'
       },
     },
     {

@@ -109,7 +109,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         const item = inv?.items.find(
           (item: any) => item.finance_account_id === record.finance_account_id
         )
-        return inv && item ? `${item.qty_update}` : ''
+        return inv && item ? `Qt${item.qty_update}` : ''
       },
     },
     {

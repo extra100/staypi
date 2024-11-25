@@ -315,8 +315,8 @@ const StockSelectorTable = () => {
 
     if (selectedDiscount) {
       const newPrice = calculateDiscount(basePrice, selectedDiscount.percentage)
-      // const gapPrice = Number(basePrice) - Number(newPrice)
-      const gapPrice = Number(basePrice)
+      const gapPrice = Number(basePrice) - Number(newPrice)
+      // const gapPrice = Number(basePrice)
       const gapPriceTotal = gapPrice * record.qty
 
       setDataSource((prev) =>
