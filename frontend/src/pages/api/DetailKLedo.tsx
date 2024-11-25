@@ -759,22 +759,6 @@ const DetailKledo: React.FC = () => {
         <Row gutter={16}>
           <Col span={12}></Col>
           <Col span={12}>
-            <Row>
-              <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>Sub Total</Text>
-              </Col>
-              <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>{roundUpIndonesianNumber(subTotal)}</Text>
-              </Col>
-            </Row>
-            <Row style={{ marginTop: '8px' }}>
-              <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>Total Diskon</Text>
-              </Col>
-              <Col span={12} style={{ textAlign: 'right' }}>
-                <Text strong>{roundUpIndonesianNumber(totalDiscount)}</Text>
-              </Col>
-            </Row>
             <Row style={{ marginTop: '8px' }}>
               <Col span={12} style={{ textAlign: 'right' }}>
                 <Text strong>Total setelah diskon</Text>

@@ -176,17 +176,27 @@ const ValidatePindah: React.FC = () => {
       })),
     }
 
-    saveInvoiceMutasi(transferData)
+    setIsLoading(true) // Aktifkan loading
 
     try {
       updateWarehouseTransfer(
         { ref_number: validRefNumber, updatedData: transferData },
         {
+          onSuccess: () => {
+            message.success('Data transfer berhasil diupdate!')
+
+            setTimeout(() => {
+              setIsLoading(false) // Matikan loading
+
+              navigate(`/sudah-validasi/${ref_number}`)
+            }, 3000) // 3000ms = 3 detik
+          },
           onError: (error) => {
             const errorMessage =
               error?.message ||
               'Terjadi kesalahan saat mengupdate data transfer'
             message.error(errorMessage)
+            setIsLoading(false)
             console.error('Error:', error)
           },
         }
@@ -196,10 +206,9 @@ const ValidatePindah: React.FC = () => {
         (error as Error)?.message ||
         'Terjadi kesalahan saat menyimpan data transfer'
       message.error(errorMessage)
+      setIsLoading(false)
       console.error('Error:', error)
     }
-    navigate(`/simpanidunikdarikledomutasi/${ref_number}`)
-    // navigate(`/transfer-detail/${ref_number}`)
   }
 
   const printSuratJalan = useRef<HTMLDivElement>(null)
@@ -224,7 +233,7 @@ const ValidatePindah: React.FC = () => {
   const columns = [
     // Input for transfer quantity
     {
-      title: 'Jumlah TF',
+      title: 'Qty ',
       dataIndex: 'transferQty',
       key: 'transferQty',
       render: (text: string, record: any, index: number) => (
@@ -321,8 +330,10 @@ const ValidatePindah: React.FC = () => {
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
   })
+  const [isLoading, setIsLoading] = useState(false)
+
   return (
-    <div style={{ padding: '24px', fontFamily: 'Arial, sans-serif' }}>
+    <div className={`page-container ${isLoading ? 'loading' : ''}`}>
       <div ref={componentRef} className="print-container">
         <Title level={3} style={{ textAlign: 'center' }}>
           <span style={{ color: '#AF8700', fontSize: '20px' }}>{title}</span>
@@ -434,6 +445,7 @@ const ValidatePindah: React.FC = () => {
           </>
         )}
       </div>
+      {isLoading && <div className="loading-overlay"></div>}
     </div>
   )
 }

@@ -157,7 +157,8 @@ const StockSelectorTable = () => {
     )
     return matchingBankAccount ? matchingBankAccount.id : null
   }
-
+  const [isLoading, setIsLoading] = useState(false)
+  //loading
   useEffect(() => {
     const id = getBankAccountId()
     setBankAccountId(id as any)
@@ -485,7 +486,8 @@ const StockSelectorTable = () => {
 
     // const priceToUse = record.harga_setelah_diskon || newPrice
     const priceToUse = record.harga_setelah_diskon || newPrice
-    const newSubtotal = basePrice * value
+    // const priceToUse = record.harga_setelah_diskon || newPrice
+    const newSubtotal = newPrice * value
 
     setDataSource((prev) =>
       prev.map((item) =>
@@ -737,7 +739,7 @@ const StockSelectorTable = () => {
           amount: Math.ceil(item.subtotal),
           // discount_amount:
           //   item.input_diskon_manual || item.gapPriceTotal || item.gapPrice,
-          discount_amount: Math.ceil(item.gapPrice),
+          discount_amount: Math.ceil(item.gapPrice) || item.input_diskon_manual,
           finance_account_id: item.finance_account_id,
           discount_percent: item.selectedDiscountValue || 0,
           name: item.finance_account_name,
@@ -797,15 +799,20 @@ const StockSelectorTable = () => {
 
     saveInvoiceData(invoiceData)
 
+    setIsLoading(true) // Aktifkan loading
     addPosMutation.mutate(invoiceData as any, {
       onSuccess: () => {
         message.success('Transaksi berhasil disimpan!')
 
-        // navigate(`/simpanidunikdarikledopenjualan/${refNumber}`)
-        navigate(`/getinvbasedondate`)
+        // Tetap tampilkan loading selama 3 detik sebelum navigasi
+        setTimeout(() => {
+          setIsLoading(false) // Matikan loading
+          navigate(`/getinvbasedondate`)
+        }, 3000) // 3000ms = 3 detik
       },
       onError: (error: any) => {
         message.error(`Terjadi kesalahan: ${error.message}`)
+        setIsLoading(false) // Matikan loading langsung jika gagal
       },
     })
   }
@@ -883,6 +890,39 @@ const StockSelectorTable = () => {
       dataIndex: 'satuan',
       key: 'satuan',
     },
+    {
+      title: 'Diskon',
+      dataIndex: 'input_diskon_manual',
+      key: 'input_diskon_manual',
+      render: (text: any, record: any) => (
+        <div>
+          <Input
+            type="number"
+            defaultValue={text || 0}
+            onChange={(e) => {
+              const inputDiskonManual = parseFloat(e.target.value) || 0
+              console.log({ inputDiskonManual })
+              const basePrice = hargaDasar[record.finance_account_id] || 0
+              const hargaSetelahDiskon = basePrice - inputDiskonManual
+              const newSubtotal = hargaSetelahDiskon * record.qty
+
+              setDataSource((prev) =>
+                prev.map((item) =>
+                  item.finance_account_id === record.finance_account_id
+                    ? {
+                        ...item,
+                        input_diskon_manual: inputDiskonManual,
+                        harga_setelah_diskon: hargaSetelahDiskon,
+                        subtotal: newSubtotal,
+                      }
+                    : item
+                )
+              )
+            }}
+          />
+        </div>
+      ),
+    },
 
     {
       title: 'Harga',
@@ -898,7 +938,7 @@ const StockSelectorTable = () => {
           categoryId === 19
             ? discountRates
             : discountRates.filter((rate) => rate.label !== 'Istimewa SP 23%')
-        // console.log({ availableDiscountRates })
+        console.log({ text })
 
         return (
           <div
@@ -954,16 +994,16 @@ const StockSelectorTable = () => {
         </div>
       ),
     },
-    {
-      title: 'Harga Dasar',
-      dataIndex: 'finance_account_id',
-      key: 'base_price',
-      render: (id: any) => (
-        <div>
-          {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
-        </div>
-      ),
-    },
+    // {
+    //   title: 'Harga Dasar',
+    //   dataIndex: 'finance_account_id',
+    //   key: 'base_price',
+    //   render: (id: any) => (
+    //     <div>
+    //       {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
+    //     </div>
+    //   ),
+    // },
     // {
     //   title: 'Harga Setelah Diskon',
     //   dataIndex: 'harga_setelah_diskon',
@@ -972,38 +1012,38 @@ const StockSelectorTable = () => {
     //     <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
     //   ),
     // },
-    {
-      title: 'Diskon',
-      dataIndex: 'input_diskon_manual',
-      key: 'input_diskon_manual',
-      render: (text: any, record: any) => (
-        <div>
-          <Input
-            type="number"
-            defaultValue={text || 0}
-            onChange={(e) => {
-              const inputDiskonManual = parseFloat(e.target.value) || 0
-              const basePrice = hargaDasar[record.finance_account_id] || 0
-              const hargaSetelahDiskon = basePrice - inputDiskonManual
-              const newSubtotal = hargaSetelahDiskon * record.qty
+    // {
+    //   title: 'Diskon',
+    //   dataIndex: 'input_diskon_manual',
+    //   key: 'input_diskon_manual',
+    //   render: (text: any, record: any) => (
+    //     <div>
+    //       <Input
+    //         type="number"
+    //         defaultValue={text || 0}
+    //         onChange={(e) => {
+    //           const inputDiskonManual = parseFloat(e.target.value) || 0
+    //           const basePrice = hargaDasar[record.finance_account_id] || 0
+    //           const hargaSetelahDiskon = basePrice - inputDiskonManual
+    //           const newSubtotal = hargaSetelahDiskon * record.qty
 
-              setDataSource((prev) =>
-                prev.map((item) =>
-                  item.finance_account_id === record.finance_account_id
-                    ? {
-                        ...item,
-                        input_diskon_manual: inputDiskonManual,
-                        harga_setelah_diskon: hargaSetelahDiskon,
-                        subtotal: newSubtotal,
-                      }
-                    : item
-                )
-              )
-            }}
-          />
-        </div>
-      ),
-    },
+    //           setDataSource((prev) =>
+    //             prev.map((item) =>
+    //               item.finance_account_id === record.finance_account_id
+    //                 ? {
+    //                     ...item,
+    //                     input_diskon_manual: inputDiskonManual,
+    //                     harga_setelah_diskon: hargaSetelahDiskon,
+    //                     subtotal: newSubtotal,
+    //                   }
+    //                 : item
+    //             )
+    //           )
+    //         }}
+    //       />
+    //     </div>
+    //   ),
+    // },
 
     {
       title: 'Subtotal',
@@ -1050,15 +1090,13 @@ const StockSelectorTable = () => {
 
   const primaryControl = controllings?.[0] // Ambil data kontrol pertama
 
-  // Inisialisasi state dengan nilai default berdasarkan 'name' dari primaryControl
   const [showDiskonColumn, setShowDiskonColumn] = useState(false)
 
-  // Sinkronkan state dengan data primaryControl setelah render pertama
   useEffect(() => {
     if (primaryControl) {
       setShowDiskonColumn(primaryControl.name === 'buka')
     }
-  }, [primaryControl]) // Memastikan bahwa state diperbarui jika primaryControl berubah
+  }, [primaryControl])
 
   const filteredColumns = showDiskonColumn
     ? columns
@@ -1067,13 +1105,12 @@ const StockSelectorTable = () => {
   const handleSwitchChange = (checked: boolean, controlId: string) => {
     const updatedName = checked ? 'buka' : 'tutup'
 
-    // Mutasi untuk mengupdate data di server
     updateOutletMutation.mutate(
       { _id: controlId, name: updatedName },
       {
         onSuccess: () => {
           message.success(`Berhasil mengubah status menjadi ${updatedName}`)
-          setShowDiskonColumn(checked) // Update state lokal setelah berhasil
+          setShowDiskonColumn(checked)
         },
         onError: () => {
           message.error('Gagal mengubah status')
@@ -1081,95 +1118,97 @@ const StockSelectorTable = () => {
       }
     )
   }
-
+  //tukah
   return (
     <>
-      <div
-        style={{
-          background: 'white',
-          padding: '20px',
-          // marginBottom: '10px',
-          borderRadius: '10px 10px 0px 0px',
-          fontSize: '30px',
-          borderBottom: '1px',
-        }}
-      >
-        Tambah Tagihan
-      </div>
+      <div className={`page-container ${isLoading ? 'loading' : ''}`}>
+        <div
+          className="content"
+          style={{
+            background: 'white',
+            padding: '20px',
+            // marginBottom: '10px',
+            borderRadius: '10px 10px 0px 0px',
+            fontSize: '30px',
+            borderBottom: '1px',
+          }}
+        >
+          Tambah Tagihan
+        </div>
 
-      <div
-        style={{
-          background: 'white',
-          padding: '20px',
-          marginBottom: '20px',
-          borderRadius: '0px 0px 10px 10px',
-        }}
-      >
-        <div style={{ paddingBottom: '0px', border: 'red' }}>
-          <Row gutter={16} style={{ marginBottom: '10px' }}>
-            <Col span={12}>
-              <span style={labelStyle}>Nama Pelanggan</span>
-              <span style={labelColonStyle}>:</span>
-              <Select
-                showSearch
-                placeholder="Select a Contact"
-                style={{ width: '70%' }}
-                optionFilterProp="label"
-                filterOption={(input: any, option: any) =>
-                  option?.label
-                    ?.toString()
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                value={selectedContact}
-                onChange={handleContactChange}
-              >
-                {Array.isArray(contacts) &&
-                  contacts
-                    .filter((contact) => contact.group?.name === warehouseId)
-                    .map((item) => (
-                      <Select.Option
-                        key={item.id}
-                        value={item.id}
-                        label={item.name}
-                      >
-                        {item.name}
-                      </Select.Option>
-                    ))}
-              </Select>
-            </Col>
-            <Col span={12}>
-              <span style={labelStyle}>Outlet</span>
-              <span style={labelColonStyle}>:</span>
-              <Select
-                placeholder="Warehouse"
-                showSearch
-                style={{ width: '70%' }}
-                optionFilterProp="label"
-                filterOption={(input: any, option: any) =>
-                  option?.label
-                    ?.toString()
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                value={selectedWarehouseId}
-                onChange={handleWarehouseChange}
-                disabled={!user?.isAdmin}
-              >
-                {idWarehouse?.map((warehouse) => (
-                  <Select.Option
-                    key={warehouse.id}
-                    value={warehouse.id}
-                    label={warehouse.name}
-                  >
-                    {warehouse.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Col>
-          </Row>
+        <div
+          style={{
+            background: 'white',
+            padding: '20px',
+            marginBottom: '20px',
+            borderRadius: '0px 0px 10px 10px',
+          }}
+        >
+          <div style={{ paddingBottom: '0px', border: 'red' }}>
+            <Row gutter={16} style={{ marginBottom: '10px' }}>
+              <Col span={12}>
+                <span style={labelStyle}>Nama Pelanggan</span>
+                <span style={labelColonStyle}>:</span>
+                <Select
+                  showSearch
+                  placeholder="Select a Contact"
+                  style={{ width: '70%' }}
+                  optionFilterProp="label"
+                  filterOption={(input: any, option: any) =>
+                    option?.label
+                      ?.toString()
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  value={selectedContact}
+                  onChange={handleContactChange}
+                >
+                  {Array.isArray(contacts) &&
+                    contacts
+                      .filter((contact) => contact.group?.name === warehouseId)
+                      .map((item) => (
+                        <Select.Option
+                          key={item.id}
+                          value={item.id}
+                          label={item.name}
+                        >
+                          {item.name}
+                        </Select.Option>
+                      ))}
+                </Select>
+              </Col>
+              <Col span={12}>
+                <span style={labelStyle}>Outlet</span>
+                <span style={labelColonStyle}>:</span>
+                <Select
+                  placeholder="Warehouse"
+                  showSearch
+                  style={{ width: '70%' }}
+                  optionFilterProp="label"
+                  filterOption={(input: any, option: any) =>
+                    option?.label
+                      ?.toString()
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  value={selectedWarehouseId}
+                  onChange={handleWarehouseChange}
+                  disabled={!user?.isAdmin}
+                >
+                  {idWarehouse?.map((warehouse) => (
+                    <Select.Option
+                      key={warehouse.id}
+                      value={warehouse.id}
+                      label={warehouse.name}
+                    >
+                      {warehouse.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Col>
+            </Row>
 
-          {/* <Row gutter={16} style={{ marginBottom: '10px' }}>
+            {/* <Row gutter={16} style={{ marginBottom: '10px' }}>
             <Col span={12}>
               <span style={labelStyle}>Piutang/Pelanggan</span>
               <span style={labelColonStyle}>:</span>
@@ -1180,7 +1219,7 @@ const StockSelectorTable = () => {
               />
             </Col> */}
 
-          {/* <Col span={12}>
+            {/* <Col span={12}>
               <span style={labelStyle}>Piutang/Outlet</span>
               <span style={labelColonStyle}>:</span>
               <Input
@@ -1191,7 +1230,7 @@ const StockSelectorTable = () => {
             </Col>
           </Row> */}
 
-          {/* <Row gutter={16} style={{ marginBottom: '10px' }}>
+            {/* <Row gutter={16} style={{ marginBottom: '10px' }}>
             <Col span={12}>
               <span style={labelStyle}>Platform</span>
               <span style={labelColonStyle}>:</span>
@@ -1211,223 +1250,224 @@ const StockSelectorTable = () => {
               />
             </Col>
           </Row> */}
-          <Row gutter={16} style={{ marginBottom: '10px' }}>
-            <Col span={12}>
-              <span style={labelStyle}>No Invoice</span>
-              <span style={labelColonStyle}>:</span>
-              <Input style={{ width: '70%' }} value={refNumber} readOnly />
-            </Col>
-            <Col span={12}>
-              <span style={labelStyle}>Nama Tag</span>
-              <span style={labelColonStyle}>:</span>
-              <Select
-                mode="multiple"
-                placeholder="Tag"
-                showSearch
-                style={{ width: '70%' }}
-                optionFilterProp="label"
-                filterOption={(input: any, option: any) =>
-                  option?.label
-                    ?.toString()
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                onChange={handleTag}
-                value={selectTag}
-              >
-                {Array.isArray(tagDb) &&
-                  tagDb.map((product: any) => (
-                    <Select.Option
-                      key={product.id}
-                      value={product.id}
-                      label={product.name}
-                    >
-                      {product.name}
-                    </Select.Option>
-                  ))}
-              </Select>
-            </Col>
-          </Row>
-        </div>
-        <Form.Item style={{ paddingTop: '0px' }}>
-          <DateRange
-            onChange={(dates) => {
-              setSelectedDates(dates)
-            }}
-            onDifferenceChange={(diff) => {
-              setSelectedDifference(diff)
-            }}
-            onSave={handleDateRangeSave}
-          />
-        </Form.Item>
-        <div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '16px',
-            }}
-          >
-            {/* Button di sebelah kiri */}
-            <Button
-              type="primary"
-              onClick={handleOkClick}
-              style={{ marginRight: '20px', width: '120px' }}
-            >
-              Pilih Barang
-            </Button>
-
-            {user?.isAdmin && primaryControl && (
-              <Switch
-                checked={showDiskonColumn} // Menggunakan state yang sudah disinkronkan
-                onChange={(checked) =>
-                  handleSwitchChange(checked, primaryControl._id)
-                }
-                checkedChildren="Buka dan Sembunyikan Diskon"
-                unCheckedChildren="Tutup dan Tampilkan Diskon"
-              />
-            )}
-          </div>
-          <Select
-            mode="multiple"
-            placeholder="Pilih Barang"
-            style={{ width: '100%', marginTop: '10px' }}
-            optionFilterProp="items"
-            filterOption={false}
-            onChange={handleProductChange}
-            value={selectedFinanceAccountIds}
-            showSearch
-            onSearch={handleSearch}
-            open={dropdownVisible}
-            onDropdownVisibleChange={(open) => setDropdownVisible(open)}
-            dropdownRender={(menu) => (
-              <div style={{ minWidth: '800px', padding: '8px' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    fontWeight: 'bold',
-                    padding: '8px',
-                    borderBottom: '1px solid #e8e8e8',
-                    backgroundColor: '#f5f5f5',
-                  }}
+            <Row gutter={16} style={{ marginBottom: '10px' }}>
+              <Col span={12}>
+                <span style={labelStyle}>No Invoice</span>
+                <span style={labelColonStyle}>:</span>
+                <Input style={{ width: '70%' }} value={refNumber} readOnly />
+              </Col>
+              <Col span={12}>
+                <span style={labelStyle}>Nama Tag</span>
+                <span style={labelColonStyle}>:</span>
+                <Select
+                  mode="multiple"
+                  placeholder="Tag"
+                  showSearch
+                  style={{ width: '70%' }}
+                  optionFilterProp="label"
+                  filterOption={(input: any, option: any) =>
+                    option?.label
+                      ?.toString()
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  onChange={handleTag}
+                  value={selectTag}
                 >
-                  <span style={{ flex: 2, textAlign: 'left' }}>
-                    Nama Barang
-                  </span>
-                  <span style={{ flex: 1, textAlign: 'center' }}>Qty</span>
-                  <span style={{ flex: 1, textAlign: 'center' }}>Price</span>
-
-                  {discountRates.map((rate) => (
-                    <span
-                      key={rate.label}
-                      style={{ flex: 1, textAlign: 'center' }}
-                    >
-                      {rate.label}
-                    </span>
-                  ))}
-                </div>
-                <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
-                  {menu}
-                </div>
-              </div>
-            )}
-            tagRender={customDisplayRender as any}
-          >
-            {Array.isArray(barangs) &&
-              barangs
-                .filter((item) =>
-                  item.name.toLowerCase().includes(searchValue.toLowerCase())
-                )
-                .map((product) => {
-                  const stockQuantity =
-                    warehouseStock.find((stock: any) => stock.id === product.id)
-                      ?.stock || 0
-                  if (stockQuantity === 0) return null
-
-                  const filteredDiscountRates = discountRates.map((rate) => {
-                    if (
-                      rate.label === 'Istimewa SP 23%' &&
-                      product.pos_product_category_id !== 19
-                    ) {
-                      return { ...rate, percentage: null }
-                    }
-                    return rate
-                  })
-
-                  return (
-                    <Select.Option
-                      key={product.id}
-                      value={product.id}
-                      label={product.id}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '8px',
-                          borderBottom: '1px solid #e8e8e8',
-                        }}
+                  {Array.isArray(tagDb) &&
+                    tagDb.map((product: any) => (
+                      <Select.Option
+                        key={product.id}
+                        value={product.id}
+                        label={product.name}
                       >
-                        <span style={{ flex: 2, textAlign: 'left' }}>
-                          {product.name}
-                        </span>
-                        <span style={{ flex: 1, textAlign: 'center' }}>
-                          {Number(stockQuantity).toLocaleString('id-ID')}
-                        </span>
-                        <span style={{ flex: 1, textAlign: 'center' }}>
-                          {Number(product.price).toLocaleString('id-ID', {
-                            minimumFractionDigits: 0,
-                          })}
-                        </span>
-                        {filteredDiscountRates.map((rate) => {
-                          const discountedPrice =
-                            rate.percentage !== null
-                              ? (
-                                  product.price -
-                                  (product.price * rate.percentage) / 100
-                                ).toFixed(2)
-                              : 0 // Harga menjadi 0 jika percentage null
-                          const formattedPrice =
-                            rate.percentage !== null
-                              ? Number(discountedPrice).toLocaleString(
-                                  'id-ID',
-                                  {
-                                    minimumFractionDigits: 0,
-                                  }
-                                )
-                              : '0'
+                        {product.name}
+                      </Select.Option>
+                    ))}
+                </Select>
+              </Col>
+            </Row>
+          </div>
+          <Form.Item style={{ paddingTop: '0px' }}>
+            <DateRange
+              onChange={(dates) => {
+                setSelectedDates(dates)
+              }}
+              onDifferenceChange={(diff) => {
+                setSelectedDifference(diff)
+              }}
+              onSave={handleDateRangeSave}
+            />
+          </Form.Item>
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '16px',
+              }}
+            >
+              {/* Button di sebelah kiri */}
+              <Button
+                type="primary"
+                onClick={handleOkClick}
+                style={{ marginRight: '20px', width: '120px' }}
+              >
+                Pilih Barang
+              </Button>
 
-                          return (
-                            <span
-                              key={rate.label}
-                              onClick={() =>
-                                handlePriceClick(rate.label, product)
-                              }
-                              style={{
-                                flex: 1,
-                                textAlign: 'center',
-                                backgroundColor:
-                                  selectedPrices[product.id] === rate.label
-                                    ? '#52C41A'
-                                    : 'transparent',
-                                cursor: 'pointer',
-                              }}
-                            >
-                              {formattedPrice}
-                            </span>
-                          )
-                        })}
-                      </div>
-                    </Select.Option>
+              {user?.isAdmin && primaryControl && (
+                <Switch
+                  checked={showDiskonColumn} // Menggunakan state yang sudah disinkronkan
+                  onChange={(checked) =>
+                    handleSwitchChange(checked, primaryControl._id)
+                  }
+                  checkedChildren="Buka dan Sembunyikan Diskon"
+                  unCheckedChildren="Tutup dan Tampilkan Diskon"
+                />
+              )}
+            </div>
+            <Select
+              mode="multiple"
+              placeholder="Pilih Barang"
+              style={{ width: '100%', marginTop: '10px' }}
+              optionFilterProp="items"
+              filterOption={false}
+              onChange={handleProductChange}
+              value={selectedFinanceAccountIds}
+              showSearch
+              onSearch={handleSearch}
+              open={dropdownVisible}
+              onDropdownVisibleChange={(open) => setDropdownVisible(open)}
+              dropdownRender={(menu) => (
+                <div style={{ minWidth: '800px', padding: '8px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      fontWeight: 'bold',
+                      padding: '8px',
+                      borderBottom: '1px solid #e8e8e8',
+                      backgroundColor: '#f5f5f5',
+                    }}
+                  >
+                    <span style={{ flex: 2, textAlign: 'left' }}>
+                      Nama Barang
+                    </span>
+                    <span style={{ flex: 1, textAlign: 'center' }}>Qty</span>
+                    <span style={{ flex: 1, textAlign: 'center' }}>Price</span>
+
+                    {discountRates.map((rate) => (
+                      <span
+                        key={rate.label}
+                        style={{ flex: 1, textAlign: 'center' }}
+                      >
+                        {rate.label}
+                      </span>
+                    ))}
+                  </div>
+                  <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                    {menu}
+                  </div>
+                </div>
+              )}
+              tagRender={customDisplayRender as any}
+            >
+              {Array.isArray(barangs) &&
+                barangs
+                  .filter((item) =>
+                    item.name.toLowerCase().includes(searchValue.toLowerCase())
                   )
-                })}
-          </Select>
+                  .map((product) => {
+                    const stockQuantity =
+                      warehouseStock.find(
+                        (stock: any) => stock.id === product.id
+                      )?.stock || 0
+                    if (stockQuantity === 0) return null
 
-          {/* <div>
+                    const filteredDiscountRates = discountRates.map((rate) => {
+                      if (
+                        rate.label === 'Istimewa SP 23%' &&
+                        product.pos_product_category_id !== 19
+                      ) {
+                        return { ...rate, percentage: null }
+                      }
+                      return rate
+                    })
+
+                    return (
+                      <Select.Option
+                        key={product.id}
+                        value={product.id}
+                        label={product.id}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '8px',
+                            borderBottom: '1px solid #e8e8e8',
+                          }}
+                        >
+                          <span style={{ flex: 2, textAlign: 'left' }}>
+                            {product.name}
+                          </span>
+                          <span style={{ flex: 1, textAlign: 'center' }}>
+                            {Number(stockQuantity).toLocaleString('id-ID')}
+                          </span>
+                          <span style={{ flex: 1, textAlign: 'center' }}>
+                            {Number(product.price).toLocaleString('id-ID', {
+                              minimumFractionDigits: 0,
+                            })}
+                          </span>
+                          {filteredDiscountRates.map((rate) => {
+                            const discountedPrice =
+                              rate.percentage !== null
+                                ? (
+                                    product.price -
+                                    (product.price * rate.percentage) / 100
+                                  ).toFixed(2)
+                                : 0 // Harga menjadi 0 jika percentage null
+                            const formattedPrice =
+                              rate.percentage !== null
+                                ? Number(discountedPrice).toLocaleString(
+                                    'id-ID',
+                                    {
+                                      minimumFractionDigits: 0,
+                                    }
+                                  )
+                                : '0'
+
+                            return (
+                              <span
+                                key={rate.label}
+                                onClick={() =>
+                                  handlePriceClick(rate.label, product)
+                                }
+                                style={{
+                                  flex: 1,
+                                  textAlign: 'center',
+                                  backgroundColor:
+                                    selectedPrices[product.id] === rate.label
+                                      ? '#52C41A'
+                                      : 'transparent',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                {formattedPrice}
+                              </span>
+                            )
+                          })}
+                        </div>
+                      </Select.Option>
+                    )
+                  })}
+            </Select>
+
+            {/* <div>
           {warehouseStock.length > 0 ? (
             warehouseStock.map((item) => (
               <div key={item.id}>
@@ -1442,180 +1482,182 @@ const StockSelectorTable = () => {
           )}
         </div> */}
 
-          <Table
-            dataSource={dataSource}
-            columns={filteredColumns}
-            rowKey="finance_account_id"
-            style={{ marginTop: '20px', marginBottom: '20px' }}
-            pagination={false}
-          />
+            <Table
+              dataSource={dataSource}
+              columns={filteredColumns}
+              rowKey="finance_account_id"
+              style={{ marginTop: '20px', marginBottom: '20px' }}
+              pagination={false}
+            />
 
-          <Form
-            style={{
-              paddingBottom: '0px',
-              // justifyItems: 'right',
-              border: '1px',
-            }}
-            form={paymentForm}
-          >
-            <Row gutter={16} style={{ marginBottom: '10px' }}>
-              <Col span={12}>
-                <span
-                  style={{
-                    ...labelStyle,
-                    fontSize: '16px',
-                  }}
-                >
-                  Total
-                </span>
-                <span
-                  style={{
-                    ...labelColonStyle,
-                    fontSize: '16px',
-                  }}
-                >
-                  :
-                </span>
-                <Input
-                  style={{
-                    width: '70%',
-                    textAlign: 'right',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                  }}
-                  value={formatRupiah(totalSubtotal)}
-                  readOnly
-                />
-              </Col>
-            </Row>
+            <Form
+              style={{
+                paddingBottom: '0px',
+                // justifyItems: 'right',
+                border: '1px',
+              }}
+              form={paymentForm}
+            >
+              <Row gutter={16} style={{ marginBottom: '10px' }}>
+                <Col span={12}>
+                  <span
+                    style={{
+                      ...labelStyle,
+                      fontSize: '16px',
+                    }}
+                  >
+                    Total
+                  </span>
+                  <span
+                    style={{
+                      ...labelColonStyle,
+                      fontSize: '16px',
+                    }}
+                  >
+                    :
+                  </span>
+                  <Input
+                    style={{
+                      width: '70%',
+                      textAlign: 'right',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                    }}
+                    value={formatRupiah(totalSubtotal)}
+                    readOnly
+                  />
+                </Col>
+              </Row>
 
-            <Row gutter={16} style={{ marginBottom: '10px' }}>
-              <Col span={12}>
-                <span
-                  style={{
-                    ...labelStyle,
-                    fontSize: '16px',
+              <Row gutter={16} style={{ marginBottom: '10px' }}>
+                <Col span={12}>
+                  <span
+                    style={{
+                      ...labelStyle,
+                      fontSize: '16px',
 
-                    cursor: 'pointer',
-                  }}
-                  onClick={handleSetAmountPaid}
-                >
-                  Jumlah Bayar
-                </span>
-                <span
-                  style={{
-                    ...labelColonStyle,
-                    fontSize: '16px',
-                  }}
-                >
-                  :
-                </span>
+                      cursor: 'pointer',
+                    }}
+                    onClick={handleSetAmountPaid}
+                  >
+                    Jumlah Bayar
+                  </span>
+                  <span
+                    style={{
+                      ...labelColonStyle,
+                      fontSize: '16px',
+                    }}
+                  >
+                    :
+                  </span>
 
-                <NumericFormat
-                  placeholder="Nilai Pembayaran"
-                  value={amountPaid}
-                  thousandSeparator="."
-                  decimalSeparator=","
-                  decimalScale={2}
-                  allowNegative={false}
-                  onValueChange={(values) => {
-                    const { floatValue } = values
-                    setAmountPaid(floatValue || 0)
-                  }}
-                  customInput={Input}
-                  max={totalSubtotal}
-                  style={{
-                    width: '70%',
-                    textAlign: 'right',
-                    fontSize: '24px',
-                    fontWeight: 'bold',
-                    color: '#007BFF',
-                  }}
-                />
-              </Col>
-            </Row>
+                  <NumericFormat
+                    placeholder="Nilai Pembayaran"
+                    value={amountPaid}
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    decimalScale={2}
+                    allowNegative={false}
+                    onValueChange={(values) => {
+                      const { floatValue } = values
+                      setAmountPaid(floatValue || 0)
+                    }}
+                    customInput={Input}
+                    max={totalSubtotal}
+                    style={{
+                      width: '70%',
+                      textAlign: 'right',
+                      fontSize: '24px',
+                      fontWeight: 'bold',
+                      color: '#007BFF',
+                    }}
+                  />
+                </Col>
+              </Row>
 
-            <Row gutter={16} style={{ marginBottom: '10px' }}>
-              <Col span={12}>
-                <span
-                  style={{
-                    ...labelStyle,
-                    fontSize: '16px',
-                  }}
-                >
-                  Sisa Tagihan
-                </span>
-                <span
-                  style={{
-                    ...labelColonStyle,
-                    fontSize: '16px',
-                  }}
-                >
-                  :
-                </span>
-                <Input
-                  value={formatRupiah(piutang)}
-                  style={{
-                    width: '70%',
-                    textAlign: 'right',
-                    fontSize: '16px',
-                  }}
-                />
-              </Col>
-            </Row>
+              <Row gutter={16} style={{ marginBottom: '10px' }}>
+                <Col span={12}>
+                  <span
+                    style={{
+                      ...labelStyle,
+                      fontSize: '16px',
+                    }}
+                  >
+                    Sisa Tagihan
+                  </span>
+                  <span
+                    style={{
+                      ...labelColonStyle,
+                      fontSize: '16px',
+                    }}
+                  >
+                    :
+                  </span>
+                  <Input
+                    value={formatRupiah(piutang)}
+                    style={{
+                      width: '70%',
+                      textAlign: 'right',
+                      fontSize: '16px',
+                    }}
+                  />
+                </Col>
+              </Row>
 
-            <Row gutter={16} style={{ marginBottom: '10px' }}>
-              <Col span={12}>
-                <span style={labelStyle}>Pilih Bank</span>
-                <span style={labelColonStyle}>:</span>
-                <Select
-                  showSearch // Menampilkan kolom pencarian
-                  // placeholder="Pilih bank"
-                  //bangkok
-                  // value={bankAccountName || selectedBank}
-                  value={selectedBank}
-                  onChange={(value) => setSelectedBank(value)}
-                  style={{ width: '70%' }}
-                  optionFilterProp="children"
-                  filterOption={(input: any, option: any) =>
-                    option?.children
-                      ?.toString()
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
+              <Row gutter={16} style={{ marginBottom: '10px' }}>
+                <Col span={12}>
+                  <span style={labelStyle}>Pilih Bank</span>
+                  <span style={labelColonStyle}>:</span>
+                  <Select
+                    showSearch // Menampilkan kolom pencarian
+                    // placeholder="Pilih bank"
+                    //bangkok
+                    // value={bankAccountName || selectedBank}
+                    value={selectedBank}
+                    onChange={(value) => setSelectedBank(value)}
+                    style={{ width: '70%' }}
+                    optionFilterProp="children"
+                    filterOption={(input: any, option: any) =>
+                      option?.children
+                        ?.toString()
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                  >
+                    {akunBanks?.map((e) => (
+                      <Select.Option key={e.id} value={e.name}>
+                        {e.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Col>
+              </Row>
+              <Row gutter={16} style={{ marginBottom: '10px' }}>
+                <Col span={12}>
+                  <span style={labelStyle}>Keterangan</span>
+                  <span style={labelColonStyle}>:</span>
+                  <Input
+                    style={{ width: '70%' }}
+                    value={memo}
+                    onChange={(e) => setMemo(e.target.value)}
+                  />
+                </Col>
+              </Row>
+              <Row>
+                <Button
+                  onClick={handleSave}
+                  type="primary"
+                  style={{ marginTop: '10px', width: '45%' }}
+                  // disabled={limitizeTrans}
+                  disabled={isSaveDisabled} // Tombol dinonaktifkan jika salah satu masih kosong
                 >
-                  {akunBanks?.map((e) => (
-                    <Select.Option key={e.id} value={e.name}>
-                      {e.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Col>
-            </Row>
-            <Row gutter={16} style={{ marginBottom: '10px' }}>
-              <Col span={12}>
-                <span style={labelStyle}>Keterangan</span>
-                <span style={labelColonStyle}>:</span>
-                <Input
-                  style={{ width: '70%' }}
-                  value={memo}
-                  onChange={(e) => setMemo(e.target.value)}
-                />
-              </Col>
-            </Row>
-            <Row>
-              <Button
-                onClick={handleSave}
-                type="primary"
-                style={{ marginTop: '10px', width: '45%' }}
-                // disabled={limitizeTrans}
-                disabled={isSaveDisabled} // Tombol dinonaktifkan jika salah satu masih kosong
-              >
-                Simpan
-              </Button>
-            </Row>
-          </Form>
+                  Simpan
+                </Button>
+              </Row>
+            </Form>
+          </div>
         </div>
+        {isLoading && <div className="loading-overlay"></div>}
       </div>
     </>
   )
