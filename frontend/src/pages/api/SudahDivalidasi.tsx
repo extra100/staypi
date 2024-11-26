@@ -272,7 +272,9 @@ const SudahDivalidasi: React.FC = () => {
     >
       <div ref={componentRef} className="print-container">
         <Title level={3} style={{ textAlign: 'center' }}>
-          <span style={{ color: '#AF8700', fontSize: '20px' }}>{title}</span>
+          <span style={{ color: '#AF8700', fontSize: '20px' }}>
+            {'SURAT JALAN / SURAT MUTASI'}
+          </span>
         </Title>
 
         {transferArray.length > 0 && (
@@ -468,7 +470,7 @@ const SudahDivalidasi: React.FC = () => {
           marginRight: '10px',
         }}
       >
-        <Button
+        {/* <Button
           style={{ marginRight: '20px' }}
           className="no-print"
           danger
@@ -479,7 +481,7 @@ const SudahDivalidasi: React.FC = () => {
         </Button>
         <Button type="primary" onClick={handleEditClick} className="no-print">
           Edit Mutasi
-        </Button>
+        </Button> */}
       </div>
     </div>
   )

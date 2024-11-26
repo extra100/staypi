@@ -224,7 +224,9 @@ const WarehouseTransferDetail: React.FC = () => {
     >
       <div ref={componentRef} className="print-container">
         <Title level={3} style={{ textAlign: 'center' }}>
-          <span style={{ color: '#AF8700', fontSize: '20px' }}>{title}</span>
+          <span style={{ color: '#AF8700', fontSize: '20px' }}>
+            {'PURCHASE ORDER'}
+          </span>
         </Title>
 
         {transferArray.length > 0 && (
