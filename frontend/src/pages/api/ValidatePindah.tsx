@@ -120,11 +120,7 @@ const ValidatePindah: React.FC = () => {
   const [toQtyState, setToQtyState] = useState<{ [key: number]: number }>({})
 
   const navigate = useNavigate()
-  const [ketValue, setKetValue] = useState<string>('')
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setKetValue(e.target.value)
-  }
   useEffect(() => {
     if (transferData) {
       const initialDataSource = sumberData.map((item: any, index: number) => {
@@ -158,7 +154,7 @@ const ValidatePindah: React.FC = () => {
       to_warehouse_id: fromWarehouseId,
       trans_date: selectedDates,
       ref_number: validRefNumber,
-      memo: ketValue,
+      memo: '',
       code: 2,
       id: 14,
 
@@ -176,27 +172,17 @@ const ValidatePindah: React.FC = () => {
       })),
     }
 
-    setIsLoading(true) // Aktifkan loading
+    saveInvoiceMutasi(transferData)
 
     try {
       updateWarehouseTransfer(
         { ref_number: validRefNumber, updatedData: transferData },
         {
-          onSuccess: () => {
-            message.success('Data transfer berhasil diupdate!')
-
-            setTimeout(() => {
-              setIsLoading(false) // Matikan loading
-
-              navigate(`/sudah-validasi/${ref_number}`)
-            }, 3000) // 3000ms = 3 detik
-          },
           onError: (error) => {
             const errorMessage =
               error?.message ||
               'Terjadi kesalahan saat mengupdate data transfer'
             message.error(errorMessage)
-            setIsLoading(false)
             console.error('Error:', error)
           },
         }
@@ -206,9 +192,10 @@ const ValidatePindah: React.FC = () => {
         (error as Error)?.message ||
         'Terjadi kesalahan saat menyimpan data transfer'
       message.error(errorMessage)
-      setIsLoading(false)
       console.error('Error:', error)
     }
+    navigate(`/simpanidunikdarikledomutasi/${ref_number}`)
+    // navigate(`/transfer-detail/${ref_number}`)
   }
 
   const printSuratJalan = useRef<HTMLDivElement>(null)
@@ -233,7 +220,7 @@ const ValidatePindah: React.FC = () => {
   const columns = [
     // Input for transfer quantity
     {
-      title: 'Qty ',
+      title: 'Jumlah TF',
       dataIndex: 'transferQty',
       key: 'transferQty',
       render: (text: string, record: any, index: number) => (
@@ -330,10 +317,8 @@ const ValidatePindah: React.FC = () => {
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
   })
-  const [isLoading, setIsLoading] = useState(false)
-
   return (
-    <div className={`page-container ${isLoading ? 'loading' : ''}`}>
+    <div style={{ padding: '24px', fontFamily: 'Arial, sans-serif' }}>
       <div ref={componentRef} className="print-container">
         <Title level={3} style={{ textAlign: 'center' }}>
           <span style={{ color: '#AF8700', fontSize: '20px' }}>{title}</span>
@@ -401,12 +386,8 @@ const ValidatePindah: React.FC = () => {
                   <Col span={6}>
                     <Text>Ket</Text>
                   </Col>
-                  <Col span={6}>
-                    <Input
-                      placeholder="Masukkan keterangan"
-                      value={ketValue}
-                      onChange={handleInputChange}
-                    />
+                  <Col span={12}>
+                    <Text>: -</Text>
                   </Col>
                   <Col span={6} style={{ textAlign: 'center' }}>
                     <Text strong>{fromWarehouseName}</Text>
@@ -445,7 +426,6 @@ const ValidatePindah: React.FC = () => {
           </>
         )}
       </div>
-      {isLoading && <div className="loading-overlay"></div>}
     </div>
   )
 }
