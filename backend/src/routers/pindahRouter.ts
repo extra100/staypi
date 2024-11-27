@@ -3,6 +3,28 @@ import { WarehouseTransferModel } from '../models/pindahModel'
 import express, { Request, Response } from 'express'
 
 export const warehouseTransferRouter = express.Router()
+warehouseTransferRouter.get(
+  '/',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { date_from, date_to, warehouse_id } = req.query
+
+    const conditions: any = {}
+
+    if (date_from && date_to) {
+      conditions.trans_date = date_from
+      console.log('Date conditionsssss:', conditions.trans_date)
+    }
+
+    if (warehouse_id) {
+      conditions.warehouse_id = Number(warehouse_id)
+      console.log('Warehouse conditioneee:', conditions.warehouse_id)
+    }
+
+    const transactions = await WarehouseTransferModel.find(conditions)
+
+    res.json(transactions)
+  })
+)
 
 warehouseTransferRouter.post(
   '/',

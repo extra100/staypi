@@ -117,6 +117,7 @@ import EditPembayaran from './pages/api/EditPembayaran'
 import ListSiapDiValdiasiOutletKhusus from './pages/api/ListSiapDiValdiasiOutletKhusus'
 import SuitExApiWithOwnDbBasedDate from './pages/api/suitExApiWithOwnDatabase'
 import BagdePenjualan from './badgePenjualan'
+import SuitMutasiExDanKledo from './pages/api/SuitMutasiExDanKledo'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -176,6 +177,10 @@ const router = createBrowserRouter(
       <Route
         path="/getinvbasedondate"
         element={<SuitExApiWithOwnDbBasedDate />}
+      />
+      <Route
+        path="/getinvmutasibasedondate"
+        element={<SuitMutasiExDanKledo />}
       />
       <Route path="/cekmasalah" element={<BagdePenjualan />} />
       <Route path="/laporanstok" element={<LaporanStock />} />

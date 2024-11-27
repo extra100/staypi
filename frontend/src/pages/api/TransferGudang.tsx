@@ -8,6 +8,7 @@ import {
   Select,
   Table,
   message,
+  Tooltip,
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useIdNamaBarang } from './NamaBarang'
@@ -102,7 +103,7 @@ const ProductStocksPage: React.FC = () => {
           row.key === key
             ? {
                 ...row,
-                id: id,
+                id: id || '',
                 name: productName,
                 unit: unitName,
               }
@@ -175,6 +176,13 @@ const ProductStocksPage: React.FC = () => {
       setTitle('TRANSFER PO')
     }
   }, [warehouseTujuanId])
+  const isSaveDisabledED = dataSource.some((row) => !row.id || row.id === '')
+
+  console.log('Data Source:', dataSource)
+  console.log(
+    'Finance Account IDs:',
+    dataSource.map((row) => row.id)
+  )
 
   const columns = [
     {
@@ -195,7 +203,17 @@ const ProductStocksPage: React.FC = () => {
                   .includes(input.toLowerCase())
               : false
           }
-          onChange={(value) => handleProductChange(value, record.key)}
+          onChange={(value) => {
+            // Cek apakah ID yang dipilih sudah ada di dataSource
+            const isDuplicate = dataSource.some((row) => row.id === value)
+
+            if (isDuplicate) {
+              message.warning('Barang dengan ID yang sama sudah dipilih!')
+              return // Jangan lanjutkan jika ID sama
+            }
+
+            handleProductChange(value, record.key)
+          }}
           value={id}
         >
           {idaDataBarang?.map((product) => (
@@ -318,8 +336,8 @@ const ProductStocksPage: React.FC = () => {
       code: 1,
       memo: null,
       items: dataSource.map((row) => ({
-        product_id: row.id,
-        finance_account_id: row.id,
+        product_id: row.id || '',
+        finance_account_id: row.id || '',
         product_name: row.name,
         qty: 0,
         qty_minta: row.transferQty,
@@ -467,20 +485,30 @@ const ProductStocksPage: React.FC = () => {
           <Form.Item>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Form.Item>
-                <Button
-                  type="dashed"
-                  htmlType="submit"
-                  // disabled={isSaveDisabled}
-                  style={{
-                    marginBottom: '16px',
-                    backgroundColor: '#ffffff',
-                    borderColor: '#AF8700',
-                    color: '#AF8700',
-                    width: '300px',
+                <Tooltip
+                  title={isSaveDisabledED ? 'MOHON BARANG DIPERIKSA' : ''}
+                  overlayInnerStyle={{
+                    color: 'red',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    boxShadow: 'none',
                   }}
                 >
-                  Simpan
-                </Button>
+                  <Button
+                    type="dashed"
+                    htmlType="submit"
+                    style={{
+                      marginBottom: '16px',
+                      backgroundColor: '#ffffff',
+                      borderColor: '#AF8700',
+                      color: '#AF8700',
+                      width: '300px',
+                    }}
+                    disabled={isSaveDisabledED}
+                  >
+                    AJUKAN PEMESANAN
+                  </Button>
+                </Tooltip>
               </Form.Item>
             </div>
           </Form.Item>

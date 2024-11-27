@@ -21,7 +21,6 @@ export type TransferItem = {
   qty: number
   qty_minta: number
   id: number
-
   unit_name: string
 }
 // export const WarehouseTransferModel = getModelForClass(WarehouseTransfer)

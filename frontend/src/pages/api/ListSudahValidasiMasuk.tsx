@@ -57,12 +57,12 @@ const ListSudahValidasiMasuk: React.FC = () => {
 
     if (value === '1') {
       navigate('/listsiapvalidasi')
-      // } else if (value === '2') {
-      //   navigate('/listpindah')
     } else if (value === '2') {
       navigate('/listsudahdivalidasikeluar')
     } else if (value === '3') {
       navigate('/ListSudahValidasiMasuk')
+    } else if (value === '4') {
+      navigate('/listpindah')
     }
   }
   const columns = [
@@ -135,6 +135,16 @@ const ListSudahValidasiMasuk: React.FC = () => {
         onClick={() => handleButtonClick('3')}
       >
         <span>Sudah Divalidasi Masuk</span>
+      </Button>
+      <Button
+        id="btn-filter-4"
+        value="4"
+        type="default"
+        className={activeButton === '4' ? 'btn-default-selected' : ''}
+        style={{ borderRadius: '0px' }}
+        onClick={() => handleButtonClick('4')}
+      >
+        <span>List Permintaan</span>
       </Button>
 
       <Table

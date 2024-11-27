@@ -15,6 +15,7 @@ import {
   message,
   Input,
   Form,
+  Tooltip,
 } from 'antd'
 import { useIdWarehouse } from './namaWarehouse'
 import { useIdNamaBarang } from './NamaBarang'
@@ -53,6 +54,8 @@ const ValidatePindah: React.FC = () => {
   const transfer = transferArray[0] || {}
   const sumberData = transfer.items || []
   const productIds = sumberData.map((item: any) => item.product_id).join(',')
+  console.log({ productIds })
+  const qtyPermintaan = sumberData.map((item: any) => item.qty_minta).join(',')
 
   const warehouseMap: Record<any, any> = {}
 
@@ -67,7 +70,7 @@ const ValidatePindah: React.FC = () => {
   })
 
   const fromWarehouseId = warehouseMap[transfer.from_warehouse_id]
-
+  console.log({ fromWarehouseId })
   const toWarehouseId = warehouseMap[transfer.to_warehouse_id]
 
   const fromWarehouseCode = idWarehouseMonggo?.find(
@@ -116,10 +119,16 @@ const ValidatePindah: React.FC = () => {
   const [fromQtyState, setFromQtyState] = useState<{ [key: number]: number }>(
     {}
   )
-
+  console.log({ fromQtyState })
   const [toQtyState, setToQtyState] = useState<{ [key: number]: number }>({})
-
+  console.log({ toQtyState })
+  // Pastikan tanggal menggunakan zona waktu lokal Indonesia
+  const todays = new Date()
+  const offset = todays.getTimezoneOffset() // Perbedaan waktu dari UTC
+  const localTime = new Date(todays.getTime() - offset * 60 * 1000)
+  const transDate = localTime.toISOString().split('T')[0] // Format YYYY-MM-DD
   const navigate = useNavigate()
+  // Jumlah minimum yang harus dipenuhi untuk validasi (dapat berasal dari sumberData)
 
   useEffect(() => {
     if (transferData) {
@@ -145,6 +154,7 @@ const ValidatePindah: React.FC = () => {
       setDataSource(initialDataSource)
     }
   }, [transferData, sumberData, fromWarehouseId, toWarehouseId])
+  const [keterangan, setKeterangan] = useState('')
 
   const handleSaveTransfer = async () => {
     const validRefNumber = ref_number || ''
@@ -152,9 +162,10 @@ const ValidatePindah: React.FC = () => {
     const transferData = {
       from_warehouse_id: toWarehouseId,
       to_warehouse_id: fromWarehouseId,
-      trans_date: selectedDates,
+      trans_date: transDate,
+
       ref_number: validRefNumber,
-      memo: '',
+      memo: keterangan,
       code: 2,
       id: 14,
 
@@ -172,30 +183,39 @@ const ValidatePindah: React.FC = () => {
       })),
     }
 
-    saveInvoiceMutasi(transferData)
+    setIsLoading(true)
 
     try {
-      updateWarehouseTransfer(
-        { ref_number: validRefNumber, updatedData: transferData },
-        {
-          onError: (error) => {
-            const errorMessage =
-              error?.message ||
-              'Terjadi kesalahan saat mengupdate data transfer'
-            message.error(errorMessage)
-            console.error('Error:', error)
-          },
+      await saveInvoiceMutasi(transferData)
+
+      setTimeout(async () => {
+        try {
+          await updateWarehouseTransfer(
+            { ref_number: validRefNumber, updatedData: transferData },
+            {
+              onError: (error) => {
+                const errorMessage =
+                  error?.message ||
+                  'Terjadi kesalahan saat mengupdate data transfer'
+                message.error(errorMessage)
+                console.error('Error:', error)
+              },
+            }
+          )
+
+          setTimeout(() => {
+            setIsLoading(false)
+            navigate(`/sudah-validasi/${ref_number}`)
+          }, 1000)
+        } catch (error) {
+          setIsLoading(false)
         }
-      )
+      }, 1000)
     } catch (error) {
-      const errorMessage =
-        (error as Error)?.message ||
-        'Terjadi kesalahan saat menyimpan data transfer'
-      message.error(errorMessage)
-      console.error('Error:', error)
+      setIsLoading(false)
+    } finally {
+      console.log('Proses transfer selesai.')
     }
-    navigate(`/simpanidunikdarikledomutasi/${ref_number}`)
-    // navigate(`/transfer-detail/${ref_number}`)
   }
 
   const printSuratJalan = useRef<HTMLDivElement>(null)
@@ -210,58 +230,105 @@ const ValidatePindah: React.FC = () => {
   const [qtyTujuan, setQtyTujuan] = useState<number | null>(null)
 
   const combinedWarehouseIds = `${fromWarehouseId},${toWarehouseId}`
-
-  const { stocks, qtyById } = useProductStocks(productIds, combinedWarehouseIds)
-  const [selectedDates, setSelectedDates] = useState<string>()
-
   const handleDateRangeSave = (startDate: string) => {
     setSelectedDates(startDate)
   }
+  const [selectedDates, setSelectedDates] = useState<string>()
+
+  const { stocks, qtyById } = useProductStocks(productIds, combinedWarehouseIds)
+  console.log({ stocks })
+
+  const qtyValuesss = stocks.map((item: any) => item.qty)
+  const qtyPermintaanArray = qtyPermintaan.split(',').map(Number)
+
+  const isValidationDisabled = qtyValuesss.some((qty, index) => {
+    const transfer = transferQty[index] || 0
+    const permintaan = qtyPermintaanArray[index] || 0
+
+    return qty < transfer || transfer > permintaan
+  })
+
+  console.log({ isValidationDisabled })
+
+  console.log({ qtyPermintaan })
   const columns = [
-    // Input for transfer quantity
     {
-      title: 'Jumlah TF',
+      title: 'Qty Validasi',
       dataIndex: 'transferQty',
       key: 'transferQty',
-      render: (text: string, record: any, index: number) => (
-        <Input
-          type="number"
-          value={transferQty[index] || 0}
-          onChange={(e) => {
-            const value = Number(e.target.value)
+      render: (text: string, record: any, index: number) => {
+        const product = stocks.find(
+          (product) => String(product.id) === String(record.product_id)
+        )
 
-            setTransferQty((prev) => {
-              const newQty = [...prev]
-              newQty[index] = value
-              return newQty
-            })
+        const qtyDariValue = product?.stocks?.[toWarehouseId]?.qty || 0
+        const qtyPermintaan = record.qty_minta || 0
 
-            // Update fromQtyState dan toQtyState
-            const productId = record.product_id
-            const product = stocks.find(
-              (p) => String(p.id) === String(productId)
-            )
-            if (product) {
-              const qtyDari = product.stocks?.[fromWarehouseId]?.qty || 0
-              const qtyTujuan = product.stocks?.[toWarehouseId]?.qty || 0
+        const isQtyValid =
+          transferQty[index] <= qtyPermintaan &&
+          transferQty[index] <= qtyDariValue
 
-              setFromQtyState((prevState) => ({
-                ...prevState,
-                [productId]: qtyDari + value,
-              }))
-
-              setToQtyState((prevState) => ({
-                ...prevState,
-                [productId]: qtyTujuan - value,
-              }))
+        return (
+          <Tooltip
+            title={
+              transferQty[index] > qtyPermintaan
+                ? 'Qty Validasi melebihi Qty Permintaan'
+                : transferQty[index] > qtyDariValue
+                ? 'Qty Validasi melebihi Stok Terakhir'
+                : ''
             }
-          }}
-        />
-      ),
+            overlayInnerStyle={{
+              color: 'red',
+              backgroundColor: 'transparent',
+            }}
+          >
+            <Input
+              type="number"
+              value={transferQty[index] || 0}
+              onChange={(e) => {
+                const value = Number(e.target.value)
+
+                // Update nilai transferQty jika ada perubahan
+                setTransferQty((prev) => {
+                  const newQty = [...prev]
+                  newQty[index] = value
+                  return newQty
+                })
+                const productId = record.product_id
+                const product = stocks.find(
+                  (p) => String(p.id) === String(productId)
+                )
+                if (product) {
+                  const qtyDari = product.stocks?.[fromWarehouseId]?.qty || 0
+                  const qtyTujuan = product.stocks?.[toWarehouseId]?.qty || 0
+
+                  setFromQtyState((prevState) => ({
+                    ...prevState,
+                    [productId]: qtyDari + value,
+                  }))
+
+                  setToQtyState((prevState) => ({
+                    ...prevState,
+                    [productId]: qtyTujuan - value,
+                  }))
+                }
+              }}
+              style={{
+                borderColor:
+                  transferQty[index] > qtyPermintaan ||
+                  transferQty[index] > qtyDariValue
+                    ? 'red'
+                    : undefined,
+                width: '120px', // Atur lebar input
+              }}
+            />
+          </Tooltip>
+        )
+      },
     },
 
     {
-      title: 'No',
+      title: 'Stok Terakhir',
       dataIndex: 'transferQty',
       key: 'transferQty',
       render: (_: any, record: any, index: number) => {
@@ -269,22 +336,38 @@ const ValidatePindah: React.FC = () => {
           (product) => String(product.id) === String(record.product_id)
         )
 
-        if (!product) return <span>Product not found</span>
+        // if (!product) return <span>Refresh</span>
+        if (!product) return <span style={{ color: 'red' }}>Refresh</span>
 
-        const qtyDariValue = product?.stocks?.[fromWarehouseId]?.qty || 0
-        const qtyTujuanValue = product?.stocks?.[toWarehouseId]?.qty || 0
+        const qtyDariValue = product?.stocks?.[toWarehouseId]?.qty || 0
+        const qtyTujuanValue = product?.stocks?.[fromWarehouseId]?.qty || 0
 
-        const transferAmount = transferQty[index] || 0 // Gunakan index
-        const updatedQtyDariValue = qtyDariValue + transferAmount
-        const updatedQtyTujuanValue = qtyTujuanValue - transferAmount
+        const transferAmount = transferQty[index] || 0
+        const updatedQtyDariValue = qtyTujuanValue + transferAmount
+        const updatedQtyTujuanValue = qtyDariValue - transferAmount
+
+        console.log(`Index: ${index}`)
+        console.log(`Product ID: ${record.product_id}`)
+        console.log(`Transfer Amount: ${transferAmount}`)
+        console.log(`Updated Qty Dari: ${updatedQtyDariValue}`)
+        console.log(`Updated Qty Tujuan: ${updatedQtyTujuanValue}`)
 
         return (
           <div>
-            <span>{`${updatedQtyDariValue} / ${updatedQtyTujuanValue}`}</span>
+            <span>{`${updatedQtyTujuanValue} / ${updatedQtyDariValue}`}</span>
           </div>
         )
       },
     },
+    ...(transferData?.code === 1
+      ? [
+          {
+            title: 'Tervalidasi',
+            dataIndex: 'qty',
+            key: 'qty',
+          },
+        ]
+      : []),
     {
       title: 'Barang',
       dataIndex: 'product_name',
@@ -317,9 +400,20 @@ const ValidatePindah: React.FC = () => {
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const today = new Date()
+  const formattedDate = today.toLocaleDateString('id-ID', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
   return (
-    <div style={{ padding: '24px', fontFamily: 'Arial, sans-serif' }}>
-      <div ref={componentRef} className="print-container">
+    <div className={`page-container ${isLoading ? 'loading' : ''}`}>
+      <div
+        ref={componentRef}
+        className="print-container"
+        style={{ width: '70%', margin: '0 auto', maxWidth: '1200px' }}
+      >
         <Title level={3} style={{ textAlign: 'center' }}>
           <span style={{ color: '#AF8700', fontSize: '20px' }}>{title}</span>
         </Title>
@@ -336,7 +430,7 @@ const ValidatePindah: React.FC = () => {
               <Col span={24}>
                 <Row>
                   <Col span={6}>
-                    <Text>Refer</Text>
+                    <Text>No Permintaan</Text>
                   </Col>
                   <Col span={12}>
                     <Text strong>: {transfer.ref_number}</Text>
@@ -348,22 +442,12 @@ const ValidatePindah: React.FC = () => {
 
                 <Row>
                   <Col span={6}>
-                    <Text>Tanggal PO</Text>
-                  </Col>
-                  <Col span={12}>
-                    <Text strong>: {transfer.trans_date}</Text>
-                  </Col>
-                  <Col span={6}>
                     <Text>Tanggal Validasi</Text>
                   </Col>
                   <Col span={12}>
-                    <SingleDate
-                      onChange={(dates) => {
-                        setSelectedDates(dates)
-                      }}
-                      onSave={handleDateRangeSave}
-                    />
+                    <Text strong>: {formattedDate}</Text>
                   </Col>
+
                   <Col span={6} style={{ textAlign: 'center' }}>
                     <Text strong>{toWarehouseName}</Text>
                   </Col>
@@ -387,8 +471,18 @@ const ValidatePindah: React.FC = () => {
                     <Text>Ket</Text>
                   </Col>
                   <Col span={12}>
-                    <Text>: -</Text>
+                    <Input
+                      placeholder="Masukkan keterangan..."
+                      onChange={(e) => setKeterangan(e.target.value)}
+                      value={keterangan}
+                      style={{
+                        border: 'none',
+                        borderBottom: '1px solid #ccc',
+                        width: '40%',
+                      }}
+                    />
                   </Col>
+
                   <Col span={6} style={{ textAlign: 'center' }}>
                     <Text strong>{fromWarehouseName}</Text>
                   </Col>
@@ -405,27 +499,37 @@ const ValidatePindah: React.FC = () => {
             />
 
             {transferData?.code !== 2 && (
-              <>
-                <div style={{ textAlign: 'right' }}>
+              <div style={{ textAlign: 'left' }}>
+                <Tooltip
+                  title={
+                    isValidationDisabled
+                      ? 'Qty Validasi tidak boleh lebih besar dari Qty Permintaan'
+                      : ''
+                  }
+                >
                   <Button
                     type="dashed"
-                    onClick={handleSaveTransfer} // Fungsi untuk menyimpan
+                    onClick={handleSaveTransfer}
                     style={{
-                      marginBottom: '16px',
-                      backgroundColor: '#28a745', // Ubah warna jika perlu
-                      borderColor: '#28a745',
+                      marginTop: '16px',
+                      backgroundColor: isValidationDisabled
+                        ? '#ccc'
+                        : '#28a745',
+                      borderColor: isValidationDisabled ? '#ccc' : '#28a745',
                       color: '#ffffff',
-                      width: '140px',
+                      width: '200px',
                     }}
+                    disabled={isValidationDisabled}
                   >
-                    Simpan
+                    VALIDASI PERMINTAAN
                   </Button>
-                </div>
-              </>
+                </Tooltip>
+              </div>
             )}
           </>
         )}
       </div>
+      {isLoading && <div className="loading-overlay"></div>}
     </div>
   )
 }

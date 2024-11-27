@@ -68,21 +68,24 @@ const ListSiapDiValidasi: React.FC = () => {
       navigate('/listsudahdivalidasikeluar')
     } else if (value === '3') {
       navigate('/ListSudahValidasiMasuk')
+    } else if (value === '4') {
+      navigate('/listpindah')
     }
   }
   const columns = [
-    {
-      title: 'Tujuan',
-      dataIndex: 'from_warehouse_id',
-      key: 'from_warehouse_id',
-      render: (id: number) => warehouseMap[id] || id,
-    },
     {
       title: 'Dari',
       dataIndex: 'to_warehouse_id',
       key: 'to_warehouse_id',
       render: (id: number) => warehouseMap[id] || id,
     },
+    {
+      title: 'Tujuan',
+      dataIndex: 'from_warehouse_id',
+      key: 'from_warehouse_id',
+      render: (id: number) => warehouseMap[id] || id,
+    },
+
     {
       title: 'INV',
       dataIndex: 'ref_number',
@@ -140,6 +143,16 @@ const ListSiapDiValidasi: React.FC = () => {
         onClick={() => handleButtonClick('3')}
       >
         <span>Sudah Divalidasi Masuk</span>
+      </Button>
+      <Button
+        id="btn-filter-4"
+        value="4"
+        type="default"
+        className={activeButton === '4' ? 'btn-default-selected' : ''}
+        style={{ borderRadius: '0px' }}
+        onClick={() => handleButtonClick('4')}
+      >
+        <span>List Permintaan</span>
       </Button>
 
       <Table

@@ -151,7 +151,6 @@ function App() {
                   >
                     <i className="fas fa-bars"></i> All
                   </Link>
-
                   {/* <Link
                     className="nav-link header-link p-1 px-3"
                     to={`/penjualankledo`}
@@ -241,11 +240,18 @@ function App() {
                   >
                     List Penjualan
                   </Link>
+
                   <Link
                     className="nav-link header-link p-1 px-3"
                     to={`/listpp`}
                   >
                     List Pemesanan Penjualan
+                  </Link>
+                  <Link
+                    className="nav-link header-link p-1 px-3"
+                    to={`/getinvmutasibasedondate`}
+                  >
+                    Kirim Ulang Data
                   </Link>
                   <Link
                     className="nav-link header-link p-1 px-3"

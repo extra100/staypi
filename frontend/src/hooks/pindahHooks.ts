@@ -26,6 +26,38 @@ type UpdatePpIdInput = {
   ref_number: string
   id: number
 }
+interface UseTransactionsParams {
+  transDateFrom?: string | null
+  transDateTo?: string | null
+  selectedWarehouse?: string | null
+}
+
+export const useGetFilteredMutasisisQuery = ({
+  transDateFrom,
+  transDateTo,
+  selectedWarehouse,
+}: UseTransactionsParams) =>
+  useQuery({
+    queryKey: ['pindah', { selectedWarehouse, transDateFrom, transDateTo }],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (selectedWarehouse) params.append('warehouse_id', selectedWarehouse)
+
+      if (transDateFrom) params.append('date_from', transDateFrom)
+      if (transDateTo) params.append('date_to', transDateTo)
+
+      const response = await apiClient.get<WarehouseTransfer[]>(
+        `/api/pindah?${params.toString()}`
+      )
+
+      const filteredData = response.data.filter(
+        (transaction) => transaction.code === 1
+      )
+
+      return filteredData
+    },
+    enabled: Boolean(transDateFrom && transDateTo),
+  })
 
 export const updateDenganIdUnikMutasiDariKledo = () => {
   const queryClient = useQueryClient()

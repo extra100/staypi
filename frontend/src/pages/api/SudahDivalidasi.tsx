@@ -273,7 +273,7 @@ const SudahDivalidasi: React.FC = () => {
       <div ref={componentRef} className="print-container">
         <Title level={3} style={{ textAlign: 'center' }}>
           <span style={{ color: '#AF8700', fontSize: '20px' }}>
-            {'SURAT JALAN / SURAT MUTASI'}
+            {'SURAT JALAN MUTASI'}
           </span>
         </Title>
 
@@ -456,7 +456,7 @@ const SudahDivalidasi: React.FC = () => {
             onClick={handlePrint}
             style={{ color: '#AF8700', borderColor: '#AF8700' }}
           >
-            Print Surat Jalan Mutasi
+            Print Surat Jalan
           </Button>
         </div>
       </div>
