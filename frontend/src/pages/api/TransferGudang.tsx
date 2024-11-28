@@ -65,7 +65,7 @@ const ProductStocksPage: React.FC = () => {
     const warehouse = idWarehouse.find((w) => w.id === id)
     return warehouse ? warehouse.name : 'Unknown Warehouse'
   }
-  //
+
   const { data: idaDataBarang } = useGetProductsQuery()
   console.log({ idaDataBarang })
   const getProductName = (id: any) => {
@@ -88,8 +88,7 @@ const ProductStocksPage: React.FC = () => {
       setWarehouseDariId(user.id_outlet)
     }
   }, [user])
-  const [unitName, setUnitName] = useState<string>('') // Atau tipe lain yang sesuai
-
+  const [unitName, setUnitName] = useState<string>('')
   const handleProductChange = (id: any, key: any) => {
     const selectedProduct = idaDataBarang?.find((product) => product.id === id)
 
