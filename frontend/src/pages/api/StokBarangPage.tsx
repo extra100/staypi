@@ -670,7 +670,6 @@ const StockSelectorTable = () => {
     setAmountPaid(totalSubtotal)
   }
   const [memo, setMemo] = useState('')
-
   const handleSave = () => {
     if (isSaveDisabled) return
 
@@ -710,6 +709,22 @@ const StockSelectorTable = () => {
       dueDate = formatDate(selectedDates[0])
     }
 
+    // Cek jika `amountPaid` tidak kosong
+    const witholdings = amountPaid
+      ? [
+          {
+            witholding_account_id: accountId || bankAccountId,
+            name: selectedBank || bankAccountName,
+            down_payment: Math.ceil(amountPaid),
+            witholding_percent: 0,
+            witholding_amount: Math.ceil(0),
+            status: 0,
+            id: 0,
+            trans_date: formatDate(selectedDates[0]),
+          },
+        ]
+      : []
+
     const invoiceData = {
       id: uniqueNumber,
       jalur: 'penjualan',
@@ -718,7 +733,6 @@ const StockSelectorTable = () => {
       status_id: status,
       unique_id: uniqueNumber,
       trans_date: formatDate(selectedDates[0]),
-
       due_date: dueDate,
       contact_id: selectedContact,
       sales_id: null,
@@ -737,9 +751,8 @@ const StockSelectorTable = () => {
         return {
           id: 12345,
           amount: Math.ceil(item.subtotal),
-          // discount_amount:
-          //   item.input_diskon_manual || item.gapPriceTotal || item.gapPrice,
-          discount_amount: Math.ceil(item.gapPrice) || item.input_diskon_manual,
+          discount_amount:
+            Math.ceil(item.gapPrice) || item.input_diskon_manual || 0,
           finance_account_id: item.finance_account_id,
           discount_percent: item.selectedDiscountValue || 0,
           name: item.finance_account_name,
@@ -752,18 +765,7 @@ const StockSelectorTable = () => {
           satuan: item.name,
         }
       }),
-
-      witholdings: [
-        {
-          witholding_account_id: accountId || bankAccountId,
-          name: selectedBank || bankAccountName,
-          down_payment: Math.ceil(amountPaid || 0),
-          witholding_percent: 0,
-          witholding_amount: Math.ceil(0),
-          status: 0,
-          trans_date: formatDate(selectedDates[0]),
-        },
-      ],
+      witholdings,
       contacts: [
         {
           id: selectedContact,
@@ -776,19 +778,16 @@ const StockSelectorTable = () => {
           name: simpanGudang,
         },
       ],
-      // ...
       tages: saveIdTags.map((tag) => ({
         id: tag?.id || tagId,
         name: tag?.name || tagName,
       })),
       due: Math.ceil(piutang),
-      down_payment: Math.ceil(amountPaid || 0),
+      down_payment: Math.ceil(amountPaid as any),
+
       down_payment_bank_account_id: accountId || bankAccountId,
       witholding_account_id: accountId || bankAccountId,
-
-      // message: catatan,
       tags: selectTag || tagId,
-
       witholding_amount: 0,
       witholding_percent: 0,
       column_name: '',
@@ -806,7 +805,7 @@ const StockSelectorTable = () => {
 
         setTimeout(() => {
           setIsLoading(false)
-          navigate(`/getinvbasedondate`)
+          navigate(`/getinvbasedondate/${refNumber}`)
         }, 3000) // 3000ms = 3 detik
       },
       onError: (error: any) => {

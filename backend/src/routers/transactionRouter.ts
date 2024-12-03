@@ -102,41 +102,144 @@ transactionRouter.put(
     }
   })
 )
+// transactionRouter.put(
+//   '/by-memo/:memo',
+//   asyncHandler(async (req: any, res: any) => {
+//     const transaction = await TransactionModel.findOne({
+//       memo: req.params.memo, // Cari berdasarkan memo
+//     })
+
+//     if (!transaction) {
+//       return res.status(404).json({ message: 'Transaction not found' })
+//     }
+
+//     if (req.body.id) {
+//       transaction.id = req.body.id
+//     }
+
+//     if (Array.isArray(req.body.items) && req.body.items.length > 0) {
+//       transaction.items = transaction.items.map((item) => {
+//         // Cocokan payload dengan database
+//         const updatedItem = req.body.items.find(
+//           (i: any) => i.finance_account_id === item.finance_account_id
+//         )
+
+//         if (updatedItem) {
+//           // Update isi items dengan data baru
+//           return { ...item, id: updatedItem.id }
+//         }
+
+//         return item
+//       })
+//     }
+
+//     // Simpan ke database
+//     const updatedTransaction = await transaction.save()
+
+//     res.json(updatedTransaction)
+//   })
+// )
+type Witholding = {
+  _id: string // Properti _id harus ada
+  down_payment: number
+  status: number
+  witholding_account_id?: number
+  witholding_amount?: number
+  witholding_percent?: number
+  trans_date?: string
+  name?: string
+}
 transactionRouter.put(
   '/by-memo/:memo',
   asyncHandler(async (req: any, res: any) => {
+    // Cari transaksi berdasarkan memo
     const transaction = await TransactionModel.findOne({
-      memo: req.params.memo, // Cari berdasarkan memo
+      memo: req.params.memo,
     })
 
     if (!transaction) {
       return res.status(404).json({ message: 'Transaction not found' })
     }
 
+    // Perbarui ID transaksi jika tersedia dalam body request
     if (req.body.id) {
+      console.log('Updating ID:', req.body.id)
       transaction.id = req.body.id
     }
 
+    // Perbarui item jika ada
     if (Array.isArray(req.body.items) && req.body.items.length > 0) {
       transaction.items = transaction.items.map((item) => {
-        // Cocokan payload dengan database
         const updatedItem = req.body.items.find(
           (i: any) => i.finance_account_id === item.finance_account_id
         )
 
         if (updatedItem) {
-          // Update isi items dengan data baru
-          return { ...item, id: updatedItem.id }
+          return {
+            ...item,
+            id: updatedItem.id,
+            price: updatedItem.price,
+            amount: updatedItem.amount,
+            discount_amount: updatedItem.discount_amount,
+          }
         }
 
         return item
       })
     }
 
-    // Simpan ke database
-    const updatedTransaction = await transaction.save()
+    // Perbarui witholdings berdasarkan _id
+    if (
+      Array.isArray(req.body.witholdings) &&
+      req.body.witholdings.length > 0
+    ) {
+      req.body.witholdings.forEach((updateWitholding: any) => {
+        if (updateWitholding._id) {
+          // Cari elemen berdasarkan _id
+          const targetWitholding = transaction.witholdings.find(
+            (witholding: any) =>
+              witholding._id.toString() === updateWitholding._id
+          )
 
-    res.json(updatedTransaction)
+          if (targetWitholding) {
+            // Update elemen yang ditemukan
+            Object.assign(targetWitholding, {
+              down_payment: updateWitholding.down_payment,
+              status: updateWitholding.status,
+              witholding_account_id: updateWitholding.witholding_account_id,
+              witholding_amount: updateWitholding.witholding_amount,
+              witholding_percent: updateWitholding.witholding_percent,
+              trans_date: updateWitholding.trans_date,
+              name: updateWitholding.name,
+              id: updateWitholding.id,
+            })
+          } else {
+            console.log(
+              `Skipping update: Witholding with _id ${updateWitholding._id} not found in transaction.`
+            )
+          }
+        } else {
+          console.log(
+            'Skipping witholding update due to missing _id:',
+            updateWitholding
+          )
+        }
+      })
+    } else {
+      console.log('No witholding data received or witholdings array is empty.')
+    }
+
+    // Simpan perubahan ke database
+    try {
+      const updatedTransaction = await transaction.save()
+      console.log('Transaction Updated:', updatedTransaction)
+
+      // Kembalikan respon JSON
+      res.json(updatedTransaction)
+    } catch (err) {
+      console.error('Error while saving updated transaction:', err)
+      res.status(500).json({ message: 'Failed to update transaction.' })
+    }
   })
 )
 
@@ -206,26 +309,31 @@ transactionRouter.put(
 //     }
 //   })
 // )
-
 transactionRouter.delete(
   '/:ref_number/witholdings/:witholdingId',
   asyncHandler(async (req: Request, res: Response) => {
-    const { ref_number, witholdingId } = req.params
+    console.log('Request params:', req.params)
 
+    const { ref_number, witholdingId } = req.params
     const transaction = await TransactionModel.findOne({ ref_number })
 
     if (transaction) {
+      console.log('Transaction found:', transaction)
+
       transaction.witholdings = transaction.witholdings.filter(
         (witholding: any) => witholding._id.toString() !== witholdingId
       )
 
       await transaction.save()
+      console.log('Witholding removed successfully')
       res.json({ message: 'Witholding removed successfully' })
     } else {
+      console.error('Transaction not found')
       res.status(404).json({ message: 'Transaction not found' })
     }
   })
 )
+
 transactionRouter.patch(
   '/:ref_number/witholding/:witholdingId',
   asyncHandler(async (req: any, res: any) => {

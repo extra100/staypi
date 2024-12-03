@@ -22,13 +22,21 @@ export interface Invoice {
     amount: number
     price_after_tax: number
     amount_after_tax: number
+    discount_amount: number
+    discount_persen: number
+  }[]
+  witholdings: {
+    down_payment: number
+    status: string
+    id: string
   }[]
 }
 
 export function TakeInvoicesFromKledoBasedOnDate(
   dateFrom: string | null,
   dateTo: string | null,
-  warehouseId?: string
+  warehouseId?: string,
+  search?: string
 ) {
   const [loading, setLoading] = useState(true)
   const [getInvFromKledoBasedDate, setGetInvFromKledo] = useState<Invoice[]>([])
@@ -43,7 +51,7 @@ export function TakeInvoicesFromKledoBasedOnDate(
         let page = 1
         let hasMoreData = true
         while (hasMoreData) {
-          const url = `${HOST}/finance/invoices?per_page=500&page=${page}&date_from=${dateFrom}&date_to=${dateTo}${
+          const url = `${HOST}/finance/invoices?per_page=500&page=${page}&search=${search}&date_from=${dateFrom}&date_to=${dateTo}${
             warehouseId ? `&warehouse_id=${warehouseId}` : ''
           }&include_items=1`
 
@@ -79,7 +87,16 @@ export function TakeInvoicesFromKledoBasedOnDate(
                   price: item.price,
                   amount: item.amount,
                   price_after_tax: item.price_after_tax,
+                  discount_amount: item.discount_amount,
+                  discount_persen: item.discount_persen,
                   amount_after_tax: item.amount_after_tax,
+                }))
+              : [],
+            witholdings: Array.isArray(inv.witholdings)
+              ? inv.witholdings.map((witholding: any) => ({
+                  down_payment: witholding.down_payment,
+                  status: witholding.status,
+                  id: witholding.id,
                 }))
               : [],
           }))
@@ -102,7 +119,7 @@ export function TakeInvoicesFromKledoBasedOnDate(
     }
 
     fetchData()
-  }, [dateFrom, dateTo, warehouseId])
+  }, [dateFrom, dateTo, warehouseId, search])
 
   const memoizedData = useMemo(
     () => getInvFromKledoBasedDate,

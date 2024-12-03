@@ -25,9 +25,27 @@ export const useGetReturnssQuery = () =>
     queryKey: ['returns'],
     queryFn: async () => (await apiClient.get<Return[]>(`/api/returns`)).data,
   })
+
+export const useGetReturnByIdQuery = (ref_number: string) =>
+  useQuery<Return[]>(
+    ['returns', ref_number],
+    async () => {
+      try {
+        const response = await apiClient.get<Return[]>(
+          `/api/returns/${ref_number}`
+        )
+        return response.data
+      } catch (error) {
+        throw new Error('Failed to fetch return data')
+      }
+    },
+    {
+      enabled: !!ref_number,
+    }
+  )
+
 export const updateDenganIdUnikReturnDariKledo = () => {
   const queryClient = useQueryClient()
-
   return useMutation(
     ({ memo, id }: any) => {
       return apiClient.put(`/api/returns/by-id/${memo}`, {

@@ -118,6 +118,9 @@ import ListSiapDiValdiasiOutletKhusus from './pages/api/ListSiapDiValdiasiOutlet
 import SuitExApiWithOwnDbBasedDate from './pages/api/suitExApiWithOwnDatabase'
 import BagdePenjualan from './badgePenjualan'
 import SuitMutasiExDanKledo from './pages/api/SuitMutasiExDanKledo'
+import SaveReturDetailSourceKledo from './pages/api/saveReturDetailSourceKledo'
+import BayarHutangRetur from './pages/api/BayarHutangRetur'
+import GetIdNextPaymnet from './pages/api/GetIdNextPaymnet'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -175,9 +178,10 @@ const router = createBrowserRouter(
       />
       <Route path="/detailpiutangperkontak" element={<DetailPiutangKontak />} />
       <Route
-        path="/getinvbasedondate"
+        path="/getinvbasedondate/:refNumber"
         element={<SuitExApiWithOwnDbBasedDate />}
       />
+      <Route path="/getnextpaymnet/:refNumber" element={<GetIdNextPaymnet />} />
       <Route
         path="/getinvmutasibasedondate"
         element={<SuitMutasiExDanKledo />}
@@ -190,6 +194,11 @@ const router = createBrowserRouter(
       <Route path="/listvoid" element={<ListVoid />} />
       <Route path="/laporanstok" element={<ListVoid />} />
       <Route path="/listreturn" element={<ListReturn />} />
+      <Route path="/returpayment/:ref_number" element={<BayarHutangRetur />} />
+      <Route
+        path="/pembayaranretur/:memorandum/:selectedDate"
+        element={<SaveReturDetailSourceKledo />}
+      />
       <Route path="/detailkledo/:ref_number" element={<DetailKledo />} />
       {/* New Route for InvoiceTable */}
       <Route
@@ -219,7 +228,7 @@ const router = createBrowserRouter(
       <Route path="/okepemesanan/:ref_number" element={<OkPemesanan />} />
       <Route path="/returninvoice/:ref_number" element={<Aneh />} />
       <Route path="/edittransaksi/:ref_number" element={<EditTransaksi />} />
-      <Route path="/editpembayaran/:ref_number" element={<EditPembayaran />} />
+      <Route path="/editpembayaran/:memorandum" element={<EditPembayaran />} />
       <Route path="/update/:id" element={<EditTransaksiTes />} />
       <Route path="/printnota/:ref_number" element={<Receipt />} />
       <Route path="/printsuratjalan/:ref_number" element={<ReceiptJalan />} />

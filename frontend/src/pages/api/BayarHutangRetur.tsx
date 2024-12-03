@@ -34,7 +34,7 @@ import { saveToApiNextPayment } from './NextPayment'
 import { useReactToPrint } from 'react-to-print'
 import Receipt from './printNota'
 import ReceiptJalan from './ReceiptJalan'
-import { useIdInvoice } from './takeSingleInvoice'
+// import { useIdInvoice } from './takeSingleInvoice'
 import { useIdWarehouse } from './namaWarehouse'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
 import { useGetAkunBanksQueryDb } from '../../hooks/akunBankHooks'
@@ -61,15 +61,52 @@ import {
 } from '@ant-design/icons'
 import { useDeleteInvoice } from './DeleteInvoicePenjualan'
 import { useRedData } from '../../badgeMessage'
+import {
+  useGetReturnByIdQuery,
+  useGetReturnssQuery,
+} from '../../hooks/returnHooks'
+import { TakeIdReturPayment } from '../TakeIdReturPayment'
 
 const { Title, Text } = Typography
 const { Option } = Select
 
-const DetailKledo: React.FC = () => {
+const BayarHutangRetur: React.FC = () => {
   const [showButtons, setShowButtons] = useState(false)
   const currentDate = dayjs()
   const [startDate, setStartDate] = useState<Dayjs>(currentDate)
+  const [transDateFrom, setTransDateFrom] = useState<string | null>(
+    dayjs().format('YYYY-MM-DD')
+  )
 
+  const [transDateTo, setTransDateTo] = useState<string | null>(
+    dayjs().format('YYYY-MM-DD')
+  )
+
+  const { memorandum, selectedDate } = useParams<{
+    memorandum: string
+    selectedDate: string
+  }>()
+  const [search, setSearch] = useState<any>({
+    memorandum,
+    selectedDate,
+  })
+
+  console.log({ search })
+
+  const { getIdReturPayment } = TakeIdReturPayment(
+    transDateFrom,
+    transDateTo,
+    search
+  )
+  const getReturKledo = getIdReturPayment?.find(
+    (transaction: any) => transaction.memo === memorandum
+  )
+  // const [memoState, setMemoState] = useState<any>(ref_number)
+
+  console.log({ getReturKledo })
+  const memes = getReturKledo?.memo
+  const contactId = getReturKledo?.contact_id
+  const tglTrans = getReturKledo?.trans_date
   const handleStartDateChange = (date: Dayjs | null) => {
     if (date) {
       setStartDate(date)
@@ -86,49 +123,24 @@ const DetailKledo: React.FC = () => {
 
   const updatePosMutation = useUpdateTransactionMutation()
   //
-  const { data: allTransactions } = useGetTransactionByIdQuery(
-    ref_number as string
+  const { data: allTransactionsss } = useGetTransactionByIdQuery(
+    memorandum as any
   )
-
+  const getPosDetail = allTransactionsss?.find(
+    (transaction: any) => transaction.memo === memorandum
+  )
+  console.log({ allTransactionsss })
   const { data: contacts } = useGetContactsQuery()
   const { data: akunBanks } = useGetAkunBanksQueryDb()
 
-  const { getIdAtInvoice } = useIdInvoice(ref_number || '')
-
-  const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
-
-  const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
-
-  const getPosDetail = allTransactions?.find(
-    (transaction: any) => transaction.ref_number === ref_number
-  )
-
-  //delete
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(
     null
   )
-  const IdYangAkanDiDelete = getPosDetail?.id
-  const memorandum = getPosDetail?.memo
-  const idMonggo = getPosDetail?._id
-  const pesan = getPosDetail?.message
+
   const { hapusLoading, isDeleted } = useDeleteInvoice(selectedInvoiceId ?? 0)
 
-  const handleDelete = () => {
-    if (IdYangAkanDiDelete) {
-      setSelectedInvoiceId(IdYangAkanDiDelete)
-      message.loading('Deleting invoice...')
-    }
-  }
-  useEffect(() => {
-    if (isDeleted) {
-      message.success('Invoice deleted successfully')
-      setSelectedInvoiceId(null)
-    }
-  }, [isDeleted])
-  //delete
   const gudangName = getPosDetail?.warehouses?.[0]?.name
-  const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
-  const idididid = getPosDetail?.items?.[0]?.id
+  const gudangId = getPosDetail?.warehouse_id
 
   const langka = getPosDetail?.id
 
@@ -151,6 +163,14 @@ const DetailKledo: React.FC = () => {
     return total + (item.discount_amount || 0)
   }, 0)
   const subTotal = totalDiscount + amount
+
+  // const { getIdReturPayment } = TakeIdReturPayment(
+  //   transDateFrom,
+  //   transDateTo,
+  //   memoState
+  // )
+
+  console.log({ getIdReturPayment })
 
   const { fiAc } = useFiac()
 
@@ -184,187 +204,23 @@ const DetailKledo: React.FC = () => {
   const [contactName, setContactName] = useState<string>('Unknown Contact')
 
   useEffect(() => {
-    if (allTransactions && contacts) {
-      const contactId = getPosDetail?.contacts?.[0]?.id
+    if (allTransactionsss && contacts) {
+      const contactId = getPosDetail?.contact_id
       const contact = contacts.find((c: any) => c.id === contactId)
       if (contact) {
         setContactName(contact.name)
       }
     }
-  }, [allTransactions, contacts])
+  }, [allTransactionsss, contacts])
   const { idWarehouse } = useIdWarehouse()
 
   const [selectedBank, setSelectedBank] = useState<any | null>(null)
 
   const today = dayjs().format('DD-MM-YYYY')
   const { saveNextPayment } = saveToApiNextPayment()
-  const handleVoid = (values: any) => {
-    if (langka) {
-      const existingInvoice = allTransactions?.find(
-        (transaction) => transaction.id === langka
-      )
-
-      if (existingInvoice) {
-        voidInvoice(langka as any)
-          .then(() => {
-            const updatedInvoice: Transaction = {
-              ...existingInvoice,
-              reason_id: 'void',
-            }
-
-            updatePosMutation.mutate(updatedInvoice, {
-              onSuccess: () => {
-                message.success('Transaksi berhasil dibatalkan dan diperbarui!')
-                setLoadingSpinner(true)
-
-                setTimeout(() => {
-                  setLoadingSpinner(false)
-                  navigate('/listvoid')
-                }, 3000)
-              },
-              onError: (error) => {
-                message.error(
-                  `Terjadi kesalahan saat memperbarui database: ${error.message}`
-                )
-              },
-            })
-          })
-          .catch((error) => {
-            message.error(
-              `Terjadi kesalahan saat void invoice: ${error.message}`
-            )
-          })
-      } else {
-        message.error('Melebihi batas pembatalan:')
-      }
-    } else {
-      message.error('Menyebabkan double data')
-    }
-  }
 
   const [loadingSpinner, setLoadingSpinner] = useState(false)
 
-  const handleUnVoid = (values: any) => {
-    if (langka) {
-      const existingInvoice = allTransactions?.find(
-        (transaction) => transaction.id === langka
-      )
-
-      if (existingInvoice) {
-        unvoidInvoice(langka as any)
-          .then(() => {
-            const updatedInvoice: Transaction = {
-              ...existingInvoice,
-              reason_id: 'unvoid',
-            }
-
-            // Lanjutkan dengan mutasi untuk memperbarui database
-            updatePosMutation.mutate(updatedInvoice, {
-              onSuccess: () => {
-                message.success('Transaksi berhasil dibatalkan dan diperbarui!')
-                setLoadingSpinner(true)
-
-                setTimeout(() => {
-                  setLoadingSpinner(false)
-                  navigate('/listvoid')
-                }, 3000)
-              },
-              onError: (error) => {
-                message.error(
-                  `Terjadi kesalahan saat memperbarui database: ${error.message}`
-                )
-              },
-            })
-          })
-          .catch((error) => {
-            message.error(
-              `Terjadi kesalahan saat void invoice: ${error.message}`
-            )
-          })
-      } else {
-        message.error('Melebihi batas pembatalan:')
-      }
-    } else {
-      message.error('Menyebabkan double data')
-    }
-  }
-  // const handleFormSubmit = (values: any) => {
-  //   const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
-  //     map[warehouse.name] = warehouse.id
-  //     return map
-  //   }, {})
-
-  //   const accountId = accountMap[selectedBank as any]
-
-  //   if (langka) {
-  //     const invoiceData = {
-  //       witholdings: [
-  //         {
-  //           witholding_account_id: accountId || bankAccountId,
-  //           name: selectedBank || bankAccountName,
-  //           amount: amountPaid || 0,
-  //           witholding_percent: 0,
-  //           // witholding_amount: amountPaid || 0,
-  //           status: 0,
-  //           trans_date: selectedDates,
-  //           id: 23646,
-  //         },
-  //       ],
-  //     }
-
-  //     const existingInvoice = allTransactions?.find(
-  //       (transaction) => transaction.id === langka
-  //     )
-
-  //     if (existingInvoice) {
-  //       const updatedWithholdings = [
-  //         ...existingInvoice.witholdings,
-  //         ...invoiceData.witholdings,
-  //       ]
-
-  //       const updatedInvoice = {
-  //         ...existingInvoice,
-  //         witholdings: updatedWithholdings,
-  //       }
-
-  //       updatePosMutation.mutate(updatedInvoice as any, {
-  //         onSuccess: () => {
-  //           console.log('Invoice updated successfully.')
-  //           navigate(`/getnextpaymnet/${refNumber}`)
-  //         },
-  //         onError: (error: any) => {
-  //           console.error('Error updating invoice:', error)
-  //         },
-  //       })
-  //     } else {
-  //       console.error('Invoice with ref_number not found:', refNumber)
-  //     }
-  //   } else {
-  //     console.error('No valid ref_number found.')
-  //   }
-
-  //   // Membuat payload untuk pembayaran baru
-  //   const payload = {
-  //     amount: amountPaid || 0,
-  //     attachment: [],
-  //     bank_account_id: accountId || bankAccountId,
-  //     business_tran_id: langka,
-
-  //     // witholding_amount: amountPaid,
-  //     memo: memorandum,
-  //     trans_date: selectedDates,
-  //     witholdings: [],
-  //   }
-
-  //   saveNextPayment(payload)
-  //     .then((response: any) => {
-  //       console.log('Payment saved successfully:', response)
-  //       navigate(`/getnextpaymnet/${refNumber}`) // Navigasi setelah berhasil
-  //     })
-  //     .catch((error: any) => {
-  //       console.error('Error saving payment:', error)
-  //     })
-  // }
   const handleFormSubmit = (values: any) => {
     const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
       map[warehouse.name] = warehouse.id
@@ -381,16 +237,14 @@ const DetailKledo: React.FC = () => {
             name: selectedBank || bankAccountName,
             down_payment: amountPaid || 0,
             witholding_percent: 0,
-            witholding_amount: 0,
+            witholding_amount: amountPaid || 0,
             status: 0,
             trans_date: selectedDates,
-            id: 23646,
-            // _id: idMonggo,
           },
         ],
       }
 
-      const existingInvoice = allTransactions?.find(
+      const existingInvoice = allTransactionsss?.find(
         (transaction) => transaction.id === langka
       )
 
@@ -407,7 +261,6 @@ const DetailKledo: React.FC = () => {
 
         updatePosMutation.mutate(updatedInvoice as any)
       } else {
-        console.error('Invoice with ref_number not found:', refNumber)
       }
     } else {
       console.error('No valid ref_number found.')
@@ -419,8 +272,9 @@ const DetailKledo: React.FC = () => {
       attachment: [],
       bank_account_id: accountId || bankAccountId,
       business_tran_id: langka,
-      witholding_amount: 0,
-      memo: refNumber,
+
+      witholding_amount: amountPaid,
+      memo: values.catatan || null,
       trans_date: selectedDates,
       witholdings: [],
     }
@@ -428,7 +282,6 @@ const DetailKledo: React.FC = () => {
     saveNextPayment(payload)
       .then((response: any) => {
         console.log('Payment saved successfully:', response)
-        navigate(`/getnextpaymnet/${refNumber}`) // Navigasi setelah berhasil
       })
       .catch((error: any) => {
         console.error('Error saving payment:', error)
@@ -451,16 +304,18 @@ const DetailKledo: React.FC = () => {
 
   const tele = akunBank?.data
 
-  const matchingTele = tele?.find((item) => {
-    const nameParts = item.name.split('_')
-    return nameParts[1] === gudangName
-  })
+  // const matchingTele = tele?.find((item) => {
+  //   const nameParts = item.name.split('_')
+  //   return nameParts[1] === gudangName
+  // })
 
   const [bankAccountName, setBankAccountName] = useState<string | null>(null)
 
   const [bankAccountId, setBankAccountId] = useState<string | null>(null)
 
-  const [warehouseName, setWarehouseName] = useState<string | null>(null)
+  //   const [warehouseName, setWarehouseName] = useState<string | null>(null)
+  const [warehouseName, setWarehouseName] = useState<string>('')
+
   const { data: gudangdb } = useGetWarehousesQuery()
 
   const getWarehouseName = () => {
@@ -474,128 +329,69 @@ const DetailKledo: React.FC = () => {
   }
 
   useEffect(() => {
-    const name = getWarehouseName()
-    setWarehouseName(name)
-    if (name) {
-    }
-  }, [gudangdb, gudangId])
-  const getBankAccountName = () => {
-    if (!akunBanks || !warehouseName) return null
-
-    const matchingBankAccount = akunBanks.find((bank: { name: string }) => {
-      const parts = bank.name.split('_')
-      return parts[1] === warehouseName
-    })
-    return matchingBankAccount ? matchingBankAccount.name : null
-  }
-  useEffect(() => {
-    const name = getBankAccountName()
-    setBankAccountName(name)
-  }, [warehouseName, akunBanks])
-  const getBankAccountId = () => {
-    if (!akunBanks || !warehouseName) return null
-
-    const matchingBankAccount = akunBanks.find(
-      (bank: { name: any; id: any }) => {
-        const parts = bank.name.split('_')
-        return parts[1] === warehouseName
+    if (allTransactionsss && gudangdb) {
+      const warehouseId = getPosDetail?.warehouse_id
+      const gudang = gudangdb.find((c: any) => c.id === warehouseId)
+      if (gudang) {
+        setWarehouseName(gudang.name)
       }
-    )
-    return matchingBankAccount ? matchingBankAccount.id : null
-  }
-  const matchingName = matchingTele?.name
-  useEffect(() => {
-    if (bankAccountName) {
-      setSelectedBank(bankAccountName)
     }
-  }, [bankAccountName])
-  useEffect(() => {
-    const id = getBankAccountId()
-    setBankAccountId(id as any)
-  }, [warehouseName, akunBanks])
+  }, [allTransactionsss, gudangdb])
+  //   useEffect(() => {
+  //     const name = getWarehouseName()
+  //     setWarehouseName(name)
+  //     if (name) {
+  //     }
+  //   }, [gudangdb, gudangId])
+  // const getBankAccountName = () => {
+  //   if (!akunBanks || !warehouseName) return null
 
-  const [refNumbers, setRefNumber] = useState('')
-  const { voidInvoice, voidLoading, voidError, voidSuccess } = useVoidInvoice()
-  const { unvoidInvoice } = useUnvoidInvoice()
+  //   const matchingBankAccount = akunBanks.find((bank: { name: string }) => {
+  //     const parts = bank.name.split('_')
+  //     return parts[1] === warehouseName
+  //   })
+  //   return matchingBankAccount ? matchingBankAccount.name : null
+  // }
+  // useEffect(() => {
+  //   const name = getBankAccountName()
+  //   setBankAccountName(name)
+  // }, [warehouseName, akunBanks])
+  // const getBankAccountId = () => {
+  //   if (!akunBanks || !warehouseName) return null
+
+  //   const matchingBankAccount = akunBanks.find(
+  //     (bank: { name: any; id: any }) => {
+  //       const parts = bank.name.split('_')
+  //       return parts[1] === warehouseName
+  //     }
+  //   )
+  //   return matchingBankAccount ? matchingBankAccount.id : null
+  // }
+  // const matchingName = matchingTele?.name
+  // useEffect(() => {
+  //   if (bankAccountName) {
+  //     setSelectedBank(bankAccountName)
+  //   }
+  // }, [bankAccountName])
+  // useEffect(() => {
+  //   const id = getBankAccountId()
+  //   setBankAccountId(id as any)
+  // }, [warehouseName, akunBanks])
+
   const [selectedDates, setSelectedDates] = useState<string>()
 
   const handleDateRangeSave = (startDate: string) => {
     setSelectedDates(startDate)
   }
-  const formatDate = (dateString: any) => {
-    const [day, month, year] = dateString.split('-')
-    return `${year}-${month}-${day}`
-  }
+  // const formatDate = (dateString: any) => {
+  //   const [day, month, year] = dateString as any
+  //   return `${year}-${month}-${day}`
+  // }
 
   const navigate = useNavigate()
 
-  const menu = (
-    <Menu>
-      <Menu.Item key="lihatAudit" icon={<FileSearchOutlined />}>
-        Lihat Audit
-      </Menu.Item>
-      {getPosDetail?.reason_id === 'void' && (
-        <Menu.Item
-          key="unvoid"
-          icon={<UndoOutlined />}
-          onClick={() => {
-            // unvoidInvoice()
-            handleUnVoid(null)
-          }}
-          disabled={voidLoading}
-        >
-          {voidLoading ? 'Proses UnVoid...' : 'UnVoid'}
-        </Menu.Item>
-      )}
-      {getPosDetail?.reason_id === 'unvoid' && (
-        <Menu.Item
-          key="void"
-          icon={<CloseCircleOutlined />}
-          onClick={() => {
-            // voidInvoice()
-            handleVoid(null)
-          }}
-          disabled={voidLoading}
-        >
-          {voidLoading ? 'Proses Void...' : 'Void'}
-        </Menu.Item>
-      )}
-
-      <Menu.Item
-        key="retur"
-        icon={<RollbackOutlined />}
-        onClick={() => {
-          navigate(`/returninvoice/${ref_number}`)
-        }}
-      >
-        Retur
-      </Menu.Item>
-
-      <Menu.Item
-        key="edit"
-        icon={<EditOutlined />}
-        onClick={() => {
-          navigate(`/edittransaksi/${ref_number}`)
-        }}
-      >
-        Edit
-      </Menu.Item>
-      <Menu.Item
-        key="hapus"
-        icon={<CloseCircleOutlined />}
-        onClick={() => {
-          handleDelete()
-          handleVoid(null)
-        }}
-        disabled={hapusLoading}
-      >
-        {hapusLoading ? 'Proses Penghapusan...' : 'hapus'}
-      </Menu.Item>
-    </Menu>
-  )
-
   const { hasRedData } = useRedData()
-  console.log({ hasRedData })
+
   const columns = [
     {
       title: 'No',
@@ -607,12 +403,12 @@ const DetailKledo: React.FC = () => {
     },
     {
       title: 'Barang',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'finance_account_id',
+      key: 'finance_account_id',
       align: 'center',
-      render: (name: string) => (
+      render: (finance_account_id: string) => (
         <div style={{ textAlign: 'left' }}>
-          {name !== undefined ? name : ''}
+          {finance_account_id !== undefined ? finance_account_id : ''}
         </div>
       ),
     },
@@ -628,12 +424,7 @@ const DetailKledo: React.FC = () => {
         </div>
       ),
     },
-    {
-      title: 'Satuan',
-      key: 'unit_id',
-      dataIndex: 'unit_id',
-      align: 'center',
-    },
+
     {
       title: 'Harga',
       dataIndex: 'price',
@@ -691,76 +482,6 @@ const DetailKledo: React.FC = () => {
                 }
               })()}
             </Col>
-
-            <Dropdown
-              overlay={menu}
-              trigger={['click']}
-              placement="bottomRight"
-            >
-              <a
-                className="ant-dropdown-link"
-                onClick={(e) => e.preventDefault()}
-              >
-                {loading ? (
-                  <Spin size="small" /> // Menampilkan spinner saat loading
-                ) : (
-                  <svg
-                    viewBox="64 64 896 896"
-                    focusable="false"
-                    data-icon="more"
-                    width="2em" // Lebar ikon
-                    height="2em" // Tinggi ikon
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path d="M456 231a56 56 0 10112 0 56 56 0 10-112 0zm0 280a56 56 0 10112 0 56 56 0 10-112 0zm0 280a56 56 0 10112 0 56 56 0 10-112 0z" />
-                  </svg>
-                )}
-              </a>
-            </Dropdown>
-
-            <Col>
-              {showButtons && (
-                <>
-                  <div>
-                    <button onClick={printNotaHandler}>Print Nota</button>
-                    <div style={{ display: 'none' }}>
-                      <Receipt ref={printNota} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <button onClick={printSuratJalanHandler}>
-                      Print Surat Jalan
-                    </button>
-                    <div style={{ display: 'none' }}>
-                      <ReceiptJalan ref={printSuratJalan} />
-                    </div>
-                  </div>
-                </>
-              )}
-            </Col>
-            {/* <Col>
-              {showButtons && (
-                <>
-                  <div>
-                    <button onClick={printNotaHandler}>Print Nota</button>
-                    <div style={{ display: 'none' }}>
-                      <Receipt ref={printNota} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <button onClick={printSuratJalanHandler}>
-                      Print Surat Jalan
-                    </button>
-                    <div style={{ display: 'none' }}>
-                      <ReceiptJalan ref={printSuratJalan} />
-                    </div>
-                  </div>
-                </>
-              )}
-            </Col> */}
           </Row>
         }
         bordered
@@ -771,14 +492,14 @@ const DetailKledo: React.FC = () => {
               <Text strong>Pelanggan:</Text>
             </div>
             <Title level={5} style={{ marginBottom: 0 }}>
-              {contactName}
+              {contactId}
             </Title>
           </Col>
           <Col span={12}>
             <div style={{ marginBottom: '0px' }}>
               <Text strong>NOMOR:</Text>
             </div>
-            <Title level={5}>{getPosDetail?.ref_number || []}</Title>
+            <Title level={5}>{memes}</Title>
           </Col>
         </Row>
 
@@ -787,9 +508,7 @@ const DetailKledo: React.FC = () => {
             <div style={{ marginBottom: '0px' }}>
               <Text strong>Tgl. Transaksi:</Text>
             </div>
-            <Title level={5}>
-              {formatDate(getPosDetail?.trans_date || '')}
-            </Title>
+            <Title level={5}>{tglTrans}</Title>
           </Col>
 
           {getPosDetail?.memo && (
@@ -797,7 +516,7 @@ const DetailKledo: React.FC = () => {
               <div style={{ marginBottom: '0px' }}>
                 <Text strong>Ket:</Text>
               </div>
-              <Text>{getPosDetail?.message}</Text>
+              <Text>{getPosDetail?.memo}</Text>
             </Col>
           )}
         </Row>
@@ -806,7 +525,7 @@ const DetailKledo: React.FC = () => {
             <div style={{ marginBottom: '0px' }}>
               <Text strong>Gudang:</Text>
             </div>
-            <Title level={5}>{gudangName}</Title>
+            <Title level={5}>{warehouseName}</Title>
           </Col>
           <Col span={12}>
             <div style={{ marginBottom: '0px' }}>
@@ -822,7 +541,7 @@ const DetailKledo: React.FC = () => {
 
       {/* Transaction Table */}
       <Table
-        dataSource={getPosDetail?.items || []}
+        dataSource={items}
         columns={columns as any}
         pagination={false}
         rowKey="_id"
@@ -867,7 +586,7 @@ const DetailKledo: React.FC = () => {
                 .map((witholding: any, index: number) => (
                   <Row key={index} style={{ marginTop: '8px' }}>
                     <Col span={12} style={{ textAlign: 'left' }}>
-                      <a href={`/editpembayaran/${memorandum}`}>
+                      <a href={`/editpembayaran/${ref_number}`}>
                         <Text strong>{witholding.name}</Text>
                       </a>
                     </Col>
@@ -890,7 +609,7 @@ const DetailKledo: React.FC = () => {
               <Col span={12} style={{ textAlign: 'right' }}>
                 <Text strong style={{ fontSize: '20px' }}>
                   {' '}
-                  {roundUpIndonesianNumber(due)}
+                  {roundUpIndonesianNumber(due < 0 ? 0 : due)}
                 </Text>
               </Col>
             </Row>
@@ -1005,4 +724,4 @@ const DetailKledo: React.FC = () => {
   )
 }
 
-export default DetailKledo
+export default BayarHutangRetur

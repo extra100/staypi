@@ -112,6 +112,8 @@ class Witholding {
   @prop({ required: true })
   public witholding_account_id!: number
   @prop({ required: true })
+  public id!: number
+  @prop({ required: true })
   public down_payment!: number
   @prop({ required: true })
   public status!: number

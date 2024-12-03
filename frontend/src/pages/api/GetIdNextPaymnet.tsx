@@ -29,7 +29,7 @@ import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
 import { useGetBarangsQuery } from '../../hooks/barangHooks'
 import { TakePembayaranBankTrans } from '../TakePembayaranBankTrans'
 
-const SuitExApiWithOwnDbBasedDate: React.FC = () => {
+const GetIdNextPaymnet: React.FC = () => {
   const navigate = useNavigate()
   const { ref_number } = useParams<{ ref_number?: string }>()
   const { refNumber } = useParams<{ refNumber: string }>() // Mengambil parameter `memo` dari URL
@@ -48,7 +48,7 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
     dayjs().format('YYYY-MM-DD')
   )
   const [search, setSearch] = useState<any | null>(refNumber)
-  console.log({ search })
+
   const handleDateFromChange = (date: dayjs.Dayjs | null) => {
     setTransDateFrom(date ? date.format('YYYY-MM-DD') : null)
   }
@@ -79,29 +79,23 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
   const { data: allTransactions } = useGetTransactionByIdQuery(
     refNumber as string
   )
+  const getPosDetail = allTransactions?.find(
+    (transaction: any) => transaction.memo === search
+  )
+  const tetapkanIdYangii = getPosDetail?.id || 0
+  console.log({ tetapkanIdYangii })
+  const idBank = getPosDetail?.witholdings?.[0]?.witholding_account_id
   // const idUnique = selectedData?.id || 0
 
-  const { loading, getInvFromKledoBasedDate } =
-    TakeInvoicesFromKledoBasedOnDate(
-      transDateFrom,
-      transDateTo,
-      selectedWarehouse,
-      search as any
-    )
-
-  const { data: filteredTransaksis, isLoading: loadingOwnDb } =
-    useGetFilteredTransaksisQuery({
-      transDateFrom,
-      transDateTo,
-      selectedWarehouse,
-    })
-  console.log({ getInvFromKledoBasedDate })
   const handleStatusChange = (value: number) => {
     setSelectedStatus(value)
   }
-
+  const { getBankTrans } = TakePembayaranBankTrans(refNumber as any) || {
+    getBankTrans: [],
+  }
+  console.log({ getBankTrans })
   const handleRowClick = (record: any) => {
-    const selectedTransaction = getInvFromKledoBasedDate?.find(
+    const selectedTransaction = getBankTrans?.find(
       (transaksi: any) => transaksi.id === record.id
     )
 
@@ -115,34 +109,25 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
   }
   //
 
-  const getPosDetail = allTransactions?.find(
-    (transaction: any) => transaction.memo === search
-  )
-
-  const idBank = getPosDetail?.witholdings?.[0]?.witholding_account_id
   const name = getPosDetail?.witholdings?.[0]?.name
   const whPersen = getPosDetail?.witholdings?.[0]?.witholding_percent
   const whAmount = getPosDetail?.witholdings?.[0]?.witholding_amount
-  const idMonggo = getPosDetail?.witholdings?.[0]?._id
-  console.log({ idBank })
-  const nilai = getPosDetail?.memo
+  const idMonggo =
+    getPosDetail?.witholdings?.[getPosDetail?.witholdings.length - 1]?._id
 
-  const { getBankTrans } = TakePembayaranBankTrans(
-    nilai as any
-    // idBank as any
-  ) || {
-    getBankTrans: [],
-  }
-  console.log({ idBank })
-  console.log({ getBankTrans })
+  console.log({ idMonggo })
+  const nilai = getPosDetail?.witholdings?.[0]
   const firstPayment =
     getBankTrans && getBankTrans.length > 0 ? getBankTrans[0] : null
+
+  // Menampilkan lastPayment
+  console.log('Last Payment:', firstPayment)
   const amount = firstPayment?.amount || 0
   const statusId = firstPayment?.status_id || 0
   const tanggalBayar = firstPayment?.trans_date || 0
   const idUnique = firstPayment?.id || 0
 
-  console.log({ firstPayment })
+  console.log({ idUnique })
 
   const updateHanyaId = updateDenganMemoDariKledo()
 
@@ -158,7 +143,7 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
       return
     }
 
-    const invoiceId = selectedData.id
+    const invoiceId = tetapkanIdYangii
     const totalAmount = selectedData.amount
     console.log({ totalAmount })
     const due = selectedData.due
@@ -189,9 +174,7 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
     try {
       const response = await updateHanyaId.mutateAsync({
         memo,
-        id: invoiceId,
-        // amount: totalAmount,
-        // due: due,
+        id: invoiceId as any,
         items: idPadaItems,
         witholdings: idPadaWitholdings,
       })
@@ -214,21 +197,15 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
-      title: 'Kledo',
-      dataIndex: 'id_kledo',
-      key: 'id_kledo',
-      ellipsis: true,
-    },
-    {
-      title: 'Wakanda',
-      dataIndex: 'id_own_db',
-      key: 'id_own_db',
+      title: 'id Unique',
+      dataIndex: 'id',
+      key: 'id',
       ellipsis: true,
     },
     {
       title: 'Inv',
-      dataIndex: 'ref_number',
-      key: 'ref_number',
+      dataIndex: 'memo',
+      key: 'memo',
       ellipsis: true,
     },
     {
@@ -238,17 +215,23 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
       render: (text: string) => formatDate(text),
     },
     {
-      title: 'Gudang',
-      dataIndex: 'warehouse_id',
-      key: 'warehouse_name',
+      title: 'Jml. bayar',
+      dataIndex: 'amount',
+      key: 'amount',
       ellipsis: true,
-      render: (warehouse_id: string) => {
-        const warehouse = gudangdb?.find(
-          (gudang: { id: any; name: any }) => gudang.id === warehouse_id
-        )
-        return warehouse ? warehouse.name : 'Unknown'
-      },
     },
+    // {
+    //   title: 'Gudang',
+    //   dataIndex: 'warehouse_id',
+    //   key: 'warehouse_name',
+    //   ellipsis: true,
+    //   render: (warehouse_id: string) => {
+    //     const warehouse = gudangdb?.find(
+    //       (gudang: { id: any; name: any }) => gudang.id === warehouse_id
+    //     )
+    //     return warehouse ? warehouse.name : 'Unknown'
+    //   },
+    // },
   ]
 
   const itemsColumns = [
@@ -270,38 +253,6 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
       dataIndex: 'qty',
       key: 'qty',
     },
-  ]
-
-  const checkIfRowIsRed = (rowId: string) => {
-    const matchingRow = filteredTransaksis?.find(
-      (transaksi: any) => transaksi.id === rowId
-    )
-    return matchingRow ? false : true
-  }
-
-  const combinedData = [
-    ...(getInvFromKledoBasedDate?.map((row: any) => {
-      const matchingRow = filteredTransaksis?.find(
-        (transaksi) => transaksi.id === row.id
-      )
-      return {
-        ...row,
-        id_kledo: row.id,
-        id_own_db: matchingRow?.id,
-        isRed: !matchingRow,
-      }
-    }) ?? []),
-    ...(filteredTransaksis
-      ?.filter(
-        (transaksi) =>
-          !getInvFromKledoBasedDate?.some((row: any) => row.id === transaksi.id)
-      )
-      .map((transaksi: any) => ({
-        ...transaksi,
-        id_kledo: null,
-        id_own_db: transaksi.id,
-        isRed: true,
-      })) ?? []),
   ]
 
   return (
@@ -352,18 +303,29 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
           </Select>
         </Col>
       </Row>
-      <Table
-        dataSource={getInvFromKledoBasedDate}
+      {/* <Table
+        dataSource={
+          getBankTrans.length > 0 ? [getBankTrans[getBankTrans.length - 1]] : []
+        }
         columns={columns}
         rowKey="id"
-        loading={loading || loadingOwnDb}
-        pagination={{ pageSize: 100 }}
+        pagination={false} // Tidak perlu pagination untuk hanya satu baris
         style={{ marginTop: '20px' }}
-        // rowClassName={(record) => (record.isRed ? 'red-row' : '')}
+        onRow={(record) => ({
+          onClick: () => handleRowClick(record),
+        })}
+      /> */}
+      <Table
+        dataSource={getBankTrans.length > 0 ? [getBankTrans[0]] : []}
+        columns={columns}
+        rowKey="id"
+        pagination={false} // Tidak perlu pagination untuk hanya satu baris
+        style={{ marginTop: '20px' }}
         onRow={(record) => ({
           onClick: () => handleRowClick(record),
         })}
       />
+
       <Modal
         title="Detail Data"
         visible={isModalVisible}
@@ -406,7 +368,7 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
               <strong>Tgl Trans:</strong> {formatDate(selectedData.trans_date)}
             </p>
             <Table
-              dataSource={selectedData.items}
+              dataSource={getBankTrans}
               columns={itemsColumns}
               rowKey="id"
               pagination={false}
@@ -418,4 +380,4 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
   )
 }
 
-export default SuitExApiWithOwnDbBasedDate
+export default GetIdNextPaymnet

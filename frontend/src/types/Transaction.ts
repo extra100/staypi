@@ -49,11 +49,13 @@ export type Transaction = {
   }[]
   witholdings: {
     witholding_account_id: number
+    id: number
     name: string
     trans_date: string
     witholding_amount: number
     witholding_percent: number
     status: number
+    _id: string
   }[]
   warehouse_id: number
   additional_discount_percent: number

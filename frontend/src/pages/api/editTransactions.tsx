@@ -243,10 +243,10 @@ const EditTransaksi = () => {
           items: dataSource.map((item) => {
             return {
               amount: item.amount,
-              amount_after_tax: item.amount_after_tax || item.amount, // Fallback jika tidak ada
+              amount_after_tax: item.amount_after_tax || item.amount,
               finance_account_id: item.finance_account_id,
-              tax_id: '', // Bisa diisi jika ada data pajak
-              desc: item.name, // Menggunakan nama sebagai deskripsi
+              tax_id: '',
+              desc: item.name,
               qty: item.qty,
               price: item.price,
               id: item.id,

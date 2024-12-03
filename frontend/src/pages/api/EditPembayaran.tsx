@@ -15,84 +15,258 @@ import {
   useGetTransactionByIdQuery,
   useUpdateWitholdingMutation,
 } from '../../hooks/transactionHooks'
+import { TakePembayaranBankTrans } from '../TakePembayaranBankTrans'
+import { HOST } from '../../config'
+import TOKEN from '../../token'
 
 const EditPembayaran = () => {
-  const { ref_number } = useParams<{ ref_number?: string }>()
+  // const { memorandum } = useParams<{ memorandum?: string }>()
+  const { memorandum, bankId } = useParams<{
+    memorandum: string
+    bankId: string
+  }>()
 
   const { data: allTransactions } = useGetTransactionByIdQuery(
-    ref_number as string
+    memorandum as string
   )
   const getPosDetail = allTransactions?.find(
-    (transaction: any) => transaction.ref_number === ref_number
+    (transaction: any) => transaction.ref_number === memorandum
   )
-  const [isModalVisible, setIsModalVisible] = useState(false)
+  const transDateUrl = getPosDetail?.trans_date
+  const idBank = getPosDetail?.witholdings?.[0]?.witholding_account_id
+  const tags = getPosDetail?.tages?.[0]?.id
+
+  const [search, setSearch] = useState<any>({
+    memorandum,
+    bankId,
+  })
+  console.log({ search })
+
+  const { getBankTrans } = TakePembayaranBankTrans(memorandum as any) || {
+    getBankTrans: [],
+  }
+  console.log({ getBankTrans })
+
+  const firstPayment =
+    getBankTrans && getBankTrans.length > 0 ? getBankTrans[0] : null
+
+  const [isModalVisibleEdit, setIsModalVisibleEdit] = useState(false)
+  const [isModalVisibleHapus, setIsModalVisibleHapus] = useState(false)
   const [editingRecord, setEditingRecord] = useState<any>(null)
+  const [erasingRecord, setErasingRecord] = useState<any>(null)
   const [form] = Form.useForm()
 
+  const idControlEdit = getPosDetail?.witholdings?.find(
+    (witholding: any) => witholding._id === editingRecord?._id
+  )?.id
+
+  const idControlHapus = getPosDetail?.witholdings?.find(
+    (witholding: any) => witholding._id === erasingRecord?._id
+  )?.id
+
+  console.log({ idControlEdit })
+  console.log({ idControlHapus })
+
   const { mutate: updateWitholding, isLoading } = useUpdateWitholdingMutation()
+  const handleHapus = (record: any) => {
+    const { _id, ref_number, trans_date, down_payment } = record
 
-  const handleEdit = (record: any) => {
-    // Ambil ref_number dari objek transaksi utama
-    const ref_number = record.ref_number
+    setErasingRecord({ ...record, ref_number, _id })
 
-    // Sertakan ref_number ke dalam editingRecord
-    setEditingRecord({ ...record, ref_number })
-
-    // Set nilai form dengan data yang ada pada record
     form.setFieldsValue({
-      trans_date: record.trans_date,
-      down_payment: record.down_payment,
+      trans_date,
+      down_payment,
     })
 
-    setIsModalVisible(true)
+    setIsModalVisibleHapus(true)
   }
+  const handleEdit = (record: any) => {
+    const { _id, ref_number, trans_date, down_payment } = record
+
+    setEditingRecord({ ...record, ref_number, _id })
+
+    form.setFieldsValue({
+      trans_date,
+      down_payment,
+    })
+
+    setIsModalVisibleEdit(true)
+  }
+
   const { mutate: deleteWitholding, isLoading: isDeleting } =
     useDeleteWitholdingMutation()
-  const handleDelete = async (record: any) => {
-    if (!record._id || !ref_number) {
-      message.error('Data tidak valid untuk dihapus.')
-      return
-    }
 
-    console.log('ref_number:', ref_number)
-    console.log('_id (witholdingId):', record._id)
+  const handleModalEditOk = async () => {
+    let values: any
 
     try {
-      await deleteWitholding({
-        ref_number: ref_number, // Ambil dari useParams
-        witholdingId: record._id,
-      })
-
-      message.success('Data berhasil dihapus!')
-    } catch (error) {
-      console.error('Error saat menghapus:', error)
-      message.error('Gagal menghapus data.')
-    }
-  }
-
-  const handleModalOk = async () => {
-    try {
-      const values = await form.validateFields()
+      values = await form.validateFields()
 
       await updateWitholding({
-        ref_number: ref_number as string,
+        ref_number: memorandum as string,
         witholdingId: editingRecord?._id,
         trans_date: values.trans_date,
         down_payment: parseFloat(values.down_payment),
       })
 
+      const payload = {
+        amount: parseFloat(values.down_payment),
+        attachment: [],
+        bank_account_id: idBank,
+        business_tran_id: null,
+        currency_rate: null,
+        currency_source_id: 0,
+        memo: memorandum as string,
+        tags: [tags],
+        trans_date: values.trans_date,
+        withholdings: [],
+      }
+      console.log('Payload yang akan dikirim:', payload)
+
+      console.log('Mengirim permintaan PUT ke API...')
+      const response = await fetch(
+        `${HOST}/finance/bankTrans/${idControlEdit}/invoicePayment`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${TOKEN}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      )
+      console.log('Response status:', response.status)
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${response.statusText}`)
+      }
+      console.log('Data berhasil dikirim ke Kledo.')
+
       message.success('Data berhasil diperbarui!')
-      setIsModalVisible(false)
+      setIsModalVisibleEdit(false)
       setEditingRecord(null)
-    } catch (error) {
-      console.error('Error saat update:', error)
-      message.error('Gagal memperbarui data.')
+    } catch (error: any) {
+      console.error('Terjadi error:', error)
+      message.error('Terjadi kesalahan saat memperbarui data.')
     }
   }
 
-  const handleModalCancel = () => {
-    setIsModalVisible(false)
+  // const handleModalHapusOk = async () => {
+  //   try {
+  //     console.log('Menghapus data dari database...')
+  //     if (!idControl || !memorandum) {
+  //       message.error('Data tidak valid untuk dihapus.')
+  //       return
+  //     }
+
+  //     await deleteWitholding({
+  //       ref_number: memorandum as any,
+  //       witholdingId: idControl as any,
+  //     })
+
+  //     message.success('Data berhasil dihapus dari database!')
+
+  //     console.log('Menyiapkan permintaan DELETE ke API eksternal...')
+  //     const response = await fetch(`${HOST}/finance/bankTrans/${idControl}`, {
+  //       method: 'DELETE',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `Bearer ${TOKEN}`,
+  //       },
+  //     })
+
+  //     console.log('Response status API eksternal:', response.status)
+
+  //     if (!response.ok) {
+  //       throw new Error(`Error: ${response.status} - ${response.statusText}`)
+  //     }
+
+  //     message.success('Data berhasil dihapus dari API eksternal!')
+
+  //     // Reset state/modal setelah berhasil
+  //     setIsModalVisibleEdit(false)
+  //     setErasingRecord(null)
+  //   } catch (error: any) {
+  //     console.error('Error saat menghapus:', error)
+  //     message.error('Gagal menghapus data: ' + error.message)
+  //   }
+  // }
+
+  const handleModalHapusOk = async () => {
+    let values: any
+
+    try {
+      values = await form.validateFields()
+
+      await deleteWitholding({
+        ref_number: memorandum as string,
+        witholdingId: erasingRecord?._id,
+      })
+      console.log('Data berhasil dikirim ke Wakanda.')
+
+      console.log('Mengirim permintaan DELETE Kledo')
+      const response = await await fetch(
+        `${HOST}/finance/bankTrans/${idControlHapus}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${response.statusText}`)
+      }
+
+      message.success('Data berhasil dihapus!')
+      setIsModalVisibleHapus(false)
+      setEditingRecord(null)
+    } catch (error: any) {
+      console.error('Terjadi error:', error)
+      message.error('Terjadi kesalahan saat memperbarui data.')
+    }
+  }
+  // const handleModalHapusOk = async (record: any) => {
+  //   if (!idControl || !memorandum) {
+  //     message.error('Data tidak valid untuk dihapus.')
+  //     return
+  //   }
+
+  //   try {
+  //     const response = await fetch(`${HOST}/finance/bankTrans/${idControl}`, {
+  //       method: 'DELETE',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `Bearer ${TOKEN}`,
+  //       },
+  //     })
+
+  //     if (!response.ok) {
+  //       throw new Error(`Error: ${response.status} - ${response.statusText}`)
+  //     }
+  //     await deleteWitholding({
+  //       ref_number: memorandum,
+  //       witholdingId: idControl as any,
+  //     })
+  //     message.success('Contact ID dan invoice berhasil diperbarui dengan items')
+  //   } catch (innerError: any) {
+  //     message.error(
+  //       'Gagal memperbarui Contact ID dan invoice dengan items: ' +
+  //         innerError.message
+  //     )
+  //     message.success('Data berhasil dihapus!')
+  //   }
+  // }
+
+  const handleModalEditCancel = () => {
+    setIsModalVisibleEdit(false)
     setEditingRecord(null)
+  }
+  const handleModalHapusCancel = () => {
+    setIsModalVisibleHapus(false)
+    setErasingRecord(null)
   }
 
   const paymentData = getPosDetail ? getPosDetail.witholdings : []
@@ -102,6 +276,11 @@ const EditPembayaran = () => {
       title: 'ID',
       dataIndex: '_id',
       key: '_id',
+    },
+    {
+      title: 'ID BANK',
+      dataIndex: 'witholding_account_id',
+      key: 'witholding_account_id',
     },
     {
       title: 'Tanggal Bayar',
@@ -123,16 +302,11 @@ const EditPembayaran = () => {
           <Button type="link" onClick={() => handleEdit(record)}>
             Edit
           </Button>
-          <Popconfirm
-            title="Apakah Anda yakin ingin menghapus?"
-            onConfirm={() => handleDelete(record)}
-            okText="Ya"
-            cancelText="Tidak"
-          >
+          <Button type="link" onClick={() => handleHapus(record)}>
             <Button type="link" danger>
               Hapus
             </Button>
-          </Popconfirm>
+          </Button>
         </Space>
       ),
     },
@@ -146,9 +320,9 @@ const EditPembayaran = () => {
       {/* Modal Edit */}
       <Modal
         title="Edit Pembayaran"
-        visible={isModalVisible}
-        onOk={handleModalOk}
-        onCancel={handleModalCancel}
+        visible={isModalVisibleEdit}
+        onOk={handleModalEditOk}
+        onCancel={handleModalEditCancel}
         confirmLoading={isLoading}
       >
         <Form form={form} layout="vertical">
@@ -168,6 +342,13 @@ const EditPembayaran = () => {
           </Form.Item>
         </Form>
       </Modal>
+      <Modal
+        title="Hapus Pembayaran"
+        visible={isModalVisibleHapus}
+        onOk={handleModalHapusOk}
+        onCancel={handleModalHapusCancel}
+        confirmLoading={isLoading}
+      ></Modal>
     </div>
   )
 }

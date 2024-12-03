@@ -22,22 +22,26 @@ returnRouter.get(
 
 returnRouter.get(
   '/:ref_number',
-  asyncHandler(async (req: Request, res: Response) => {
-    const posData = await ReturnModel.find({
-      ref_number: req.params.ref_number,
-    })
-    if (posData && posData.length > 0) {
-      res.json(posData)
-    } else {
-      const posById = await ReturnModel.findById(req.params.ref_number)
-      if (posById) {
-        res.json(posById)
+  asyncHandler(async (req: any, res: any) => {
+    try {
+      console.log('Received ref_number:', req.params.ref_number)
+
+      const posData = await ReturnModel.find({
+        ref_number: req.params.ref_number,
+      })
+
+      if (posData && posData.length > 0) {
+        return res.json(posData)
       } else {
-        res.status(404).json({ message: 'Pos not found' })
+        res.status(404).json({ message: 'Return not found' })
       }
+    } catch (err) {
+      console.error('Error processing the request:', err)
+      res.status(500).json({ message: 'Internal Server Error' })
     }
   })
 )
+
 returnRouter.put(
   '/by-id/:id',
   asyncHandler(async (req: any, res: any) => {

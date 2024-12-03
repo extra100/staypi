@@ -107,7 +107,8 @@ const Aneh: React.FC = () => {
     getPosDetail?.items?.map((item: any) => item.finance_account_id) || []
   const qty = getPosDetail?.items?.[0]?.qty || null
   const price = getPosDetail?.items?.[0]?.price || null
-
+  const memorandum = getPosDetail?.memo ?? 0
+  console.log({ memorandum })
   const amount = getPosDetail?.amount ?? 0
   const warehouseNomor = getPosDetail?.warehouse_id ?? 0
   const status_id = getPosDetail?.status_id ?? 0
@@ -315,7 +316,8 @@ const Aneh: React.FC = () => {
       ],
     }
     simpanReturn.mutate(simpanQty as any)
-    navigate(`/simpanidunikdarikledoreturn/${refNumber}`)
+    navigate(`/pembayaranretur/${memorandum}/${selectedDates}`)
+    // navigate(`/returpayment/${memorandum}`)
 
     // useAddReturnMutation(simpanQty as any)
   }

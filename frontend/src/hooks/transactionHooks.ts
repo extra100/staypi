@@ -152,10 +152,21 @@ export const updateDenganMemoDariKledo = () => {
   const queryClient = useQueryClient()
 
   return useMutation(
-    ({ memo, id, items }: { memo: string; id: string; items: any[] }) => {
+    ({
+      memo,
+      id,
+      items,
+      witholdings,
+    }: {
+      memo: string
+      id: string
+      items: any[]
+      witholdings: any[]
+    }) => {
       return apiClient.put(`/api/transactions/by-memo/${memo}`, {
         id,
         items,
+        witholdings,
       })
     },
     {
