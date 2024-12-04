@@ -646,6 +646,17 @@ const DetailKledo: React.FC = () => {
       ),
     },
     {
+      title: 'Jumlah Diskon',
+      dataIndex: 'discount_amount',
+      key: 'discount_amount',
+      align: 'center',
+      render: (discount_amount: number) => (
+        <div style={{ textAlign: 'right' }}>
+          {discount_amount !== undefined ? roundUpIndonesianNumber(discount_amount) : 'Rp 0'}
+        </div>
+      ),
+    },
+    {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
