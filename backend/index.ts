@@ -3,33 +3,37 @@ import dotenv from 'dotenv'
 import express, { Request, Response } from 'express'
 import mongoose from 'mongoose'
 import path from 'path'
-import AmbilDetailBarangDariKledoRouter from './routers/AmbilDetailBarangDariKledoRouter'
-import { controlRouter } from './routers/controlRouter'
-import akunBankRouter from './routers/akunBankRouter'
-import { barangRouter } from './routers/barangRouter'
-import barangTerjualRouter from './routers/barangTerjualRouter'
-import { contactRouter } from './routers/contactRouter'
-import { keyRouter } from './routers/keyRouter'
-import { orderRouter } from './routers/orderRouter'
-import outletRouter from './routers/outletRouter'
-import perhitunganRouter from './routers/perthitunganRouter'
-import productRouter from './routers/productRouter'
-import ppRouter from './routers/PpRouter'
-import warehouseTransferRouter from './routers/pindahRouter'
-import { returnRouter } from './routers/returnRouter'
-import soldBarangRouter from './routers/soldBarangRouter'
-import tagRouter from './routers/tagRouter'
-import transactionRouter from './routers/transactionRouter'
-import transaksiPolosanRouter from './routers/transaksiPolosanRouter'
-import { userRouter } from './routers/userRouter'
-import warehouseRouter from './routers/warehousesRouter'
-import AmbilDetailBarangDariGoretRouter from './routers/AmbilDetailBarangDariGoretRouter'
-import barangTetukRouter from './routers/barangTetukRouter'
-import pelangganRouter from './routers/pelangganRouter'
+import AmbilDetailBarangDariKledoRouter from './src/routers/AmbilDetailBarangDariKledoRouter'
+
+import akunBankRouter from './src/routers/akunBankRouter'
+import { barangRouter } from './src/routers/barangRouter'
+import barangTerjualRouter from './src/routers/barangTerjualRouter'
+// import barangRouter from './routers/barangRouter'
+
+import { contactRouter } from './src/routers/contactRouter'
+
+import { keyRouter } from './src/routers/keyRouter'
+import { orderRouter } from './src/routers/orderRouter'
+import outletRouter from './src/routers/outletRouter'
+import perhitunganRouter from './src/routers/perthitunganRouter'
+import warehouseTransferRouter from './src/routers/pindahRouter'
+import ppRouter from './src/routers/PpRouter'
+import productRouter from './src/routers/productRouter'
+import { returnRouter } from './src/routers/returnRouter'
+import soldBarangRouter from './src/routers/soldBarangRouter'
+import tagRouter from './src/routers/tagRouter'
+import transactionRouter from './src/routers/transactionRouter'
+import transaksiPolosanRouter from './src/routers/transaksiPolosanRouter'
+import { userRouter } from './src/routers/userRouter'
+import warehouseRouter from './src/routers/warehousesRouter'
+import AmbilDetailBarangDariGoretRouter from './src/routers/AmbilDetailBarangDariGoretRouter'
+import barangTetukRouter from './src/routers/barangTetukRouter'
+import pelangganRouter from './src/routers/pelangganRouter'
+import { controlRouter } from './src/routers/controlRouter'
 
 dotenv.config()
 const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://localhost/tsmernamazonadb' 
+  process.env.MONGODB_URI || 'mongodb://localhost/tsmernamazonadb'
 mongoose.set('strictQuery', true)
 mongoose
   .connect(MONGODB_URI)
@@ -56,6 +60,7 @@ app.use(
     ],
   })
 );
+
 
 app.use(express.json({ limit: '200mb' }))
 app.use(express.urlencoded({ extended: true, limit: '200mb' }))
