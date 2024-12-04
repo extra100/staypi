@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently \"npm run dev --prefix backend\"  \"npm run dev --prefix frontend\" ",
     "build": "cd backend && npm install && npm run build  && cd ../frontend && npm install && npm run build",
-    "start": "set TG_ALLOW_MIXED=ALLOW && node backend/build/index.js",
+    "start": "TG_ALLOW_MIXED=ALLOW node backend/build/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -30,8 +30,8 @@
     "@types/lodash": "^4.14.202",
     "@types/multer": "^1.4.11",
     "@types/papaparse": "^5.3.14",
-    "@types/react": "18.2.18",
-    "@types/react-dom": "^18.2.18",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
     "@types/react-router-bootstrap": "^0.26.6",
     "@types/uuid": "^9.0.7",
     "@vitejs/plugin-react": "^1.0.7",
@@ -46,6 +46,7 @@
     "color-convert": "^2.0.1",
     "color-name": "^1.1.4",
     "date-fns": "^2.30.0",
+    "dotenv": "^16.4.6",
     "emoji-regex": "^8.0.0",
     "escalade": "^3.1.1",
     "get-caller-file": "^2.0.5",
@@ -65,7 +66,7 @@
     "supports-color": "^8.1.1",
     "tree-kill": "^1.2.2",
     "tslib": "^2.6.2",
-    "typescript": "^5.3.3",
+    "typescript": "^5.7.2",
     "wrap-ansi": "^7.0.0",
     "y18n": "^5.0.8",
     "yargs": "^17.7.2",
