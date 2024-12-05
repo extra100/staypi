@@ -23,6 +23,7 @@ import { useIdProduct } from './SingleProduct'
 import { useGetProductsQuery } from '../../hooks/productHooks'
 import { saveMutation } from './apiMutasi'
 import SingleDate from '../SingleDate'
+import { useGetoutletsQuery } from '../../hooks/outletHooks'
 
 const { Option } = Select
 
@@ -35,13 +36,23 @@ const ProductStocksPage: React.FC = () => {
 
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
+  // const generateShortInvoiceId = (idOutlet: string): string => {
+  //   const uuid = uuidv4()
+  //   const last4OfUUID = uuid.substr(uuid.length - 4)
+  //   const shortNumber = parseInt(last4OfUUID, 16) % 10000
+  //   return `IPO-${idOutlet}-${String(shortNumber).padStart(4, '0')}`
+  // }
   const generateShortInvoiceId = (idOutlet: string): string => {
     const uuid = uuidv4()
+    const timestamp = Date.now()
     const last4OfUUID = uuid.substr(uuid.length - 4)
     const shortNumber = parseInt(last4OfUUID, 16) % 10000
-    return `IPO-${idOutlet}-${String(shortNumber).padStart(4, '0')}`
-  }
 
+    return `IPO-${idOutlet}-${timestamp}-${String(shortNumber).padStart(
+      5,
+      '0'
+    )}`
+  }
   const [refNumber, setRefNumber] = useState<string>('')
 
   useEffect(() => {
@@ -52,6 +63,7 @@ const ProductStocksPage: React.FC = () => {
       setRefNumber(newRefNumber)
     }
   }, [user])
+  const { data: gudangs } = useGetoutletsQuery()
 
   const [warehouseDariId, setWarehouseDariId] = useState<string>('')
 
@@ -60,14 +72,32 @@ const ProductStocksPage: React.FC = () => {
   const [dataSource, setDataSource] = useState<any[]>([])
 
   const { idWarehouse } = useIdWarehouse()
-  console.log({ idWarehouse })
+  console.log({ gudangs })
+  console.log({ warehouseTujuanId })
+
+  const [warehouseName, setWarehouseName] = useState<string>('')
+  console.log({ warehouseName })
+
+  useEffect(() => {
+    if (gudangs && warehouseTujuanId) {
+      const warehouse = gudangs.find(
+        (transfer: any) => transfer.id_outlet === String(warehouseTujuanId)
+      )
+      setWarehouseName(warehouse?.nama_outlet || '')
+    }
+  }, [gudangs, warehouseTujuanId])
   const getWarehouseNameById = (id: any) => {
     const warehouse = idWarehouse.find((w) => w.id === id)
     return warehouse ? warehouse.name : 'Unknown Warehouse'
   }
 
+  const handleWarehouseSelection = (id: any) => {
+    const name = getWarehouseNameById(id)
+    setWarehouseName(name)
+  }
+
   const { data: idaDataBarang } = useGetProductsQuery()
-  console.log({ idaDataBarang })
+
   const getProductName = (id: any) => {
     const barang = idaDataBarang?.find((w) => w.id === id)
     return barang ? barang.name : 'Unknown Warehouse'
@@ -80,7 +110,7 @@ const ProductStocksPage: React.FC = () => {
       .join(','),
     combinedWarehouseIds
   )
-  console.log({ stocks })
+
   const { mutate: addWarehouseTransfer } = useAddWarehouseTransferMutation()
 
   useEffect(() => {
@@ -131,16 +161,16 @@ const ProductStocksPage: React.FC = () => {
     const productStock = stocks.find(
       (stock: any) => String(stock.id) === String(dataSource[key].id)
     )
-    const qtyTujuanValue = productStock?.stocks?.[warehouseTujuanId]?.qty || 0
+    // const qtyTujuanValue = productStock?.stocks?.[warehouseTujuanId]?.qty || 0
 
-    if (value > qtyTujuanValue) {
-      message.warning(
-        'Jumlah transfer tidak boleh lebih besar dari stok tujuan.'
-      )
-      setIsSaveDisabled(true)
-    } else {
-      setIsSaveDisabled(false)
-    }
+    // if (value > qtyTujuanValue) {
+    //   message.warning(
+    //     'Jumlah transfer tidak boleh lebih besar dari stok tujuan.'
+    //   )
+    //   setIsSaveDisabled(true)
+    // } else {
+    //   setIsSaveDisabled(false)
+    // }
   }
 
   const addRow = () => {
@@ -161,27 +191,17 @@ const ProductStocksPage: React.FC = () => {
   const [qtyDari, setQtyDari] = useState<number | null>(null)
 
   const [qtyTujuan, setQtyTujuan] = useState<number | null>(null)
-  const [title, setTitle] = useState('TRANSFER . . . ')
+  const [title, setTitle] = useState('PENGAJUAN PO . . . ')
 
-  // useEffect(() => {
-  //   if (user) {
-  //     setWarehouseDariId(user.id_outlet)
-  //   }
-  // }, [user])
   useEffect(() => {
     if (String(warehouseTujuanId) === '2') {
-      setTitle('TRANSFER GUDANG')
+      setTitle(`PENGAJUAN PO GUDANG KE ${warehouseName}`)
     } else {
-      setTitle('TRANSFER PO')
+      setTitle(`PENGAJUAN PO OUTLET KE ${warehouseName}`)
     }
-  }, [warehouseTujuanId])
-  const isSaveDisabledED = dataSource.some((row) => !row.id || row.id === '')
+  }, [warehouseTujuanId, warehouseName])
 
-  console.log('Data Source:', dataSource)
-  console.log(
-    'Finance Account IDs:',
-    dataSource.map((row) => row.id)
-  )
+  const isSaveDisabledED = dataSource.some((row) => !row.id || row.id === '')
 
   const columns = [
     {
@@ -207,7 +227,7 @@ const ProductStocksPage: React.FC = () => {
             const isDuplicate = dataSource.some((row) => row.id === value)
 
             if (isDuplicate) {
-              message.warning('Barang dengan ID yang sama sudah dipilih!')
+              message.warning('BARANG INI SUDAH DIPILIH!')
               return // Jangan lanjutkan jika ID sama
             }
 
@@ -505,7 +525,7 @@ const ProductStocksPage: React.FC = () => {
                     }}
                     disabled={isSaveDisabledED}
                   >
-                    AJUKAN PEMESANAN
+                    SIMPAN PENGAJUAN PEMESANAN
                   </Button>
                 </Tooltip>
               </Form.Item>
