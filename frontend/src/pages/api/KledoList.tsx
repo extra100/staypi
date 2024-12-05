@@ -228,30 +228,20 @@ const ListTransaksi: React.FC = () => {
         return <Tag color={color}>{text}</Tag>
       },
     },
-    {
-      title: 'Total',
-      dataIndex: 'amount',
-      key: 'amount',
-      align: 'center',
-      render: (amount: number) => (
-        <div style={{ textAlign: 'right' }}>
-          {amount !== undefined ? roundUpIndonesianNumber(amount) : 'Rp 0'}
-        </div>
-      ),
-    },
+   
 
     {
       title: 'Terbayar',
       dataIndex: 'witholdings',
       key: 'witholdings',
-      align: 'center',
+      align: 'left',
       render: (witholdings: any[]) => {
         const totalDownPayment = witholdings
           .filter((witholding) => witholding.status === 0)
           .reduce((sum, witholding) => sum + (witholding.down_payment || 0), 0)
 
         return (
-          <div style={{ textAlign: 'right' }}>
+          <div style={{ textAlign: 'left' }}>
             {totalDownPayment !== undefined
               ? roundUpIndonesianNumber(totalDownPayment)
               : 'Rp 0'}
@@ -262,7 +252,7 @@ const ListTransaksi: React.FC = () => {
     {
       title: 'Sisa Tagihan',
       key: 'due',
-      align: 'center',
+      align: 'left',
       render: (record: any) => {
         const totalDownPayment = record.witholdings
           .filter((witholding: any) => witholding.status === 0)
@@ -275,11 +265,22 @@ const ListTransaksi: React.FC = () => {
         const due = record.amount - totalDownPayment
 
         return (
-          <div style={{ textAlign: 'right' }}>
+          <div style={{ textAlign: 'left' }}>
             {roundUpIndonesianNumber(due < 0 ? 0 : due)}
           </div>
         )
       },
+    },
+    {
+      title: 'Total',
+      dataIndex: 'amount',
+      key: 'amount',
+      align: 'right',
+      render: (amount: number) => (
+        <div style={{ textAlign: 'right' }}>
+          {amount !== undefined ? roundUpIndonesianNumber(amount) : 'Rp 0'}
+        </div>
+      ),
     },
   
   ]

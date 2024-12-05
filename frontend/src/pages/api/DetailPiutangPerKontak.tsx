@@ -75,11 +75,14 @@ const DetailPiutangKontak: React.FC = () => {
       dataIndex: 'ref_number',
       key: 'ref_number',
       ellipsis: true, // Untuk teks panjang
+      align: 'left',
     },
     {
       title: 'Tanggal',
       dataIndex: 'trans_date',
       key: 'trans_date',
+      align: 'left',
+
       ellipsis: true,
       render: (value: any) => formatDate(value),
     },
@@ -88,6 +91,8 @@ const DetailPiutangKontak: React.FC = () => {
       title: 'Piutang',
       dataIndex: 'due',
       key: 'due',
+      align: 'right',
+
       ellipsis: true,
       render: (value: any) => (
         <div style={{ textAlign: 'right' }}>
@@ -97,14 +102,22 @@ const DetailPiutangKontak: React.FC = () => {
     },
     {
       title: 'Grand Total',
-      dataIndex: 'amount_after_tax',
-      key: 'amount_after_tax',
+      dataIndex: 'amount',
+      key: 'amount',
       ellipsis: true,
-      render: (value: any) => (
-        <div style={{ textAlign: 'right' }}>
-          {`Rp ${Number(value).toLocaleString()}`}
-        </div>
-      ),
+      align: 'right',
+
+      render: (value: any) => {
+        const validValue =
+          !isNaN(value) && value !== null && value !== undefined
+            ? Number(value)
+            : 0
+        return (
+          <div style={{ textAlign: 'right' }}>
+            {`Rp ${validValue.toLocaleString()}`}
+          </div>
+        )
+      },
     },
   ]
 
@@ -202,7 +215,7 @@ const DetailPiutangKontak: React.FC = () => {
 
         <Table
           dataSource={takeInvoicesFromKledoBasedOnPelanggan}
-          columns={columns}
+          columns={columns as any}
           rowKey="ref_number"
           pagination={false}
           style={{ width: '100%' }} // Sesuaikan lebar tabel dengan parent
