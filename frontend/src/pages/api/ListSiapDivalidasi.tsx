@@ -129,7 +129,7 @@ const ListSiapDiValidasi: React.FC = () => {
         style={{ borderRadius: '0px' }}
         onClick={() => handleButtonClick('1')}
       >
-        <span>Validasi Permintaan</span>
+        <span>Validasi Permintaanmu</span>
       </Button>
       <Button
         id="btn-filter-2"
