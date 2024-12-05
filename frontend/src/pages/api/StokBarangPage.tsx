@@ -834,6 +834,9 @@ const StockSelectorTable = () => {
       title: 'Barang',
       dataIndex: 'finance_account_id',
       key: 'finance_account_id',
+      align: 'left',
+      className: 'wrap-text',
+
       render: (id: any) => (
         <div>
           <Select
@@ -861,7 +864,7 @@ const StockSelectorTable = () => {
 
               return (
                 <Select.Option key={product.id} value={product.id}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'left' }}>
                     <span style={{ paddingRight: '16px' }}>{product.name}</span>
                     <Badge
                       count={stockQuantity}
@@ -887,11 +890,14 @@ const StockSelectorTable = () => {
       title: 'Satuan',
       dataIndex: 'satuan',
       key: 'satuan',
+      align: 'center',
     },
     {
       title: 'Diskon',
       dataIndex: 'input_diskon_manual',
       key: 'input_diskon_manual',
+      align: 'center',
+
       render: (text: any, record: any) => (
         <div>
           <Input
@@ -926,6 +932,8 @@ const StockSelectorTable = () => {
       title: 'Harga',
       dataIndex: 'price',
       key: 'price',
+      align: 'center',
+
       render: (text: number, record: any) => {
         const product = barangs?.find(
           (item) => item.id === record.finance_account_id
@@ -974,6 +982,8 @@ const StockSelectorTable = () => {
       title: 'Qty',
       dataIndex: 'qty',
       key: 'qty',
+      align: 'center',
+
       render: (text: any, record: any) => (
         <div>
           <NumericFormat
@@ -987,13 +997,13 @@ const StockSelectorTable = () => {
               handleQtyChange(floatValue || 0, record)
             }}
             customInput={Input}
-            style={{ textAlign: 'left', width: '70px' }}
+            style={{ textAlign: 'center', width: '70px' }}
           />
         </div>
       ),
     },
     // {
-    //   title: 'Harga Dasar',
+    //   title: 'Umum 2',
     //   dataIndex: 'finance_account_id',
     //   key: 'base_price',
     //   render: (id: any) => (
@@ -1047,6 +1057,8 @@ const StockSelectorTable = () => {
       title: 'Subtotal',
       dataIndex: 'subtotal',
       key: 'subtotal',
+      align: 'right',
+
       render: (text: any) => (
         <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
       ),
@@ -1329,7 +1341,7 @@ const StockSelectorTable = () => {
             <Select
               mode="multiple"
               placeholder="Pilih Barang"
-              style={{ width: '100%', marginTop: '10px' }}
+              style={{ width: '100%', marginTop: '10px', alignItems: 'center' }}
               optionFilterProp="items"
               filterOption={false}
               onChange={handleProductChange}
@@ -1339,23 +1351,29 @@ const StockSelectorTable = () => {
               open={dropdownVisible}
               onDropdownVisibleChange={(open) => setDropdownVisible(open)}
               dropdownRender={(menu) => (
-                <div style={{ minWidth: '800px', padding: '8px' }}>
+                <div
+                  style={{
+                    minWidth: '800px',
+                    padding: '8px',
+                    textAlign: 'center',
+                  }}
+                >
                   <div
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center',
+                      textAlign: 'center',
                       fontWeight: 'bold',
                       padding: '8px',
                       borderBottom: '1px solid #e8e8e8',
                       backgroundColor: '#f5f5f5',
                     }}
                   >
-                    <span style={{ flex: 2, textAlign: 'left' }}>
+                    <span style={{ flex: 2, textAlign: 'center' }}>
                       Nama Barang
                     </span>
                     <span style={{ flex: 1, textAlign: 'center' }}>Qty</span>
-                    <span style={{ flex: 1, textAlign: 'center' }}>Price</span>
+                    {/* <span style={{ flex: 1, textAlign: 'center' }}>Price</span> */}
 
                     {discountRates.map((rate) => (
                       <span
@@ -1366,7 +1384,12 @@ const StockSelectorTable = () => {
                       </span>
                     ))}
                   </div>
-                  <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                  <div
+                    style={{
+                      maxHeight: '2000px', // Tinggi dropdown diperbesar
+                      overflowY: 'auto', // Aktifkan scroll jika lebih dari 1200px
+                    }}
+                  >
                     {menu}
                   </div>
                 </div>
@@ -1406,21 +1429,42 @@ const StockSelectorTable = () => {
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            padding: '8px',
+                            padding: '4px 8px', // Perkecil padding baris
+                            lineHeight: '1.2', // Kurangi tinggi baris
+                            fontSize: '12px', // Kurangi ukuran font jika diperlukan
                             borderBottom: '1px solid #e8e8e8',
                           }}
                         >
-                          <span style={{ flex: 2, textAlign: 'left' }}>
+                          {/* Nama Barang */}
+                          <span
+                            style={{
+                              flex: 2,
+                              textAlign: 'left',
+                              borderRight: '1px solid #e8e8e8',
+                              paddingRight: '8px',
+                              wordWrap: 'break-word',
+                              whiteSpace: 'normal',
+                            }}
+                          >
                             {product.name}
                           </span>
-                          <span style={{ flex: 1, textAlign: 'center' }}>
+
+                          {/* Stok */}
+                          <span
+                            style={{
+                              flex: 1,
+                              textAlign: 'center',
+                              borderRight: '1px solid #e8e8e8',
+                              paddingRight: '8px',
+                              paddingLeft: '8px',
+                              wordWrap: 'break-word',
+                              whiteSpace: 'normal',
+                            }}
+                          >
                             {Number(stockQuantity).toLocaleString('id-ID')}
                           </span>
-                          <span style={{ flex: 1, textAlign: 'center' }}>
-                            {Number(product.price).toLocaleString('id-ID', {
-                              minimumFractionDigits: 0,
-                            })}
-                          </span>
+
+                          {/* Harga Diskon */}
                           {filteredDiscountRates.map((rate) => {
                             const discountedPrice =
                               rate.percentage !== null
@@ -1428,16 +1472,7 @@ const StockSelectorTable = () => {
                                     product.price -
                                     (product.price * rate.percentage) / 100
                                   ).toFixed(2)
-                                : 0 // Harga menjadi 0 jika percentage null
-                            const formattedPrice =
-                              rate.percentage !== null
-                                ? Number(discountedPrice).toLocaleString(
-                                    'id-ID',
-                                    {
-                                      minimumFractionDigits: 0,
-                                    }
-                                  )
-                                : '0'
+                                : 0
 
                             return (
                               <span
@@ -1453,9 +1488,16 @@ const StockSelectorTable = () => {
                                       ? '#52C41A'
                                       : 'transparent',
                                   cursor: 'pointer',
+                                  paddingLeft: '8px',
+                                  paddingRight: '8px',
+                                  borderRight: '1px solid #e8e8e8',
+                                  wordWrap: 'break-word',
+                                  whiteSpace: 'normal',
                                 }}
                               >
-                                {formattedPrice}
+                                {Number(discountedPrice).toLocaleString(
+                                  'id-ID'
+                                )}
                               </span>
                             )
                           })}
@@ -1482,7 +1524,7 @@ const StockSelectorTable = () => {
 
             <Table
               dataSource={dataSource}
-              columns={filteredColumns}
+              columns={filteredColumns as any}
               rowKey="finance_account_id"
               style={{ marginTop: '20px', marginBottom: '20px' }}
               pagination={false}
