@@ -34,7 +34,7 @@ const ListSiapDiValidasi: React.FC = () => {
 
 
   const today = dayjs().format('YYYY-MM-DD')
-
+  console.log({today})
   const dataSource = Array.isArray(transfers)
     ? transfers
         .filter((transfer: any) => {
