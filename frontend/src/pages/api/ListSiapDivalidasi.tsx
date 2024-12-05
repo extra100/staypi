@@ -99,9 +99,9 @@ const ListSiapDiValidasi: React.FC = () => {
       key: 'ref_number',
     },
     {
-      title: 'Kode',
-      dataIndex: 'code',
-      key: 'code',
+      title: 'Ket',
+      dataIndex: 'memo',
+      key: 'memo',
     },
     {
       title: 'Tanggal Trans',

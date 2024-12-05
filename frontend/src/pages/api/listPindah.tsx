@@ -71,7 +71,7 @@ const WarehouseTransferTable: React.FC = () => {
       key: 'ref_number',
     },
     {
-      title: 'Memo',
+      title: 'Ket',
       dataIndex: 'memo',
       key: 'memo',
     },

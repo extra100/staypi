@@ -88,9 +88,9 @@ const ListSudahDivalidasi: React.FC = () => {
       key: 'ref_number',
     },
     {
-      title: 'code',
-      dataIndex: 'code',
-      key: 'code',
+      title: 'Ket',
+      dataIndex: 'memo',
+      key: 'memo',
     },
     {
       title: 'Tanggal',

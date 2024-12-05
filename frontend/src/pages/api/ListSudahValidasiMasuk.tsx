@@ -84,9 +84,9 @@ const ListSudahValidasiMasuk: React.FC = () => {
       key: 'ref_number',
     },
     {
-      title: 'Memo',
-      dataIndex: 'code',
-      key: 'code',
+      title: 'Ket',
+      dataIndex: 'memo',
+      key: 'memo',
     },
     {
       title: 'Tanggal',
