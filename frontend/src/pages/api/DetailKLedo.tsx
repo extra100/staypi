@@ -600,16 +600,16 @@ const DetailKledo: React.FC = () => {
     {
       title: 'No',
       key: 'no',
-      align: 'center',
+      align: 'left',
       render: (_: any, __: any, index: number) => (
-        <div style={{ textAlign: 'center' }}>{index + 1}</div>
+        <div style={{ textAlign: 'left' }}>{index + 1}</div>
       ),
     },
     {
       title: 'Barang',
       dataIndex: 'name',
       key: 'name',
-      align: 'center',
+      align: 'left',
       render: (name: string) => (
         <div style={{ textAlign: 'left' }}>
           {name !== undefined ? name : ''}
@@ -621,46 +621,48 @@ const DetailKledo: React.FC = () => {
       title: 'Qty',
       dataIndex: 'qty',
       key: 'qty',
-      align: 'center',
+      align: 'left',
       render: (qty: number) => (
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'left' }}>
           {qty !== undefined ? qty : '0'}
         </div>
       ),
     },
-    {
-      title: 'Satuan',
-      key: 'unit_id',
-      dataIndex: 'unit_id',
-      align: 'center',
-    },
+   
     {
       title: 'Harga',
       dataIndex: 'price',
       key: 'price',
-      align: 'center',
+      align: 'left',
       render: (price: number) => (
-        <div style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: 'left' }}>
           {price !== undefined ? roundUpIndonesianNumber(price) : 'Rp 0'}
         </div>
       ),
     },
+   
     {
-      title: 'Jumlah Diskon',
-      dataIndex: 'discount_amount',
-      key: 'discount_amount',
-      align: 'center',
-      render: (discount_amount: number) => (
-        <div style={{ textAlign: 'right' }}>
-          {discount_amount !== undefined ? roundUpIndonesianNumber(discount_amount) : 'Rp 0'}
-        </div>
-      ),
+      title: 'Harga Setelah Diskon',
+      dataIndex: 'price',
+      key: 'discounted_price', 
+      align: 'left',
+      render: (price: number, record: any) => {
+        const discount_amount = record.discount_amount || 0; 
+        const discountedPrice = price - discount_amount; 
+        return (
+          <div style={{ textAlign: 'left' }}>
+            {discountedPrice !== undefined ? roundUpIndonesianNumber(discountedPrice) : 'Rp 0'}
+          </div>
+        );
+      },
     },
+    
+  
     {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
-      align: 'center',
+      align: 'right',
       render: (amount: number) => (
         <div style={{ textAlign: 'right' }}>
           {amount !== undefined ? roundUpIndonesianNumber(amount) : 'Rp 0'}

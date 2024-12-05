@@ -77,7 +77,7 @@ const ListTransaksi: React.FC = () => {
   const [searchStatus, setSearchStatus] = useState<string | undefined>()
   const filteredData = data
     ?.filter((transaction) => {
-      // Filter berdasarkan Ref Number
+
       if (searchRef) {
         return transaction.ref_number
           .toLowerCase()
@@ -86,14 +86,14 @@ const ListTransaksi: React.FC = () => {
       return true
     })
     ?.filter((transaction) => {
-      // Filter berdasarkan Nama Kontak
+
       if (searchContact) {
         return transaction.contact_id === searchContact
       }
       return true
     })
     ?.filter((transaction) => {
-      // Filter berdasarkan Nama Gudang
+
       if (searchWarehouse) {
         return transaction.warehouse_id === searchWarehouse
       }
@@ -177,7 +177,7 @@ const ListTransaksi: React.FC = () => {
       render: (contactId: string) => getContactName(contactId),
     },
     {
-      title: 'Warehouse',
+      title: 'Outlet',
       dataIndex: 'warehouse_id',
       key: 'warehouse_name',
       render: (warehouseId: number) => getWarehouseName(warehouseId),
@@ -192,6 +192,12 @@ const ListTransaksi: React.FC = () => {
       title: 'Tgl. Trans',
       dataIndex: 'trans_date',
       key: 'trans_date',
+      render: (text: any) => formatDate(text),
+    },
+    {
+      title: 'Tgl. Jatuh Tempo',
+      dataIndex: 'due_date',
+      key: 'due_date',
       render: (text: any) => formatDate(text),
     },
     {
@@ -275,11 +281,7 @@ const ListTransaksi: React.FC = () => {
         )
       },
     },
-    {
-      title: 'Ket',
-      dataIndex: 'id',
-      key: 'id',
-    },
+  
   ]
 
   return (
