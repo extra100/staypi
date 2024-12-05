@@ -101,9 +101,9 @@ const ValidatePindah: React.FC = () => {
 
   useEffect(() => {
     if (String(transfer.to_warehouse_name) === 'EXTRA TRUSS') {
-      setTitle('TRANSFER GUDANG')
+      setTitle(`VALIDASI PO ${fromWarehouseName}`)
     } else {
-      setTitle('TRANSFER PO')
+      setTitle(`VALIDASI PO ${fromWarehouseName}`)
     }
   }, [transfer.to_warehouse_name])
 
@@ -122,13 +122,12 @@ const ValidatePindah: React.FC = () => {
   console.log({ fromQtyState })
   const [toQtyState, setToQtyState] = useState<{ [key: number]: number }>({})
   console.log({ toQtyState })
-  // Pastikan tanggal menggunakan zona waktu lokal Indonesia
+
   const todays = new Date()
-  const offset = todays.getTimezoneOffset() // Perbedaan waktu dari UTC
+  const offset = todays.getTimezoneOffset()
   const localTime = new Date(todays.getTime() - offset * 60 * 1000)
-  const transDate = localTime.toISOString().split('T')[0] // Format YYYY-MM-DD
+  const transDate = localTime.toISOString().split('T')[0]
   const navigate = useNavigate()
-  // Jumlah minimum yang harus dipenuhi untuk validasi (dapat berasal dari sumberData)
 
   useEffect(() => {
     if (transferData) {
@@ -241,12 +240,19 @@ const ValidatePindah: React.FC = () => {
   const qtyValuesss = stocks.map((item: any) => item.qty)
   const qtyPermintaanArray = qtyPermintaan.split(',').map(Number)
 
-  const isValidationDisabled = qtyValuesss.some((qty, index) => {
-    const transfer = transferQty[index] || 0
-    const permintaan = qtyPermintaanArray[index] || 0
+  // const isValidationDisabled = qtyValuesss.some((qty, index) => {
+  //   const transfer = transferQty[index] || 0
+  //   const permintaan = qtyPermintaanArray[index] || 0
 
-    return qty < transfer || transfer > permintaan
-  })
+  //   return qty < transfer || transfer > permintaan
+  // })
+  const isValidationDisabled =
+    qtyValuesss.some((qty, index) => {
+      const transfer = transferQty[index] || 0
+      const permintaan = qtyPermintaanArray[index] || 0
+
+      return qty < transfer || transfer > permintaan
+    }) || !keterangan.trim() // Disable jika keterangan kosong atau hanya spasi
 
   console.log({ isValidationDisabled })
 
@@ -319,7 +325,7 @@ const ValidatePindah: React.FC = () => {
                   transferQty[index] > qtyDariValue
                     ? 'red'
                     : undefined,
-                width: '120px', // Atur lebar input
+                width: '100px',
               }}
             />
           </Tooltip>
@@ -346,15 +352,9 @@ const ValidatePindah: React.FC = () => {
         const updatedQtyDariValue = qtyTujuanValue + transferAmount
         const updatedQtyTujuanValue = qtyDariValue - transferAmount
 
-        console.log(`Index: ${index}`)
-        console.log(`Product ID: ${record.product_id}`)
-        console.log(`Transfer Amount: ${transferAmount}`)
-        console.log(`Updated Qty Dari: ${updatedQtyDariValue}`)
-        console.log(`Updated Qty Tujuan: ${updatedQtyTujuanValue}`)
-
         return (
           <div>
-            <span>{`${updatedQtyTujuanValue} / ${updatedQtyDariValue}`}</span>
+            <span>{`D${updatedQtyTujuanValue} / K${updatedQtyDariValue}`}</span>
           </div>
         )
       },
@@ -468,7 +468,7 @@ const ValidatePindah: React.FC = () => {
 
                 <Row>
                   <Col span={6}>
-                    <Text>Ket</Text>
+                    <Text>Keterangan</Text>
                   </Col>
                   <Col span={12}>
                     <Input
@@ -478,7 +478,7 @@ const ValidatePindah: React.FC = () => {
                       style={{
                         border: 'none',
                         borderBottom: '1px solid #ccc',
-                        width: '40%',
+                        width: '80%',
                       }}
                     />
                   </Col>
