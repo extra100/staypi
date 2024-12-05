@@ -4,6 +4,7 @@ import { useGetWarehouseTransfersQuery } from '../../hooks/pindahHooks'
 import { useIdWarehouse } from './namaWarehouse'
 import { useNavigate } from 'react-router-dom'
 import UserContext from '../../contexts/UserContext'
+import dayjs from 'dayjs'
 
 const ListSiapDiValidasi: React.FC = () => {
   const userContext = useContext(UserContext)
@@ -30,9 +31,16 @@ const ListSiapDiValidasi: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('')
 
+
+
+  const today = dayjs().format('YYYY-MM-DD')
+
   const dataSource = Array.isArray(transfers)
     ? transfers
         .filter((transfer: any) => {
+          const transDate = dayjs(transfer.trans_date).format('YYYY-MM-DD')
+          const isToday = transDate === today
+
           const isCommonCriteriaMet =
             transfer.code === 1 &&
             transfer.to_warehouse_id !== user?.isAdmin &&
@@ -40,20 +48,19 @@ const ListSiapDiValidasi: React.FC = () => {
               String(transfer.from_warehouse_id || '').includes(searchTerm))
 
           if (user?.isAdmin) {
-            return isCommonCriteriaMet
+            return isToday && isCommonCriteriaMet
           }
 
           const isNonAdminCriteriaMet =
             transfer.code === 1 && transfer.to_warehouse_id === idOutletLoggedIn
 
-          return isNonAdminCriteriaMet
+          return isToday && isNonAdminCriteriaMet
         })
         .sort(
           (a: any, b: any) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         )
     : []
-
   const handleRowClick = (record: any) => {
     navigate(`/validasi-pindah/${record.ref_number}`)
   }
