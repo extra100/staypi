@@ -1,7 +1,8 @@
 /node_modules
 /build
 # .env
-
+/root/.ssh/sweet
+/root/.ssh/sweet.pub
 # System Files
 .DS_Store
 Thumbs.db
