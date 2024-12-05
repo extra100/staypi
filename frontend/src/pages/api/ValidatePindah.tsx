@@ -251,12 +251,19 @@ const ValidatePindah: React.FC = () => {
       const transfer = transferQty[index] || 0
       const permintaan = qtyPermintaanArray[index] || 0
 
-      return qty < transfer || transfer > permintaan
-    }) || !keterangan.trim() // Disable jika keterangan kosong atau hanya spasi
 
-  console.log({ isValidationDisabled })
+      const productId = Object.keys(toQtyState)[index]
+      const toQtyValue = productId ? toQtyState[Number(productId)] || 0 : 0
 
-  console.log({ qtyPermintaan })
+      console.log({ transfer })
+      console.log({ permintaan })
+      console.log({ toQtyValue })
+
+
+      return (
+        qty < transfer || transfer > permintaan || toQtyValue < 0 
+      )
+    }) || !keterangan.trim()
   const columns = [
     {
       title: 'Qty Validasi',
