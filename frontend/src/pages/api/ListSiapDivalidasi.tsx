@@ -104,7 +104,7 @@ const ListSiapDiValidasi: React.FC = () => {
       key: 'code',
     },
     {
-      title: 'Tanggal',
+      title: 'Tanggal Trans',
       dataIndex: 'trans_date',
       key: 'trans_date',
     },
