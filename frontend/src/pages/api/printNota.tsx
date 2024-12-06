@@ -130,16 +130,19 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
     },
     {
       title: 'Harga',
-      dataIndex: 'price',
-      key: 'price',
-      align: 'center',
-      render: (price: number) => (
-        <div style={{ textAlign: 'right' }}>
-          {price !== undefined ? roundUpIndonesianNumber(price) : 'Rp 0'}
-        </div>
-      ),
+      key: 'amountPerBaris',
+      align: 'left',
+      render: (record: any) => {
+        const amount = record.amount || 0
+        const qty = record.qty || 1 // Pastikan qty tidak nol
+        const amountPerBaris = qty > 0 ? amount / qty : 0
+        return (
+          <div style={{ textAlign: 'left' }}>
+            {roundUpIndonesianNumber(amountPerBaris)}
+          </div>
+        )
+      },
     },
-
     {
       title: 'Total',
       dataIndex: 'amount',
