@@ -125,16 +125,36 @@ const DetailKledo: React.FC = () => {
       setSelectedInvoiceId(null)
     }
   }, [isDeleted])
-  //delete
+  //delete\\
+  const items = getPosDetail?.items || []
+
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
   const idididid = getPosDetail?.items?.[0]?.id
+  const amountsPerBaris = items.map((item: any) => {
+    const amount = item.amount || 0
+    const qty = item.qty || 1 // Pastikan qty tidak nol
+    return qty > 0 ? amount / qty : 0
+  })
 
+  // console.log({ amountsPerBaris })
+
+  const totalAmountPerBaris = items.reduce((total: number, item: any) => {
+    const amount = item.price || 0
+    const qty = item.qty || 1 // Pastikan qty tidak nol
+    const amountPerBaris = qty > 0 ? amount * qty : 0
+    return total + amountPerBaris
+  }, 0)
+  console.log({ totalAmountPerBaris })
+  const totalDiskonSemua = items.reduce((total: number, item: any) => {
+    const amount = item.discount_amount || 0
+
+    return total + amount
+  }, 0)
+  console.log({ totalDiskonSemua })
   const langka = getPosDetail?.id
 
   const tagName = getPosDetail?.tages?.map((tag: any) => tag.name) || []
-
-  const items = getPosDetail?.items || []
 
   const witholdings = getPosDetail?.witholdings || []
   const amount = getPosDetail?.amount ?? 0
@@ -155,9 +175,7 @@ const DetailKledo: React.FC = () => {
   const { fiAc } = useFiac()
 
   const [amountPaid, setAmountPaid] = useState<number | null>(null)
-  useEffect(() => {
-    console.log({ due, amountPaid })
-  }, [due, amountPaid])
+  useEffect(() => {}, [due, amountPaid])
 
   const roundUpIndonesianNumber = (value: number | null): string => {
     if (value === null) return ''
@@ -595,21 +613,21 @@ const DetailKledo: React.FC = () => {
   )
 
   const { hasRedData } = useRedData()
-  console.log({ hasRedData })
+
   const columns = [
     {
       title: 'No',
       key: 'no',
-      align: 'left',
+      align: 'center',
       render: (_: any, __: any, index: number) => (
-        <div style={{ textAlign: 'left' }}>{index + 1}</div>
+        <div style={{ textAlign: 'center' }}>{index + 1}</div>
       ),
     },
     {
       title: 'Barang',
       dataIndex: 'name',
       key: 'name',
-      align: 'left',
+      align: 'center',
       render: (name: string) => (
         <div style={{ textAlign: 'left' }}>
           {name !== undefined ? name : ''}
@@ -621,14 +639,14 @@ const DetailKledo: React.FC = () => {
       title: 'Qty',
       dataIndex: 'qty',
       key: 'qty',
-      align: 'left',
+      align: 'center',
       render: (qty: number) => (
-        <div style={{ textAlign: 'left' }}>
+        <div style={{ textAlign: 'center' }}>
           {qty !== undefined ? qty : '0'}
         </div>
       ),
     },
-   
+
     {
       title: 'Harga',
       dataIndex: 'price',
@@ -640,29 +658,40 @@ const DetailKledo: React.FC = () => {
         </div>
       ),
     },
-   
-    // {
-    //   title: 'Harga Setelah Diskon',
-    //   dataIndex: 'price',
-    //   key: 'discounted_price', 
-    //   align: 'left',
-    //   render: (price: number, record: any) => {
-    //     const discount_amount = record.discount_amount || 0; 
-    //     const discountedPrice = price - discount_amount; 
-    //     return (
-    //       <div style={{ textAlign: 'left' }}>
-    //         {discountedPrice !== undefined ? roundUpIndonesianNumber(discountedPrice) : 'Rp 0'}
-    //       </div>
-    //     );
-    //   },
-    // },
-    
-  
+    {
+      title: 'Diskon',
+      dataIndex: 'discount_amount',
+      key: 'discount_amount',
+      align: 'left',
+      render: (discount_amount: number) => (
+        <div style={{ textAlign: 'left' }}>
+          {discount_amount !== undefined
+            ? roundUpIndonesianNumber(discount_amount)
+            : 'Rp 0'}
+        </div>
+      ),
+    },
+    {
+      title: 'Harga Diskon',
+      key: 'amountPerBaris',
+      align: 'left',
+      render: (record: any) => {
+        const amount = record.amount || 0
+        const qty = record.qty || 1 // Pastikan qty tidak nol
+        const amountPerBaris = qty > 0 ? amount / qty : 0
+        return (
+          <div style={{ textAlign: 'left' }}>
+            {roundUpIndonesianNumber(amountPerBaris)}
+          </div>
+        )
+      },
+    },
+
     {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
-      align: 'right',
+      align: 'center',
       render: (amount: number) => (
         <div style={{ textAlign: 'right' }}>
           {amount !== undefined ? roundUpIndonesianNumber(amount) : 'Rp 0'}
@@ -853,6 +882,24 @@ const DetailKledo: React.FC = () => {
         <Row gutter={16}>
           <Col span={12}></Col>
           <Col span={12}>
+            <Row style={{ marginTop: '8px' }}>
+              <Col span={12} style={{ textAlign: 'right' }}>
+                <Text strong>Sub Total</Text>
+              </Col>
+              <Col span={12} style={{ textAlign: 'right' }}>
+                <Text strong>
+                  {roundUpIndonesianNumber(totalAmountPerBaris)}
+                </Text>
+              </Col>
+            </Row>
+            <Row style={{ marginTop: '8px' }}>
+              <Col span={12} style={{ textAlign: 'right' }}>
+                <Text strong>Diskon</Text>
+              </Col>
+              <Col span={12} style={{ textAlign: 'right' }}>
+                <Text strong>{roundUpIndonesianNumber(totalDiskonSemua)}</Text>
+              </Col>
+            </Row>
             <Row style={{ marginTop: '8px' }}>
               <Col span={12} style={{ textAlign: 'right' }}>
                 <Text strong>Total setelah diskon</Text>
