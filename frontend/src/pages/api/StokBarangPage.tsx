@@ -232,7 +232,7 @@ const StockSelectorTable = () => {
   // console.log({ selectedPrices })
   //sen
   const discountRates = [
-    { label: 'Harga Dasar', percentage: 0 },
+    { label: 'Umum 2', percentage: 0 },
     { label: 'Retail 10%', percentage: 10 },
     { label: 'Applikator 16%', percentage: 16 },
     { label: 'Toko 18%', percentage: 18 },
@@ -415,9 +415,9 @@ const StockSelectorTable = () => {
     }
   }
   const retailDiscount =
-    discountRates.find((rate) => rate.label === 'Harga Dasar')?.percentage || 0
+    discountRates.find((rate) => rate.label === 'Umum 2')?.percentage || 0
   //oceoce
-  //harga dasar
+  //Umum 2
 
   const [hargaDasar, setHargaDasar] = useState<{ [key: string]: number }>({})
   console.log({ hargaDasar })
@@ -448,7 +448,7 @@ const StockSelectorTable = () => {
 
             qty: 1,
 
-            selectedDiscount: selectedPrices[item.id] || 'Harga Dasar',
+            selectedDiscount: selectedPrices[item.id] || 'Umum 2',
 
             selectedDiscountValue: selectedDiscounts[item.id] || retailDiscount,
 
@@ -656,11 +656,11 @@ const StockSelectorTable = () => {
     return shortNumber
   }
   const [uniqueNumber, setUniqueNumber] = useState('')
-  // console.log({ uniqueNumber })
+
   useEffect(() => {
     const generatedNumber = generateUnique()
     setUniqueNumber(generatedNumber as any)
-  }, []) // Empty dependency array means it runs only once
+  }, [])
   const [catatan, setCatatan] = useState('')
   const [yangMana, setYangMana] = useState()
 
@@ -828,6 +828,7 @@ const StockSelectorTable = () => {
     })
     setStockQuantities(newStockQuantities)
   }, [barangs, warehouseStock])
+  console.log({ stockQuantities })
 
   const columns = [
     {
@@ -886,12 +887,41 @@ const StockSelectorTable = () => {
       ),
     },
 
-    {
-      title: 'Satuan',
-      dataIndex: 'satuan',
-      key: 'satuan',
-      align: 'center',
-    },
+    // {
+    //   title: 'Diskon',
+    //   dataIndex: 'input_diskon_manual',
+    //   key: 'input_diskon_manual',
+    //   align: 'center',
+
+    //   render: (text: any, record: any) => (
+    //     <div>
+    //       <Input
+    //         type="number"
+    //         defaultValue={text || 0}
+    //         onChange={(e) => {
+    //           const inputDiskonManual = parseFloat(e.target.value) || 0
+    //           console.log({ inputDiskonManual })
+    //           const basePrice = hargaDasar[record.finance_account_id] || 0
+    //           const hargaSetelahDiskon = basePrice - inputDiskonManual
+    //           const newSubtotal = hargaSetelahDiskon * record.qty
+
+    //           setDataSource((prev) =>
+    //             prev.map((item) =>
+    //               item.finance_account_id === record.finance_account_id
+    //                 ? {
+    //                     ...item,
+    //                     input_diskon_manual: inputDiskonManual,
+    //                     harga_setelah_diskon: hargaSetelahDiskon,
+    //                     subtotal: newSubtotal,
+    //                   }
+    //                 : item
+    //             )
+    //           )
+    //         }}
+    //       />
+    //     </div>
+    //   ),
+    // },
     {
       title: 'Diskon',
       dataIndex: 'input_diskon_manual',
@@ -905,10 +935,8 @@ const StockSelectorTable = () => {
             defaultValue={text || 0}
             onChange={(e) => {
               const inputDiskonManual = parseFloat(e.target.value) || 0
-              console.log({ inputDiskonManual })
               const basePrice = hargaDasar[record.finance_account_id] || 0
               const hargaSetelahDiskon = basePrice - inputDiskonManual
-              const newSubtotal = hargaSetelahDiskon * record.qty
 
               setDataSource((prev) =>
                 prev.map((item) =>
@@ -917,7 +945,7 @@ const StockSelectorTable = () => {
                         ...item,
                         input_diskon_manual: inputDiskonManual,
                         harga_setelah_diskon: hargaSetelahDiskon,
-                        subtotal: newSubtotal,
+                        subtotal: hargaSetelahDiskon * item.qty,
                       }
                     : item
                 )
@@ -978,40 +1006,99 @@ const StockSelectorTable = () => {
       },
     },
 
+    // {
+    //   title: 'Qty',
+    //   dataIndex: 'qty',
+    //   key: 'qty',
+    //   align: 'center',
+
+    //   render: (text: any, record: any) => (
+    //     <div>
+    //       <NumericFormat
+    //         value={text}
+    //         allowNegative={false}
+    //         thousandSeparator="."
+    //         decimalSeparator=","
+    //         decimalScale={0}
+    //         onValueChange={(values) => {
+    //           const { floatValue } = values
+    //           handleQtyChange(floatValue || 0, record)
+    //         }}
+    //         customInput={Input}
+    //         style={{ textAlign: 'center', width: '70px' }}
+    //       />
+    //     </div>
+    //   ),
+    // },
     {
       title: 'Qty',
       dataIndex: 'qty',
       key: 'qty',
       align: 'center',
 
-      render: (text: any, record: any) => (
-        <div>
-          <NumericFormat
-            value={text}
-            allowNegative={false}
-            thousandSeparator="."
-            decimalSeparator=","
-            decimalScale={0}
-            onValueChange={(values) => {
-              const { floatValue } = values
-              handleQtyChange(floatValue || 0, record)
+      render: (text: any, record: any) => {
+        const stockQuantity =
+          warehouseStock.find(
+            (stock: any) => stock.id === record.finance_account_id
+          )?.stock || 0
+
+        return (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
-            customInput={Input}
-            style={{ textAlign: 'center', width: '70px' }}
-          />
-        </div>
-      ),
+          >
+            <NumericFormat
+              value={text}
+              allowNegative={false}
+              thousandSeparator="."
+              decimalSeparator=","
+              onValueChange={(values) => {
+                const { floatValue } = values
+                const newQty = floatValue!
+
+                if (newQty > stockQuantity) {
+                  setDataSource((prev) =>
+                    prev.map((item) =>
+                      item.finance_account_id === record.finance_account_id
+                        ? { ...item, error: `Stok tersedia: ${stockQuantity}` }
+                        : item
+                    )
+                  )
+                  return
+                }
+
+                const hargaSetelahDiskon =
+                  record.harga_setelah_diskon || record.price
+
+                setDataSource((prev) =>
+                  prev.map((item) =>
+                    item.finance_account_id === record.finance_account_id
+                      ? {
+                          ...item,
+                          qty: newQty,
+                          subtotal: hargaSetelahDiskon * newQty,
+                          error: undefined,
+                        }
+                      : item
+                  )
+                )
+              }}
+              customInput={Input}
+              style={{ textAlign: 'center', width: '70px' }}
+            />
+
+            {record.error && (
+              <span style={{ color: 'red', fontSize: '12px' }}>
+                {record.error}
+              </span>
+            )}
+          </div>
+        )
+      },
     },
-    // {
-    //   title: 'Umum 2',
-    //   dataIndex: 'finance_account_id',
-    //   key: 'base_price',
-    //   render: (id: any) => (
-    //     <div>
-    //       {hargaDasar[id] ? hargaDasar[id].toLocaleString('id-ID') : '-'}
-    //     </div>
-    //   ),
-    // },
     // {
     //   title: 'Harga Setelah Diskon',
     //   dataIndex: 'harga_setelah_diskon',
@@ -1020,49 +1107,35 @@ const StockSelectorTable = () => {
     //     <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
     //   ),
     // },
-    // {
-    //   title: 'Diskon',
-    //   dataIndex: 'input_diskon_manual',
-    //   key: 'input_diskon_manual',
-    //   render: (text: any, record: any) => (
-    //     <div>
-    //       <Input
-    //         type="number"
-    //         defaultValue={text || 0}
-    //         onChange={(e) => {
-    //           const inputDiskonManual = parseFloat(e.target.value) || 0
-    //           const basePrice = hargaDasar[record.finance_account_id] || 0
-    //           const hargaSetelahDiskon = basePrice - inputDiskonManual
-    //           const newSubtotal = hargaSetelahDiskon * record.qty
 
-    //           setDataSource((prev) =>
-    //             prev.map((item) =>
-    //               item.finance_account_id === record.finance_account_id
-    //                 ? {
-    //                     ...item,
-    //                     input_diskon_manual: inputDiskonManual,
-    //                     harga_setelah_diskon: hargaSetelahDiskon,
-    //                     subtotal: newSubtotal,
-    //                   }
-    //                 : item
-    //             )
-    //           )
-    //         }}
-    //       />
-    //     </div>
+    // {
+    //   title: 'Subtotal',
+    //   dataIndex: 'subtotal',
+    //   key: 'subtotal',
+    //   align: 'right',
+
+    //   render: (text: any) => (
+    //     <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
     //   ),
     // },
-
+    {
+      title: 'Harga Setelah Diskon',
+      dataIndex: 'harga_setelah_diskon',
+      key: 'harga_setelah_diskon',
+      render: (text: any) => (
+        <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
+      ),
+    },
     {
       title: 'Subtotal',
       dataIndex: 'subtotal',
       key: 'subtotal',
       align: 'right',
-
       render: (text: any) => (
         <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
       ),
     },
+
     {
       title: '',
       key: 'action',
@@ -1329,7 +1402,7 @@ const StockSelectorTable = () => {
 
               {user?.isAdmin && primaryControl && (
                 <Switch
-                  checked={showDiskonColumn} // Menggunakan state yang sudah disinkronkan
+                  checked={showDiskonColumn}
                   onChange={(checked) =>
                     handleSwitchChange(checked, primaryControl._id)
                   }
@@ -1373,7 +1446,6 @@ const StockSelectorTable = () => {
                       Nama Barang
                     </span>
                     <span style={{ flex: 1, textAlign: 'center' }}>Qty</span>
-                    {/* <span style={{ flex: 1, textAlign: 'center' }}>Price</span> */}
 
                     {discountRates.map((rate) => (
                       <span
@@ -1386,8 +1458,8 @@ const StockSelectorTable = () => {
                   </div>
                   <div
                     style={{
-                      maxHeight: '2000px', // Tinggi dropdown diperbesar
-                      overflowY: 'auto', // Aktifkan scroll jika lebih dari 1200px
+                      maxHeight: '2000px',
+                      overflowY: 'auto',
                     }}
                   >
                     {menu}
@@ -1429,13 +1501,12 @@ const StockSelectorTable = () => {
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            padding: '4px 8px', // Perkecil padding baris
-                            lineHeight: '1.2', // Kurangi tinggi baris
-                            fontSize: '12px', // Kurangi ukuran font jika diperlukan
+                            padding: '4px 8px',
+                            lineHeight: '1.2',
+                            fontSize: '12px',
                             borderBottom: '1px solid #e8e8e8',
                           }}
                         >
-                          {/* Nama Barang */}
                           <span
                             style={{
                               flex: 2,
@@ -1449,7 +1520,6 @@ const StockSelectorTable = () => {
                             {product.name}
                           </span>
 
-                          {/* Stok */}
                           <span
                             style={{
                               flex: 1,
@@ -1464,7 +1534,6 @@ const StockSelectorTable = () => {
                             {Number(stockQuantity).toLocaleString('id-ID')}
                           </span>
 
-                          {/* Harga Diskon */}
                           {filteredDiscountRates.map((rate) => {
                             const discountedPrice =
                               rate.percentage !== null
@@ -1688,7 +1757,6 @@ const StockSelectorTable = () => {
                   onClick={handleSave}
                   type="primary"
                   style={{ marginTop: '10px', width: '45%' }}
-                  // disabled={limitizeTrans}
                   disabled={isSaveDisabled} // Tombol dinonaktifkan jika salah satu masih kosong
                 >
                   Simpan

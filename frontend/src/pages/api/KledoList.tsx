@@ -229,7 +229,17 @@ const ListTransaksi: React.FC = () => {
       },
     },
    
-
+    {
+      title: 'Total',
+      dataIndex: 'amount',
+      key: 'amount',
+      align: 'right',
+      render: (amount: number) => (
+        <div style={{ textAlign: 'right' }}>
+          {amount !== undefined ? roundUpIndonesianNumber(amount) : 'Rp 0'}
+        </div>
+      ),
+    },
     {
       title: 'Terbayar',
       dataIndex: 'witholdings',
@@ -271,17 +281,7 @@ const ListTransaksi: React.FC = () => {
         )
       },
     },
-    {
-      title: 'Total',
-      dataIndex: 'amount',
-      key: 'amount',
-      align: 'right',
-      render: (amount: number) => (
-        <div style={{ textAlign: 'right' }}>
-          {amount !== undefined ? roundUpIndonesianNumber(amount) : 'Rp 0'}
-        </div>
-      ),
-    },
+   
   
   ]
 
@@ -425,7 +425,7 @@ const ListTransaksi: React.FC = () => {
         rowKey="_id"
         pagination={{ pageSize: 100 }}
       /> */}
-      <Table
+     <Table
         dataSource={filteredData}
         columns={columns as any}
         rowKey="id"
@@ -450,18 +450,18 @@ const ListTransaksi: React.FC = () => {
 
           return (
             <Table.Summary.Row>
-              <Table.Summary.Cell index={0} colSpan={6}>
+              <Table.Summary.Cell index={7} colSpan={7}>
                 <strong>Total</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={8} align="right">
+              <Table.Summary.Cell index={6} align="right">
                 <strong>{`Rp ${roundUpIndonesianNumber(totalAmount)}`}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={9} align="right">
+              <Table.Summary.Cell index={2} align="right">
                 <strong>{`Rp ${roundUpIndonesianNumber(
                   totalTerbayar
                 )}`}</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={10} align="right">
+              <Table.Summary.Cell index={17} align="right">
                 <strong>{`Rp ${roundUpIndonesianNumber(
                   totalSisaTagihan
                 )}`}</strong>
