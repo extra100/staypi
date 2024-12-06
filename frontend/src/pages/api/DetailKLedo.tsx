@@ -641,21 +641,21 @@ const DetailKledo: React.FC = () => {
       ),
     },
    
-    {
-      title: 'Harga Setelah Diskon',
-      dataIndex: 'price',
-      key: 'discounted_price', 
-      align: 'left',
-      render: (price: number, record: any) => {
-        const discount_amount = record.discount_amount || 0; 
-        const discountedPrice = price - discount_amount; 
-        return (
-          <div style={{ textAlign: 'left' }}>
-            {discountedPrice !== undefined ? roundUpIndonesianNumber(discountedPrice) : 'Rp 0'}
-          </div>
-        );
-      },
-    },
+    // {
+    //   title: 'Harga Setelah Diskon',
+    //   dataIndex: 'price',
+    //   key: 'discounted_price', 
+    //   align: 'left',
+    //   render: (price: number, record: any) => {
+    //     const discount_amount = record.discount_amount || 0; 
+    //     const discountedPrice = price - discount_amount; 
+    //     return (
+    //       <div style={{ textAlign: 'left' }}>
+    //         {discountedPrice !== undefined ? roundUpIndonesianNumber(discountedPrice) : 'Rp 0'}
+    //       </div>
+    //     );
+    //   },
+    // },
     
   
     {
