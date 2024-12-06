@@ -450,7 +450,7 @@ const ListTransaksi: React.FC = () => {
 
           return (
             <Table.Summary.Row>
-              <Table.Summary.Cell index={7} colSpan={7}>
+              <Table.Summary.Cell index={8} colSpan={8}>
                 <strong>Total</strong>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={6} align="right">
