@@ -10,11 +10,58 @@
     Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   margin-bottom: 1px;
 }
+@media print {
+  body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+  }
+
+  .ant-table {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  /* Menyesuaikan lebar kertas A4 */
+  .print-container {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  /* Menambahkan border bawah dan pengaturan padding agar sesuai dengan A4 */
+  .ant-table-cell {
+    padding: 6px 12px !important;
+    /* border: 1px solid black; */
+  }
+  .ant-table-row td {
+    border-bottom: 1px dashed black !important; /* Garis dashed di bawah setiap baris */
+  }
+
+  .ant-table-summary .ant-table-cell {
+    padding: 8px 12px !important;
+    border-top: 1px dashed black;
+    /* border-bottom: 1px dashed black; */
+  }
+  .ant-table-summary .ant-table-cell {
+    padding: 8px 12px !important;
+    border-top: 1px dashed black;
+    /* border-bottom: 1px dashed black; */
+  }
+
+  /* Memastikan tombol print tidak terlihat di print */
+  button {
+    display: none;
+  }
+}
 
 .page-container {
   position: relative;
 }
-
+.wrap-text {
+  white-space: normal !important; /* Membungkus teks */
+  word-wrap: break-word; /* Memastikan kata-kata panjang dibungkus */
+}
 .page-container.loading::after {
   content: '';
   position: fixed;

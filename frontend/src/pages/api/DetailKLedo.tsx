@@ -677,7 +677,7 @@ const DetailKledo: React.FC = () => {
       align: 'left',
       render: (record: any) => {
         const amount = record.amount || 0
-        const qty = record.qty || 1 // Pastikan qty tidak nol
+        const qty = record.qty || 1
         const amountPerBaris = qty > 0 ? amount / qty : 0
         return (
           <div style={{ textAlign: 'left' }}>

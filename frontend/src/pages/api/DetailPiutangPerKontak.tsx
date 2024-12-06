@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, forwardRef, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Col, Table } from 'antd'
+import { Button, Col, Table } from 'antd'
 
 import { TakeInvoicesFromKledoBasedOnPelanggan } from '../TakeInvoicesFromKledoBasedOnPelanggan'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
@@ -9,8 +9,9 @@ import Warehouse from '../transaction/POS/warehouse'
 import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
 import SingleDate from '../SingleDate'
 import { formatDate, formatDateBulan } from './FormatDate'
+import { useReactToPrint } from 'react-to-print'
 
-const DetailPiutangKontak: React.FC = () => {
+const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
   const navigate = useNavigate()
   const [contactId, setContactId] = useState<number | null>(null)
   const location = useLocation()
@@ -71,7 +72,7 @@ const DetailPiutangKontak: React.FC = () => {
   )?.photo
   const columns = [
     {
-      title: 'Ref Number',
+      title: 'No. INV',
       dataIndex: 'ref_number',
       key: 'ref_number',
       ellipsis: true, // Untuk teks panjang
@@ -86,22 +87,8 @@ const DetailPiutangKontak: React.FC = () => {
       ellipsis: true,
       render: (value: any) => formatDate(value),
     },
-
     {
-      title: 'Piutang',
-      dataIndex: 'due',
-      key: 'due',
-      align: 'right',
-
-      ellipsis: true,
-      render: (value: any) => (
-        <div style={{ textAlign: 'right' }}>
-          {`Rp ${Number(value).toLocaleString()}`}
-        </div>
-      ),
-    },
-    {
-      title: 'Grand Total',
+      title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
       ellipsis: true,
@@ -119,6 +106,36 @@ const DetailPiutangKontak: React.FC = () => {
         )
       },
     },
+    {
+      title: 'Progress',
+      key: 'progress',
+      align: 'right',
+      ellipsis: true,
+      render: (_: any, record: { due: number; amount: number }) => {
+        const due = Number(record.due) || 0
+        const amount = Number(record.amount) || 0
+        const progress = amount - due
+
+        return (
+          <div style={{ textAlign: 'right' }}>
+            {`Rp ${progress.toLocaleString()}`}
+          </div>
+        )
+      },
+    },
+    {
+      title: 'Sisa Piutang',
+      dataIndex: 'due',
+      key: 'due',
+      align: 'right',
+
+      ellipsis: true,
+      render: (value: any) => (
+        <div style={{ textAlign: 'right' }}>
+          {`Rp ${Number(value).toLocaleString()}`}
+        </div>
+      ),
+    },
   ]
 
   const totalDue = filteredData.reduce((acc, item) => acc + item.due, 0)
@@ -130,167 +147,268 @@ const DetailPiutangKontak: React.FC = () => {
   }
   const formattedDate = today.toLocaleDateString('id-ID', options)
 
+  const componentRef = useRef<HTMLDivElement>(null)
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  })
+
   return (
-    <div style={{ width: '800px' }}>
+    <div
+      // style={{ width: '800px', margin: '0 auto', paddingRight: '20px' }}
+      ref={componentRef}
+      style={{
+        width: '210mm',
+        minHeight: '297mm',
+        padding: '8mm',
+        backgroundColor: '#fff',
+        boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
+      }}
+    >
       <div
         style={{
-          fontFamily: 'Arial, sans-serif',
-          lineHeight: '1.6',
-          padding: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          borderBottom: '2px dashed black',
         }}
       >
         <div
           style={{
+            width: 'auto',
             display: 'flex',
+            justifyContent: 'center',
             alignItems: 'center',
-            justifyContent: 'flex-start',
           }}
         >
-          {photoGudang && (
+          {photoGudang ? (
             <img
               src={photoGudang}
               alt="Gudang"
               style={{
-                width: '60px',
-                height: 'auto',
-                marginRight: '60px',
-                marginLeft: '150px',
+                maxWidth: 'auto',
+                maxHeight: '100px',
+                objectFit: 'cover',
               }}
             />
+          ) : (
+            <span>Photo Gudang</span>
           )}
+        </div>
 
+        <div
+          style={{
+            flex: 1,
+            padding: '10px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            marginTop: '0px',
+          }}
+        >
           <div
             style={{
-              fontWeight: 'bold',
-              fontSize: '1.5em',
-
-              textAlign: 'right',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100%',
+              marginBottom: '0px',
             }}
           >
-            {namaGudang}
+            <span
+              style={{
+                textAlign: 'center',
+                fontSize: '40px',
+                fontWeight: 'bold',
+                width: '100%',
+                wordBreak: 'break-word',
+                marginBottom: '0px',
+              }}
+            >
+              {namaGudang || 'Nama Gudang'}
+            </span>
           </div>
-        </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100%',
+              marginTop: '0px',
+            }}
+          >
+            <span
+              style={{
+                textAlign: 'center',
+                fontSize: '16px',
+                marginTop: '0px',
+                fontStyle: 'italic',
 
-        <div
-          style={{
-            textAlign: 'center',
-            marginBottom: '20px',
-            marginTop: '5px',
-          }}
-        >
-          {alamatGudang}
-          <br />
-          Contact Person: {telpolGudang}
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginBottom: '20px',
-          }}
-        >
-          <div>
-            <div>
-              Nomor : ____{takeInvoicesFromKledoBasedOnPelanggan[0]?.contact_id}
-            </div>
-            <div>Hal : Konfirmasi Hutang Jatuh Tempo</div>
-            <div>Lampiran : -</div>
+                width: '100%',
+                wordBreak: 'break-word',
+              }}
+            >
+              <div>{alamatGudang || 'Alamat Gudang'}</div>
+            </span>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div>Kepada Yth.</div>
-            <div>
-              <strong>{contactName}</strong>
-            </div>
-            <div>di-</div>
-            <div>{contactAddress}</div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100%',
+              marginTop: '0px',
+            }}
+          >
+            <span
+              style={{
+                textAlign: 'center',
+                fontSize: '16px',
+                width: '100%',
+                wordBreak: 'break-word',
+                fontStyle: 'italic',
+              }}
+            >
+              <div>{telpolGudang || 'Telpon Gudang'}</div>
+            </span>
           </div>
-        </div>
-
-        <div style={{ marginBottom: '20px' }}>
-          Dengan Hormat,
-          <br /> Melalui Surat ini, Kami Mengkonfirmasi Rincian Piutang
-          Bapak/ibu Sebagai Berikut:
-        </div>
-
-        <Table
-          dataSource={takeInvoicesFromKledoBasedOnPelanggan}
-          columns={columns as any}
-          rowKey="ref_number"
-          pagination={false}
-          style={{ width: '100%' }} // Sesuaikan lebar tabel dengan parent
-          components={{
-            body: {
-              row: ({
-                children,
-                ...restProps
-              }: React.HTMLAttributes<HTMLTableRowElement> & {
-                children: React.ReactNode
-              }) => (
-                <tr
-                  {...restProps}
-                  style={{ lineHeight: '1.2', padding: '4px 8px' }}
-                >
-                  {children}
-                </tr>
-              ),
-              cell: ({
-                children,
-                ...restProps
-              }: React.TdHTMLAttributes<HTMLTableDataCellElement> & {
-                children: React.ReactNode
-              }) => (
-                <td {...restProps} style={{ padding: '4px 8px' }}>
-                  {children}
-                </td>
-              ),
-            },
-          }}
-          summary={(pageData) => {
-            let totalDue = 0
-            pageData.forEach(({ due }) => {
-              totalDue += Number(due)
-            })
-            let totalAmount = 0
-            pageData.forEach(({ amount }) => {
-              totalAmount += Number(amount)
-            })
-
-            return (
-              <Table.Summary.Row>
-                <Table.Summary.Cell index={0} colSpan={2}>
-                  <strong>Total</strong>
-                </Table.Summary.Cell>
-                <Table.Summary.Cell index={2} colSpan={1}>
-                  <div style={{ textAlign: 'right' }}>
-                    <strong>{`Rp ${totalDue.toLocaleString()}`}</strong>
-                  </div>
-                </Table.Summary.Cell>
-                <Table.Summary.Cell index={3} colSpan={1}>
-                  <div style={{ textAlign: 'right' }}>
-                    <strong>{`Rp ${totalAmount.toLocaleString()}`}</strong>
-                  </div>
-                </Table.Summary.Cell>
-              </Table.Summary.Row>
-            )
-          }}
-        />
-
-        <div style={{ marginBottom: '50px', marginTop: '14px' }}>
-          Demikian Laporan Evaluasi ini Kami Sampaikan, Terimakasih Atas
-          Kerjasama Anda.
-          <br />
-          Salam Hormat Kami, {formattedDate}
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>(an Branch Manager {namaGudang})</div>
         </div>
       </div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: '20px',
+        }}
+      >
+        <div style={{ marginTop: '20px' }}>
+          <div>
+            Nomor: ____{takeInvoicesFromKledoBasedOnPelanggan[0]?.contact_id}
+          </div>
+          <div>Hal: Konfirmasi Hutang</div>
+          <div>Lampiran: -</div>
+        </div>
+        <div style={{ textAlign: 'right', marginTop: '20px' }}>
+          <div>Kepada Yth.</div>
+          <div>
+            <strong>{contactName}</strong>
+          </div>
+          <div>di-</div>
+          <div>{contactAddress}</div>
+        </div>
+      </div>
+      {/* Section Surat */}
+      <div style={{ marginBottom: '20px' }}>
+        Dengan Hormat,
+        <br /> Melalui Surat ini, Kami Mengkonfirmasi Rincian Piutang Bapak/Ibu
+        Sebagai Berikut:
+      </div>
+      {/* Table */}
+      <Table
+        dataSource={takeInvoicesFromKledoBasedOnPelanggan}
+        columns={columns as any}
+        rowKey="ref_number"
+        pagination={false}
+        style={{
+          width: '100%',
+          marginBottom: '30px',
+        }}
+        components={{
+          body: {
+            row: ({
+              children,
+              ...restProps
+            }: React.HTMLAttributes<HTMLTableRowElement> & {
+              children: React.ReactNode
+            }) => (
+              <tr
+                {...restProps}
+                style={{ lineHeight: '1.2', padding: '4px 8px' }}
+              >
+                {children}
+              </tr>
+            ),
+            cell: ({
+              children,
+              ...restProps
+            }: React.TdHTMLAttributes<HTMLTableDataCellElement> & {
+              children: React.ReactNode
+            }) => (
+              <td {...restProps} style={{ padding: '4px 8px' }}>
+                {children}
+              </td>
+            ),
+          },
+        }}
+        summary={(pageData) => {
+          let totalDue = 0
+          pageData.forEach(({ due }) => {
+            totalDue += Number(due)
+          })
+          let totalAmount = 0
+          pageData.forEach(({ amount }) => {
+            totalAmount += Number(amount)
+          })
 
-      {/* Table Section */}
+          return (
+            <Table.Summary.Row>
+              <Table.Summary.Cell index={0} colSpan={2}>
+                <strong>Total</strong>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={3} colSpan={1}>
+                <div style={{ textAlign: 'right' }}>
+                  <strong>{`Rp ${totalAmount.toLocaleString()}`}</strong>
+                </div>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={3} colSpan={1}>
+                <div style={{ textAlign: 'right' }}>
+                  <strong>{`Rp ${(
+                    totalAmount - totalDue
+                  ).toLocaleString()}`}</strong>
+                </div>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={2} colSpan={1}>
+                <div style={{ textAlign: 'right' }}>
+                  <strong>{`Rp ${totalDue.toLocaleString()}`}</strong>
+                </div>
+              </Table.Summary.Cell>
+            </Table.Summary.Row>
+          )
+        }}
+      />
+      {/* Footer */}
+      <div style={{ marginTop: '14px' }}>
+        Demikian Laporan Evaluasi ini Kami Sampaikan, Terima Kasih Atas
+        Kerjasama Anda
+        <br />
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <span>
+            . . . . . . . . . . . . . . . . . . . . . . , {formattedDate}
+          </span>
+        </div>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: '70px',
+        }}
+      >
+        <div style={{ textAlign: 'center', flex: 1 }}>
+          Mengetahui Kepala Cabang,
+        </div>
+        <div style={{ textAlign: 'center', flex: 1 }}>Menyetujui,</div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ textAlign: 'center', flex: 1 }}>Manager</div>
+        <div style={{ textAlign: 'center', flex: 1 }}>{contactName}</div>
+      </div>
+      <Button
+        className="no-print" // Add this class
+        onClick={handlePrint}
+        style={{ color: '#AF8700', borderColor: '#AF8700' }}
+      >
+        Print Surat Jalan
+      </Button>
     </div>
   )
-}
-
+})
 export default DetailPiutangKontak
