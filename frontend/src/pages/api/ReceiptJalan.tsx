@@ -103,12 +103,11 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
     <div
       ref={ref} // Attach the ref here for printing
       style={{
-        padding: 40,
-        maxWidth: 600,
+        padding: 20,
+        maxWidth: 650,
         background: '#fff',
-        margin: 'auto',
-        paddingTop: 10,
-        paddingLeft: 25,
+        marginLeft: '20px',
+        marginTop: '20px',
       }}
     >
       <Row justify="center" align="middle">
@@ -123,11 +122,18 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
         </Col>
 
         <Col span={18}>
-          <Title level={4} style={{ textAlign: 'left' }}>
+          <Text style={{ textAlign: 'left', fontSize: '30px' }}>
             SURAT JALAN {namaGudang}
-          </Title>
-          <Text style={{ display: 'block', textAlign: 'left' }}>
-            {codeGudang} {contactGudang}
+          </Text>
+          <Text
+            style={{ display: 'block', textAlign: 'left', fontSize: '18px' }}
+          >
+            {codeGudang}
+          </Text>
+          <Text
+            style={{ display: 'block', textAlign: 'left', fontSize: '18px' }}
+          >
+            {contactGudang}
           </Text>
         </Col>
       </Row>
@@ -136,13 +142,13 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
       <br />
       <Row>
         <Col span={12}>
-          <span>Pelanggan: {contactName}</span>
+          <span style={{ fontSize: '18px' }}>Pelanggan: {contactName}</span>
         </Col>
-        <Col span={12} style={{ textAlign: 'right' }}>
+        <Col span={12} style={{ textAlign: 'right', fontSize: '18px' }}>
           <span>{refNumber}</span>
         </Col>
-        <Col span={12} style={{ textAlign: 'left' }}>
-          <span>
+        <Col span={12} style={{ textAlign: 'left', fontSize: '18px' }}>
+          <span style={{ fontSize: '18px' }}>
             {alamatPelanggan &&
             alamatPelanggan !== 'Mohon Lengkapi Alamat' &&
             telponPelanggan &&
@@ -152,7 +158,7 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
           </span>
         </Col>
 
-        <Col span={12} style={{ textAlign: 'right' }}>
+        <Col span={12} style={{ textAlign: 'right', fontSize: '18px' }}>
           <span>{tglTransaksi}</span>
         </Col>
       </Row>
@@ -162,7 +168,7 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
         dataSource={getPosDetail?.items || []}
         pagination={false}
         bordered
-        style={{ marginTop: 20 }}
+        style={{ marginTop: 20, fontSize: '18px' }}
         components={{
           body: {
             row: ({
@@ -173,7 +179,11 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
             }) => (
               <tr
                 {...restProps}
-                style={{ lineHeight: '1.2', padding: '4px 8px' }}
+                style={{
+                  lineHeight: '1.2',
+                  padding: '4px 8px',
+                  fontSize: '18px',
+                }}
               >
                 {children}
               </tr>
@@ -184,7 +194,10 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
             }: React.TdHTMLAttributes<HTMLTableDataCellElement> & {
               children: React.ReactNode
             }) => (
-              <td {...restProps} style={{ padding: '4px 8px' }}>
+              <td
+                {...restProps}
+                style={{ padding: '4px 8px', fontSize: '18px' }}
+              >
                 {children}
               </td>
             ),
@@ -196,11 +209,11 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
 
       <Row>
         <Col span={12}>
-          <Text>Tanda Terima:</Text>
+          <Text style={{ fontSize: '18px' }}>Tanda Terima:</Text>
           <br />
           <Text></Text>
           <br />
-          <Text>{contactName}</Text>
+          <Text style={{ fontSize: '18px' }}>{contactName}</Text>
         </Col>
       </Row>
 

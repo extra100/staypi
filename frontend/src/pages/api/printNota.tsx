@@ -143,6 +143,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         )
       },
     },
+
     {
       title: 'Total',
       dataIndex: 'amount',
@@ -160,12 +161,11 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
     <div
       ref={ref} // Attach the ref here for printing
       style={{
-        padding: 40,
-        maxWidth: 700,
+        padding: 20,
+        maxWidth: 650,
         background: '#fff',
-        margin: 'auto',
-        paddingTop: 10,
-        paddingRight: 30,
+        marginLeft: '20px',
+        marginTop: '20px',
       }}
     >
       <Row justify="center" align="middle">
@@ -180,12 +180,19 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
         </Col>
 
         <Col span={18}>
-          <Title level={4} style={{ textAlign: 'left' }}>
+          <Text style={{ textAlign: 'left', fontSize: '30px' }}>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             {namaGudang}
-          </Title>
-          <Text style={{ display: 'block', textAlign: 'left' }}>
-            {codeGudang} {contactGudang}
+          </Text>
+          <Text
+            style={{ display: 'block', textAlign: 'left', fontSize: '18px' }}
+          >
+            {codeGudang}
+          </Text>
+          <Text
+            style={{ display: 'block', textAlign: 'left', fontSize: '18px' }}
+          >
+            {contactGudang}
           </Text>
         </Col>
       </Row>
@@ -194,32 +201,60 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
       <br />
       <Row>
         <Col span={12}>
-          <span>Pelanggan: {contactName}</span>
+          <span
+            style={{
+              fontSize: '18px',
+            }}
+          >
+            Pelanggan: {contactName}
+          </span>
         </Col>
-        <Col span={12} style={{ textAlign: 'right' }}>
+        <Col span={12} style={{ textAlign: 'right', fontSize: '18px' }}>
           <span>{refNumber}</span>
         </Col>
 
         <Col span={12} style={{ textAlign: 'left' }}>
-          <span>
+          <span
+            style={{
+              fontSize: '18px',
+            }}
+          >
             {alamatPelanggan &&
-            alamatPelanggan !== 'Mohon Lengkapi Alamat' &&
+            alamatPelanggan !== '-' &&
             telponPelanggan &&
-            telponPelanggan !== 'Mohon Lengkapi No Tlpn'
+            telponPelanggan !== '-'
               ? `${alamatPelanggan} - ${telponPelanggan}`
               : ketPelanggan}
           </span>
         </Col>
 
         <Col span={12} style={{ textAlign: 'right' }}>
-          <span>Tgl. Trans: {formatDate(tglTransaksi as any)}</span>
+          <span
+            style={{
+              fontSize: '18px',
+            }}
+          >
+            Tgl. Trans: {formatDate(tglTransaksi as any)}
+          </span>
         </Col>
         <Col span={12} style={{ textAlign: 'left' }}>
-          <span>Sales: {namaTag}</span>
+          <span
+            style={{
+              fontSize: '18px',
+            }}
+          >
+            Sales: {namaTag}
+          </span>
         </Col>
 
         <Col span={12} style={{ textAlign: 'right' }}>
-          <span>Tgl. Jatuh Tempo: {formatDate(tglJatuhTempo as any)}</span>
+          <span
+            style={{
+              fontSize: '18px',
+            }}
+          >
+            Tgl. Jatuh Tempo: {formatDate(tglJatuhTempo as any)}
+          </span>
         </Col>
       </Row>
 
@@ -240,7 +275,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
                 {...restProps}
                 style={{
                   padding: '4px 8px',
-                  fontSize: '12px',
+                  fontSize: '20px',
                   borderBottom: '1px dashed #000',
                 }}
               >
@@ -260,6 +295,8 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
                 style={{
                   lineHeight: '1.2',
                   padding: '4px 8px',
+                  fontSize: '18px',
+
                   borderBottom: '1px dashed #000', // Garis putus-putus hitam pekat
                 }}
               >
@@ -276,7 +313,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
                 {...restProps}
                 style={{
                   padding: '4px 8px',
-                  borderBottom: '1px dashed #000', // Garis putus-putus hitam pekat
+                  borderBottom: '1px dashed #000',
                 }}
               >
                 {children}
@@ -288,11 +325,23 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
 
       <Row style={{ marginRight: '20px' }}>
         <Col span={12}>
-          <Text>Tanda Terima:</Text>
+          <Text
+            style={{
+              fontSize: '18px',
+            }}
+          >
+            Tanda Terima:
+          </Text>
           <br />
           <Text></Text>
           <br />
-          <Text>{contactName}</Text>
+          <Text
+            style={{
+              fontSize: '18px',
+            }}
+          >
+            {contactName}
+          </Text>
         </Col>
         <Col span={12} style={{ textAlign: 'right' }}>
           <div
@@ -302,10 +351,25 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
               gap: '3px',
             }}
           >
-            <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
+            <Text
+              strong
+              style={{
+                minWidth: '120px',
+                textAlign: 'left',
+
+                fontSize: '18px',
+              }}
+            >
               Total Tagihan:
             </Text>
-            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
+            <Text
+              strong
+              style={{
+                minWidth: '120px',
+                textAlign: 'right',
+                fontSize: '18px',
+              }}
+            >
               {roundUpIndonesianNumber(totalSemua)}
             </Text>
           </div>
@@ -317,7 +381,15 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
               gap: '3px',
             }}
           >
-            <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
+            <Text
+              strong
+              style={{
+                minWidth: '120px',
+                textAlign: 'left',
+
+                fontSize: '18px',
+              }}
+            >
               Jml Bayar:
             </Text>
             <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
@@ -328,8 +400,14 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
                 ) // Tambahkan pengecekan down_payment !== 0
                 .map((witholding: any, index) => (
                   <Row key={index}>
-                    <Col span={12} style={{ textAlign: 'left' }}></Col>
-                    <Col span={12} style={{ textAlign: 'right' }}>
+                    <Col
+                      span={12}
+                      style={{ textAlign: 'left', fontSize: '18px' }}
+                    ></Col>
+                    <Col
+                      span={12}
+                      style={{ textAlign: 'right', fontSize: '18px' }}
+                    >
                       <Text strong>
                         {roundUpIndonesianNumber(witholding.down_payment || 0)}
                       </Text>
@@ -345,10 +423,20 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
               gap: '3px',
             }}
           >
-            <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
+            <Text
+              strong
+              style={{ minWidth: '120px', textAlign: 'left', fontSize: '18px' }}
+            >
               Total Bayar:
             </Text>
-            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
+            <Text
+              strong
+              style={{
+                minWidth: '120px',
+                textAlign: 'right',
+                fontSize: '18px',
+              }}
+            >
               {roundUpIndonesianNumber(totalDownPayment || 0)}
             </Text>
           </div>
@@ -360,10 +448,21 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
               gap: '3px',
             }}
           >
-            <Text strong style={{ minWidth: '120px', textAlign: 'left' }}>
+            <Text
+              strong
+              style={{ minWidth: '120px', textAlign: 'left', fontSize: '18px' }}
+            >
               Sisa Tagihan:
             </Text>
-            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
+            <Text
+              strong
+              style={{
+                minWidth: '120px',
+                textAlign: 'right',
+
+                fontSize: '18px',
+              }}
+            >
               {roundUpIndonesianNumber(sisaTagohan < 0 ? 0 : sisaTagohan)}
             </Text>
           </div>
@@ -374,10 +473,14 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
 
       <Row justify="center">
         <Col span={24}>
-          <Text style={{ display: 'block', textAlign: 'center' }}>
+          <Text
+            style={{ display: 'block', textAlign: 'center', fontSize: '18px' }}
+          >
             Terima Kasih
           </Text>
-          <Text style={{ display: 'block', textAlign: 'center' }}>
+          <Text
+            style={{ display: 'block', textAlign: 'center', fontSize: '18px' }}
+          >
             Barang yang sudah dibeli tidak dapat dikembalikan
           </Text>
         </Col>
