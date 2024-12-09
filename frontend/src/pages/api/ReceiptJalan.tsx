@@ -150,9 +150,9 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
         <Col span={12} style={{ textAlign: 'left', fontSize: '18px' }}>
           <span style={{ fontSize: '18px' }}>
             {alamatPelanggan &&
-            alamatPelanggan !== 'Mohon Lengkapi Alamat' &&
+            alamatPelanggan !== '-' &&
             telponPelanggan &&
-            telponPelanggan !== 'Mohon Lengkapi No Tlpn'
+            telponPelanggan !== '-'
               ? `${alamatPelanggan} - ${telponPelanggan}`
               : ketPelanggan}
           </span>

@@ -957,110 +957,110 @@ const DetailKledo: React.FC = () => {
           </Col>
         </Row>
       </div>
-      <Card title="Pembayaran" style={{ marginTop: '20px' }}>
-        <Form layout="vertical" onFinish={handleFormSubmit}>
-          <Row gutter={16}>
-            <Col span={12}>
-              <span
-                style={{
-                  // ...labelStyle,
-                  fontSize: '16px',
-
-                  cursor: 'pointer',
-                }}
-                onClick={handleSetAmountPaid}
-              >
-                Jumlah Bayar
-              </span>
-              <span
-                style={{
-                  // ...labelColonStyle,
-                  fontSize: '16px',
-                }}
-              >
-                :
-              </span>
-
-              <NumericFormat
-                placeholder="Nilai Pembayaran"
-                value={amountPaid}
-                displayType="input"
-                thousandSeparator="."
-                decimalSeparator=","
-                allowNegative={false}
-                decimalScale={0} // Pastikan hanya angka bulat
-                onValueChange={(values) => {
-                  const { floatValue } = values
-                  setAmountPaid(floatValue || 0) // Simpan sebagai angka bulat
-                }}
-                customInput={Input}
-                max={due}
-                style={{
-                  width: '100%',
-                  textAlign: 'right',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  color: '#007BFF',
-                }}
-              />
-            </Col>
-
-            <Col span={12}>
-              <Form.Item>
-                <SingleDate
-                  onChange={(dates) => {
-                    setSelectedDates(dates)
-                  }}
-                  onSave={handleDateRangeSave}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Select
-                showSearch // Menampilkan kolom pencarian
-                placeholder="Pilih bank"
-                value={selectedBank}
-                onChange={(value) => setSelectedBank(value)}
-                style={{ width: '100%' }}
-                optionFilterProp="children"
-                filterOption={(input: any, option: any) =>
-                  option?.children
-                    ?.toString()
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-              >
-                {akunBanks?.map((e) => (
-                  <Select.Option key={e.id} value={e.name}>
-                    {e.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="catatan">
-                <Input placeholder="Catatan" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={loading} // Spinner muncul saat true
-            onClick={() => {
-              setLoading(true) // Aktifkan spinner
-              setTimeout(() => {
-                setLoading(false) // Matikan spinner setelah 1 detik
-                message.success('Pembayaran berhasil ditambahkan!') // Pesan berhasil
-              }, 1000) // Spinner aktif selama 1 detik
+      {due !== 0 && (
+  <Card title="Pembayaran" style={{ marginTop: '20px' }}>
+    <Form layout="vertical" onFinish={handleFormSubmit}>
+      <Row gutter={16}>
+        <Col span={12}>
+          <span
+            style={{
+              fontSize: '16px',
+              cursor: 'pointer',
+            }}
+            onClick={handleSetAmountPaid}
+          >
+            Jumlah Bayar
+          </span>
+          <span
+            style={{
+              fontSize: '16px',
             }}
           >
-            Tambah Pembayaran
-          </Button>
-        </Form>
-      </Card>
+            :
+          </span>
+
+          <NumericFormat
+            placeholder="Nilai Pembayaran"
+            value={amountPaid}
+            displayType="input"
+            thousandSeparator="."
+            decimalSeparator=","
+            allowNegative={false}
+            decimalScale={0}
+            onValueChange={(values) => {
+              const { floatValue } = values
+              setAmountPaid(floatValue || 0)
+            }}
+            customInput={Input}
+            max={due}
+            style={{
+              width: '100%',
+              textAlign: 'right',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              color: '#007BFF',
+            }}
+          />
+        </Col>
+
+        <Col span={12}>
+          <Form.Item>
+            <SingleDate
+              onChange={(dates) => {
+                setSelectedDates(dates)
+              }}
+              onSave={handleDateRangeSave}
+            />
+          </Form.Item>
+        </Col>
+      </Row>
+      <Row gutter={16}>
+        <Col span={12}>
+          <Select
+            showSearch
+            placeholder="Pilih bank"
+            value={selectedBank}
+            onChange={(value) => setSelectedBank(value)}
+            style={{ width: '100%' }}
+            optionFilterProp="children"
+            filterOption={(input: any, option: any) =>
+              option?.children
+                ?.toString()
+                .toLowerCase()
+                .includes(input.toLowerCase())
+            }
+          >
+            {akunBanks?.map((e) => (
+              <Select.Option key={e.id} value={e.name}>
+                {e.name}
+              </Select.Option>
+            ))}
+          </Select>
+        </Col>
+        <Col span={12}>
+          <Form.Item name="catatan">
+            <Input placeholder="Catatan" />
+          </Form.Item>
+        </Col>
+      </Row>
+      <Button
+        type="primary"
+        htmlType="submit"
+        loading={loading}
+        onClick={() => {
+          setLoading(true)
+          setTimeout(() => {
+            setLoading(false)
+            message.success('Pembayaran berhasil ditambahkan!')
+          }, 1000)
+        }}
+      >
+        Tambah Pembayaran
+      </Button>
+    </Form>
+  </Card>
+)}
+
     </div>
   )
 }
