@@ -13,9 +13,8 @@ const ListSiapDiValidasi: React.FC = () => {
   if (user) {
     idOutletLoggedIn = Number(user.id_outlet)
   }
-  console.log({ idOutletLoggedIn })
+
   const { data: transfers } = useGetWarehouseTransfersQuery()
-  console.log({ transfers })
 
   const { idWarehouse } = useIdWarehouse()
   const navigate = useNavigate()
@@ -27,14 +26,11 @@ const ListSiapDiValidasi: React.FC = () => {
     })
     return map
   }, [idWarehouse])
-  console.log({ warehouseMap })
 
   const [searchTerm, setSearchTerm] = useState('')
 
-
-
   const today = dayjs().format('YYYY-MM-DD')
-  console.log({today})
+
   const dataSource = Array.isArray(transfers)
     ? transfers
         .filter((transfer: any) => {
@@ -61,6 +57,7 @@ const ListSiapDiValidasi: React.FC = () => {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         )
     : []
+
   const handleRowClick = (record: any) => {
     navigate(`/validasi-pindah/${record.ref_number}`)
   }
@@ -77,6 +74,8 @@ const ListSiapDiValidasi: React.FC = () => {
       navigate('/ListSudahValidasiMasuk')
     } else if (value === '4') {
       navigate('/listpindah')
+    } else if (value === '5') {
+      navigate('/admin')
     }
   }
   const columns = [
@@ -99,12 +98,12 @@ const ListSiapDiValidasi: React.FC = () => {
       key: 'ref_number',
     },
     {
-      title: 'Ket',
-      dataIndex: 'memo',
-      key: 'memo',
+      title: 'Kode',
+      dataIndex: 'code',
+      key: 'code',
     },
     {
-      title: 'Tanggal Trans',
+      title: 'Tanggal',
       dataIndex: 'trans_date',
       key: 'trans_date',
     },
@@ -112,65 +111,79 @@ const ListSiapDiValidasi: React.FC = () => {
 
   return (
     <>
-      <div style={{ marginBottom: '16px' }}>
-        <Input
-          placeholder="Pencarian No"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: '300px' }}
+      <div style={{ width: '800px' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <Input
+            placeholder="Pencarian No"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: '300px' }}
+          />
+        </div>
+
+        <Button
+          id="btn-filter-1"
+          value="1"
+          type="default"
+          className={activeButton === '1' ? 'btn-default-selected' : ''}
+          style={{ borderRadius: '0px' }}
+          onClick={() => handleButtonClick('1')}
+        >
+          <span>Validasi Permintaan</span>
+        </Button>
+        <Button
+          id="btn-filter-2"
+          value="2"
+          type="default"
+          className={activeButton === '2' ? 'btn-default-selected' : ''}
+          style={{ borderRadius: '0px' }}
+          onClick={() => handleButtonClick('2')}
+        >
+          <span>Sudah Divalidasi Keluar</span>
+        </Button>
+        <Button
+          id="btn-filter-1"
+          value="1"
+          type="default"
+          className={activeButton === '3' ? 'btn-default-selected' : ''}
+          style={{ borderRadius: '0px' }}
+          onClick={() => handleButtonClick('3')}
+        >
+          <span>Sudah Divalidasi Masuk</span>
+        </Button>
+        <Button
+          id="btn-filter-4"
+          value="4"
+          type="default"
+          className={activeButton === '4' ? 'btn-default-selected' : ''}
+          style={{ borderRadius: '0px' }}
+          onClick={() => handleButtonClick('4')}
+        >
+          <span>List Permintaan</span>
+        </Button>
+        {user?.isAdmin && (
+          <Button
+            id="btn-filter-5"
+            value="5"
+            type="default"
+            className={activeButton === '5' ? 'btn-default-selected' : ''}
+            style={{ borderRadius: '0px' }}
+            onClick={() => handleButtonClick('5')}
+          >
+            <span>Khusus Extra</span>
+          </Button>
+        )}
+
+        <Table
+          columns={columns}
+          dataSource={dataSource}
+          rowKey="ref_number"
+          pagination={{ pageSize: 10 }}
+          onRow={(record) => ({
+            onClick: () => handleRowClick(record),
+          })}
         />
       </div>
-
-      <Button
-        id="btn-filter-1"
-        value="1"
-        type="default"
-        className={activeButton === '1' ? 'btn-default-selected' : ''}
-        style={{ borderRadius: '0px' }}
-        onClick={() => handleButtonClick('1')}
-      >
-        <span>Validasi Permintaanmu</span>
-      </Button>
-      <Button
-        id="btn-filter-2"
-        value="2"
-        type="default"
-        className={activeButton === '2' ? 'btn-default-selected' : ''}
-        style={{ borderRadius: '0px' }}
-        onClick={() => handleButtonClick('2')}
-      >
-        <span>Sudah Divalidasi Keluar</span>
-      </Button>
-      <Button
-        id="btn-filter-1"
-        value="1"
-        type="default"
-        className={activeButton === '3' ? 'btn-default-selected' : ''}
-        style={{ borderRadius: '0px' }}
-        onClick={() => handleButtonClick('3')}
-      >
-        <span>Sudah Divalidasi Masuk</span>
-      </Button>
-      <Button
-        id="btn-filter-4"
-        value="4"
-        type="default"
-        className={activeButton === '4' ? 'btn-default-selected' : ''}
-        style={{ borderRadius: '0px' }}
-        onClick={() => handleButtonClick('4')}
-      >
-        <span>List Permintaan</span>
-      </Button>
-
-      <Table
-        columns={columns}
-        dataSource={dataSource}
-        rowKey="ref_number"
-        pagination={{ pageSize: 10 }}
-        onRow={(record) => ({
-          onClick: () => handleRowClick(record),
-        })}
-      />
     </>
   )
 }

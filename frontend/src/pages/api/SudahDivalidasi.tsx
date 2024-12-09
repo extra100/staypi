@@ -262,7 +262,6 @@ const SudahDivalidasi: React.FC = () => {
     <div
       ref={componentRef}
       className="printable-component"
-      // style={{ padding: '40px', fontFamily: 'Arial, sans-serif' }}
       style={{
         padding: '40px',
         fontFamily: 'Arial, sans-serif',
@@ -272,7 +271,7 @@ const SudahDivalidasi: React.FC = () => {
     >
       <div ref={componentRef} className="print-container">
         <Title level={3} style={{ textAlign: 'center' }}>
-          <span style={{ color: '#AF8700', fontSize: '20px' }}>
+          <span style={{ color: '#AF8700', fontSize: '28px' }}>
             {'SURAT JALAN MUTASI'}
           </span>
         </Title>
@@ -289,61 +288,120 @@ const SudahDivalidasi: React.FC = () => {
               <Col span={24}>
                 <Row>
                   <Col span={6}>
-                    <Text>Referensi</Text>
+                    <Text style={{ textAlign: 'center', fontSize: '18px' }}>
+                      No. Inv
+                    </Text>
                   </Col>
                   <Col span={12}>
-                    <Text strong>: {transfer.ref_number}</Text>
+                    <Text
+                      strong
+                      style={{ textAlign: 'center', fontSize: '18px' }}
+                    >
+                      : {transfer.ref_number}
+                    </Text>
                   </Col>
-                  <Col span={6} style={{ textAlign: 'center' }}>
-                    <Text>Dari</Text>
+                  <Col
+                    span={6}
+                    style={{ textAlign: 'center', fontSize: '18px' }}
+                  >
+                    <Text style={{ textAlign: 'center', fontSize: '18px' }}>
+                      Dari
+                    </Text>
                   </Col>
                 </Row>
 
                 <Row>
                   <Col span={6}>
-                    <Text>Tanggal PO</Text>
+                    <Text style={{ textAlign: 'center', fontSize: '18px' }}>
+                      Tanggal PO
+                    </Text>
                   </Col>
                   <Col span={12}>
-                    <Text strong>: {formattedTransDate}</Text>
+                    <Text
+                      strong
+                      style={{ textAlign: 'center', fontSize: '18px' }}
+                    >
+                      : {formattedTransDate}
+                    </Text>
                   </Col>
 
-                  <Col span={6} style={{ textAlign: 'center' }}>
-                    <Text strong>{fromWarehouseName}</Text>
+                  <Col
+                    span={6}
+                    style={{ textAlign: 'center', fontSize: '18px' }}
+                  >
+                    <Text
+                      strong
+                      style={{ textAlign: 'center', fontSize: '18px' }}
+                    >
+                      {fromWarehouseName}
+                    </Text>
                   </Col>
                 </Row>
                 <Row>
                   <Col span={6}>
-                    <Text>Tanggal Print</Text>
+                    <Text style={{ textAlign: 'center', fontSize: '18px' }}>
+                      Tanggal Print
+                    </Text>
                   </Col>
                   <Col span={12}>
-                    <Text strong>: {formattedDate}</Text>
+                    <Text
+                      strong
+                      style={{ textAlign: 'center', fontSize: '18px' }}
+                    >
+                      : {formattedDate}
+                    </Text>
                   </Col>
                 </Row>
 
                 <Row>
                   <Col span={6}>
-                    <Text>Alamat Peminta</Text>
+                    <Text style={{ textAlign: 'center', fontSize: '18px' }}>
+                      Alamat Peminta
+                    </Text>
                   </Col>
                   <Col span={12}>
-                    <Text italic>
+                    <Text
+                      strong
+                      style={{ textAlign: 'center', fontSize: '18px' }}
+                    >
                       : {fromWarehouseCode || '-'} {noContact || '-'}
                     </Text>
                   </Col>
 
-                  <Col span={6} style={{ textAlign: 'center' }}>
-                    <Text>Kepada</Text>
+                  <Col
+                    span={6}
+                    style={{ textAlign: 'center', fontSize: '18px' }}
+                  >
+                    <Text style={{ textAlign: 'center', fontSize: '18px' }}>
+                      Kepada
+                    </Text>
                   </Col>
                 </Row>
 
                 <Row>
                   <Col span={6}>
-                    <Text>Ket</Text>
+                    <Text style={{ textAlign: 'center', fontSize: '18px' }}>
+                      Ket
+                    </Text>
                   </Col>
                   <Col span={12}>
-                    <Text>: {memo}</Text>
+                    <Text
+                      strong
+                      style={{ textAlign: 'center', fontSize: '18px' }}
+                    >
+                      : {memo}
+                    </Text>
                   </Col>
-                  <Col span={6} style={{ textAlign: 'center' }}>
-                    <Text strong>{toWarehouseName}</Text>
+                  <Col
+                    span={6}
+                    style={{ textAlign: 'center', fontSize: '18px' }}
+                  >
+                    <Text
+                      strong
+                      style={{ textAlign: 'center', fontSize: '18px' }}
+                    >
+                      {toWarehouseName}
+                    </Text>
                   </Col>
                 </Row>
               </Col>
@@ -355,7 +413,7 @@ const SudahDivalidasi: React.FC = () => {
               rowKey="_id"
               pagination={false}
               bordered
-              style={{ marginTop: 20 }}
+              style={{ marginTop: 20, fontSize: '18px' }}
               components={{
                 header: {
                   cell: ({
@@ -368,7 +426,7 @@ const SudahDivalidasi: React.FC = () => {
                       {...restProps}
                       style={{
                         padding: '4px 8px',
-                        fontSize: '16px',
+                        fontSize: '18px',
                         lineHeight: '1.2',
                         textAlign: 'center',
                       }}
@@ -399,7 +457,7 @@ const SudahDivalidasi: React.FC = () => {
                   }) => (
                     <td
                       {...restProps}
-                      style={{ padding: '4px 8px', fontSize: '14px' }}
+                      style={{ padding: '4px 8px', fontSize: '18px' }}
                     >
                       {children}
                     </td>
@@ -410,9 +468,15 @@ const SudahDivalidasi: React.FC = () => {
             <br />
 
             <div className="print-message">
-              <Row style={{ marginTop: '0px', paddingTop: '1px' }}>
+              <Row
+                style={{
+                  marginTop: '0px',
+                  paddingTop: '1px',
+                  fontSize: '18px',
+                }}
+              >
                 <Col span={24}>
-                  <Text>
+                  <Text style={{ textAlign: 'center', fontSize: '18px' }}>
                     Pesan: Barang sudah sesuai dengan jumlah fisik yang
                     diterima.
                   </Text>
@@ -422,22 +486,32 @@ const SudahDivalidasi: React.FC = () => {
               <Row
                 // className="print-message"
                 justify="space-between"
-                style={{ marginTop: '32px', textAlign: 'center' }}
+                style={{
+                  marginTop: '32px',
+                  textAlign: 'center',
+                  fontSize: '18px',
+                }}
               >
                 <Col span={8}>
-                  <Text>Diperiksa Oleh</Text>
+                  <Text style={{ textAlign: 'center', fontSize: '18px' }}>
+                    Diperiksa Oleh
+                  </Text>
                   <br />
                   <br />
                   <Text>(...................................)</Text>
                 </Col>
                 <Col span={8}>
-                  <Text>Diterima Oleh</Text>
+                  <Text style={{ textAlign: 'center', fontSize: '18px' }}>
+                    Diterima Oleh
+                  </Text>
                   <br />
                   <br />
                   <Text>(...................................)</Text>
                 </Col>
                 <Col span={8}>
-                  <Text>Pengirim</Text>
+                  <Text style={{ textAlign: 'center', fontSize: '18px' }}>
+                    Pengirim
+                  </Text>
                   <br />
                   <br />
                   <Text>(...................................)</Text>
@@ -454,7 +528,11 @@ const SudahDivalidasi: React.FC = () => {
           <Button
             className="no-print" // Add this class
             onClick={handlePrint}
-            style={{ color: '#AF8700', borderColor: '#AF8700' }}
+            style={{
+              color: '#AF8700',
+              borderColor: '#AF8700',
+              fontSize: '18px',
+            }}
           >
             Print Surat Jalan
           </Button>
