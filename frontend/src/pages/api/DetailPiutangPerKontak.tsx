@@ -30,10 +30,11 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
   console.log({ aaa })
   const { takeInvoicesFromKledoBasedOnPelanggan } =
     TakeInvoicesFromKledoBasedOnPelanggan(contactId as any)
+    const statusIds = '2,1' 
 
   const idToUse = contactId ? String(contactId) : 'default_id'
   const { loading, takedueanContactStatusIdandMemoMny } =
-    TakePiutangToPerContactStatusIdAndMemoMny('MNY', '2', idToUse)
+    TakePiutangToPerContactStatusIdAndMemoMny('MNY', statusIds, idToUse)
   console.log('bismillah 212', takedueanContactStatusIdandMemoMny)
   useEffect(() => {
     if (contactId && takedueanContactStatusIdandMemoMny?.length) {
