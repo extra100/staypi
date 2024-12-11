@@ -238,8 +238,32 @@ const StockSelectorTable = () => {
     { label: 'Toko 18%', percentage: 18 },
     { label: 'Nego 19%', percentage: 19 },
     { label: 'Khusus 21%', percentage: 20.5 },
-    { label: 'Istimewa SP 23%', percentage: 23 },
+    {
+      label: 'Istimewa SP 23%',
+      percentage: (() => {
+        const applicableCategories = barangs?.map(
+          (barang) => barang.pos_product_category_id
+        )
+        console.log({ applicableCategories })
+        const category19 = applicableCategories?.find(
+          (category) => category === 19
+        )
+        const category10 = applicableCategories?.find(
+          (category) => category === 10
+        )
+
+        if (category19) {
+          return 23 // 30% untuk kategori 19
+        } else if (category10) {
+          return 25.5 // 25.5% untuk kategori 10
+        }
+
+        return 10 // Default 10% untuk kategori lainnya
+      })(),
+    },
   ]
+
+  console.log(discountRates)
 
   const [discountedPrices, setDiscountedPrices] = useState<{
     [key: string]: number
@@ -1479,12 +1503,20 @@ const StockSelectorTable = () => {
                         (stock: any) => stock.id === product.id
                       )?.stock || 0
                     if (stockQuantity === 0) return null
-
                     const filteredDiscountRates = discountRates.map((rate) => {
-                      if (
-                        rate.label === 'Istimewa SP 23%' &&
-                        product.pos_product_category_id !== 19
-                      ) {
+                      if (rate.label === 'Istimewa SP 23%') {
+                        if (product.pos_product_category_id === 19) {
+                          return { ...rate, percentage: 23 }
+                        }
+                        if (product.pos_product_category_id === 10) {
+                          if (
+                            product.name.includes('PIPA KOTAK GALVANIS 4X4X')
+                          ) {
+                            return { ...rate, percentage: 25.5 }
+                          }
+                          return { ...rate, percentage: 22.5 }
+                        }
+
                         return { ...rate, percentage: null }
                       }
                       return rate
