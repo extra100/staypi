@@ -228,12 +228,12 @@ function App() {
                   <Link className="nav-link header-link p-1 px-3" to={`/ibo`}>
                     Nota Baru
                   </Link>
-                  <Link
+                  {/* <Link
                     className="nav-link header-link p-1 px-3"
                     to={`/pemesananpenjualan`}
                   >
                     Pemesanan Penjualan
-                  </Link>
+                  </Link> */}
                   <Link
                     className="nav-link header-link p-1 px-3"
                     to={`/listkledo`}
@@ -243,9 +243,9 @@ function App() {
 
                   <Link
                     className="nav-link header-link p-1 px-3"
-                    to={`/listpp`}
+                    to={`/filteriddangroupidcontact`}
                   >
-                    List Pemesanan Penjualan
+                    Laporan Piutang
                   </Link>
                   <Link
                     className="nav-link header-link p-1 px-3"
