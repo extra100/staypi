@@ -10,14 +10,39 @@ import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
 import SingleDate from '../SingleDate'
 import { formatDate, formatDateBulan } from './FormatDate'
 import { useReactToPrint } from 'react-to-print'
+import { TakePiutangToPerContactStatusIdAndMemoMny } from './TakePiutangToPerContactStatusIdAndMemoMny'
+
 
 const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
   const navigate = useNavigate()
-  const [contactId, setContactId] = useState<number | null>(null)
+  // const [contactId, setContactId] = useState<any | null>(null)
+  const [contactId, setContactId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (contactId) {
+      console.log('contactId is updated:', contactId)
+    }
+  }, [contactId])
+  console.log({ contactId })
   const location = useLocation()
   const [filteredData, setFilteredData] = useState<any[]>([])
+  const [aaa, setAaa] = useState<any[]>([])
+  console.log({ aaa })
   const { takeInvoicesFromKledoBasedOnPelanggan } =
     TakeInvoicesFromKledoBasedOnPelanggan(contactId as any)
+
+  const idToUse = contactId ? String(contactId) : 'default_id'
+  const { loading, takedueanContactStatusIdandMemoMny } =
+    TakePiutangToPerContactStatusIdAndMemoMny('MNY', '2', idToUse)
+  console.log('bismillah 212', takedueanContactStatusIdandMemoMny)
+  useEffect(() => {
+    if (contactId && takedueanContactStatusIdandMemoMny?.length) {
+      const filtered = takedueanContactStatusIdandMemoMny.filter(
+        (nota: any) => nota.contact_id === contactId // Pastikan key sesuai
+      )
+      setAaa(filtered)
+    }
+  }, [contactId, takedueanContactStatusIdandMemoMny])
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search)
@@ -25,7 +50,7 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
     if (id) {
       const contactIdNumber = Number(id)
       if (!isNaN(contactIdNumber)) {
-        setContactId(contactIdNumber)
+        setContactId(contactIdNumber as any)
       }
     }
 
@@ -70,6 +95,17 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
   const photoGudang = gudangs?.find(
     (contact: any) => contact.id === firstWarehouseId
   )?.photo
+
+  const normalizedData = [
+    ...takeInvoicesFromKledoBasedOnPelanggan.map((item) => ({
+      ...item,
+      amount: item.amount, // Tetap pakai amount
+    })),
+    ...takedueanContactStatusIdandMemoMny.map((item) => ({
+      ...item,
+      amount: item.amount_after_tax, // Ubah amount_after_tax jadi amount
+    })),
+  ]
   const columns = [
     {
       title: 'No. INV',
@@ -79,16 +115,47 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
       align: 'left',
     },
     {
-      title: 'Tanggal',
+      title: 'Tgl. Trans',
       dataIndex: 'trans_date',
       key: 'trans_date',
       align: 'left',
-
       ellipsis: true,
       render: (value: any) => formatDate(value),
     },
     {
-      title: 'Total',
+      title: 'Ket',
+      key: 'dued',
+      align: 'left',
+      ellipsis: true,
+      render: (_: any, record: { trans_date: string }) => {
+        if (!record.trans_date) {
+          return '-'
+        }
+
+        const currentDate = new Date()
+        const transDate = new Date(record.trans_date)
+        const dueDate = new Date(transDate.setMonth(transDate.getMonth() + 3))
+
+        const timeDifference = dueDate.getTime() - currentDate.getTime()
+        const daysDifference = Math.floor(
+          timeDifference / (1000 * 60 * 60 * 24)
+        )
+
+        let description = ''
+
+        if (daysDifference > 30) {
+          description = `MP (${daysDifference} hari)`
+        } else if (daysDifference <= 30 && daysDifference > 0) {
+          description = `1 Bulan (${daysDifference} hari)`
+        } else {
+          description = `JT (${daysDifference} hari)`
+        }
+
+        return <div style={{ textAlign: 'left' }}>{description}</div>
+      },
+    },
+    {
+      title: 'Nilai Nota',
       dataIndex: 'amount',
       key: 'amount',
       ellipsis: true,
@@ -101,11 +168,12 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
             : 0
         return (
           <div style={{ textAlign: 'right' }}>
-            {`Rp ${validValue.toLocaleString()}`}
+            {`${validValue.toLocaleString()}`}
           </div>
         )
       },
     },
+
     {
       title: 'Progress',
       key: 'progress',
@@ -118,7 +186,7 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
 
         return (
           <div style={{ textAlign: 'right' }}>
-            {`Rp ${progress.toLocaleString()}`}
+            {`${progress.toLocaleString()}`}
           </div>
         )
       },
@@ -132,7 +200,7 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
       ellipsis: true,
       render: (value: any) => (
         <div style={{ textAlign: 'right' }}>
-          {`Rp ${Number(value).toLocaleString()}`}
+          {`${Number(value).toLocaleString()}`}
         </div>
       ),
     },
@@ -159,7 +227,7 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
       style={{
         width: '210mm',
         minHeight: '297mm',
-        padding: '8mm',
+        padding: '13mm',
         backgroundColor: '#fff',
         boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
       }}
@@ -283,7 +351,7 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
           <div>
             Nomor: ____{takeInvoicesFromKledoBasedOnPelanggan[0]?.contact_id}
           </div>
-          <div>Hal: Konfirmasi Hutang</div>
+          <div>Hal: Konfirmasi Piutang</div>
           <div>Lampiran: -</div>
         </div>
         <div style={{ textAlign: 'right', marginTop: '20px' }}>
@@ -303,7 +371,7 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
       </div>
       {/* Table */}
       <Table
-        dataSource={takeInvoicesFromKledoBasedOnPelanggan}
+        dataSource={normalizedData}
         columns={columns as any}
         rowKey="ref_number"
         pagination={false}
@@ -353,21 +421,22 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
               <Table.Summary.Cell index={0} colSpan={2}>
                 <strong>Total</strong>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={3} colSpan={1}>
+              <Table.Summary.Cell index={0}></Table.Summary.Cell>
+              <Table.Summary.Cell index={4} colSpan={1}>
                 <div style={{ textAlign: 'right' }}>
-                  <strong>{`Rp ${totalAmount.toLocaleString()}`}</strong>
+                  <strong>{`${totalAmount.toLocaleString()}`}</strong>
                 </div>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={3} colSpan={1}>
+              <Table.Summary.Cell index={4} colSpan={1}>
                 <div style={{ textAlign: 'right' }}>
-                  <strong>{`Rp ${(
+                  <strong>{`${(
                     totalAmount - totalDue
                   ).toLocaleString()}`}</strong>
                 </div>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={2} colSpan={1}>
+              <Table.Summary.Cell index={4} colSpan={1}>
                 <div style={{ textAlign: 'right' }}>
-                  <strong>{`Rp ${totalDue.toLocaleString()}`}</strong>
+                  <strong>{`${totalDue.toLocaleString()}`}</strong>
                 </div>
               </Table.Summary.Cell>
             </Table.Summary.Row>

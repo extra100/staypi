@@ -1,24 +1,62 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Select, Row, Col, Table, Input } from 'antd'
 import { useIdContact } from './NamaContact'
 import { useNavigate } from 'react-router-dom'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
+
+
+import { useUserDataQuery } from '../../hooks/userHooks'
+import UserContext from '../../contexts/UserContext'
+import { TakePiutangToPerContactStatusIdAndMemoMny } from './TakePiutangToPerContactStatusIdAndMemoMny'
 
 const { Option } = Select
 
 const FilteredContact: React.FC = () => {
   const navigate = useNavigate()
   const { data: contacts } = useGetContactsQuery()
-  const [selectedContactGroup, setSelectedContactGroup] = useState<any | null>(
-    null
-  )
-  const { idContact } = useIdContact(selectedContactGroup)
-  const [filteredContacts, setFilteredContacts] = useState<any[]>([])
-  const [searchName, setSearchName] = useState<string>('')
+  const { data: users } = useUserDataQuery()
+  const userContext = useContext(UserContext)
+  const { user } = userContext || {}
+  let idOutletLoggedIn = ''
 
-  const handleContactChange = (value: string) => {
+  if (user) {
+    idOutletLoggedIn = user.id_outlet
+  }
+  console.log({ idOutletLoggedIn })
+  const outletName =
+    (Array.isArray(users) &&
+      users.find((user) => user.id_outlet === idOutletLoggedIn)?.name) ||
+    'Outlet Tidak Diketahui'
+  console.log({ outletName })
+
+  const matchingGroupName = Array.isArray(contacts)
+    ? contacts.find(
+        (contact) =>
+          typeof contact.group === 'object' &&
+          contact.group?.name === outletName
+      )?.group?.name
+    : 'Grup Tidak Ditemukan'
+  console.log({ matchingGroupName })
+
+  const [selectedContactGroup, setSelectedContactGroup] = useState<any | null>(
+    Array.isArray(contacts)
+      ? contacts.find(
+          (contact: any) =>
+            typeof contact.group === 'object' &&
+            contact.group?.name === matchingGroupName
+        )?.group?.id ?? null
+      : null
+  )
+  console.log({ selectedContactGroup })
+  const { idContact } = useIdContact(selectedContactGroup)
+  console.log({ idContact })
+
+  const [filteredContacts, setFilteredContacts] = useState<any[]>([])
+
+  const handleContactGroupChange = (value: string) => {
     setSelectedContactGroup(value)
   }
+  const [searchName, setSearchName] = useState<string>('')
 
   useEffect(() => {
     let contactsToDisplay = idContact || []
@@ -39,6 +77,12 @@ const FilteredContact: React.FC = () => {
 
     setFilteredContacts(contactsToDisplay)
   }, [selectedContactGroup, idContact, searchName])
+  const { loading, takedueanContactStatusIdandMemoMny } =
+    TakePiutangToPerContactStatusIdAndMemoMny(
+      'MNY',
+      '2',
+      selectedContactGroup as any
+    )
 
   const columns = [
     {
@@ -94,7 +138,7 @@ const FilteredContact: React.FC = () => {
                 .includes(input.toLowerCase())
             }
             value={selectedContactGroup}
-            onChange={handleContactChange}
+            onChange={handleContactGroupChange}
           >
             {Array.isArray(contacts) &&
               [
@@ -148,7 +192,7 @@ const FilteredContact: React.FC = () => {
               </Table.Summary.Cell>
               <Table.Summary.Cell index={0} colSpan={2}>
                 <div style={{ textAlign: 'right' }}>
-                  <strong>{`Rp ${totalAmount.toLocaleString()}`}</strong>
+                  <strong>{`${totalAmount.toLocaleString()}`}</strong>
                 </div>
               </Table.Summary.Cell>
             </Table.Summary.Row>

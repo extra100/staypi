@@ -5,6 +5,14 @@ import { User, UserModel } from '../models/userModel'
 import { generateToken, isAuth } from '../utils'
 
 export const userRouter = express.Router()
+
+userRouter.get(
+  '/',
+  asyncHandler(async (req: Request, res: Response) => {
+    const bebas = await UserModel.find({})
+    res.json(bebas)
+  })
+)
 // POST /api/users/signin
 userRouter.post(
   '/signin',
