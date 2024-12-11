@@ -3,11 +3,10 @@ import { Select, Row, Col, Table, Input } from 'antd'
 import { useIdContact } from './NamaContact'
 import { useNavigate } from 'react-router-dom'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
-
+import { TakePiutangToPerContactStatusIdAndMemoMny } from './TakePiutangToPerContactStatusIdAndMemoMny'
 
 import { useUserDataQuery } from '../../hooks/userHooks'
 import UserContext from '../../contexts/UserContext'
-import { TakePiutangToPerContactStatusIdAndMemoMny } from './TakePiutangToPerContactStatusIdAndMemoMny'
 
 const { Option } = Select
 
