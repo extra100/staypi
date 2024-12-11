@@ -31,11 +31,39 @@ const ListSiapDiValidasi: React.FC = () => {
 
   const today = dayjs().format('YYYY-MM-DD')
 
+  // const dataSource = Array.isArray(transfers)
+  //   ? transfers
+  //       .filter((transfer: any) => {
+  //         const transDate = dayjs(transfer.trans_date).format('YYYY-MM-DD')
+  //         const isToday = transDate === today
+
+  //         const isCommonCriteriaMet =
+  //           transfer.code === 1 &&
+  //           transfer.to_warehouse_id !== user?.isAdmin &&
+  //           (String(transfer.ref_number || '').includes(searchTerm) ||
+  //             String(transfer.from_warehouse_id || '').includes(searchTerm))
+
+  //         if (user?.isAdmin) {
+  //           return isToday && isCommonCriteriaMet
+  //         }
+
+  //         const isNonAdminCriteriaMet =
+  //           transfer.code === 1 && transfer.to_warehouse_id === idOutletLoggedIn
+
+  //         return isToday && isNonAdminCriteriaMet
+  //       })
+  //       .sort(
+  //         (a: any, b: any) =>
+  //           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  //       )
+  //   : []
   const dataSource = Array.isArray(transfers)
     ? transfers
         .filter((transfer: any) => {
           const transDate = dayjs(transfer.trans_date).format('YYYY-MM-DD')
-          const isToday = transDate === today
+          const threeDaysAgo = dayjs().subtract(3, 'days').format('YYYY-MM-DD')
+          const isWithinLastThreeDays =
+            transDate >= threeDaysAgo && transDate <= today
 
           const isCommonCriteriaMet =
             transfer.code === 1 &&
@@ -44,13 +72,13 @@ const ListSiapDiValidasi: React.FC = () => {
               String(transfer.from_warehouse_id || '').includes(searchTerm))
 
           if (user?.isAdmin) {
-            return isToday && isCommonCriteriaMet
+            return isWithinLastThreeDays && isCommonCriteriaMet
           }
 
           const isNonAdminCriteriaMet =
             transfer.code === 1 && transfer.to_warehouse_id === idOutletLoggedIn
 
-          return isToday && isNonAdminCriteriaMet
+          return isWithinLastThreeDays && isNonAdminCriteriaMet
         })
         .sort(
           (a: any, b: any) =>
