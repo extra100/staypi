@@ -471,7 +471,6 @@ const StockSelectorTable = () => {
             // price: Number(discountedPrices[item.id]) || retailPrice,
             price: Math.ceil(Number(discountedPrices[item.id]) || retailPrice),
 
-
             qty: 1,
 
             selectedDiscount: selectedPrices[item.id] || 'Umum 2',
@@ -510,9 +509,8 @@ const StockSelectorTable = () => {
       record.selectedDiscountValue || 0
     )
 
-    // const priceToUse = record.harga_setelah_diskon || newPrice
     const priceToUse = record.harga_setelah_diskon || newPrice
-    // const priceToUse = record.harga_setelah_diskon || newPrice
+
     const newSubtotal = newPrice * value
 
     setDataSource((prev) =>
@@ -556,8 +554,6 @@ const StockSelectorTable = () => {
     setSelectedDates([startDate, endDate])
     setSelectedDifference(difference)
     setTermIdSimpan(termId)
-
-    // Anda bisa menyimpan atau menggunakan termId sesuai kebutuhan
   }
 
   const [paymentForm] = Form.useForm()
@@ -591,14 +587,15 @@ const StockSelectorTable = () => {
     }, 0)
   const limitizeTrans = totalReceivable > 3800
   const [totalSubtotal, setTotalSubtotal] = useState<number>(0)
-  // console.log({ totalSubtotal })
+  console.log({ totalSubtotal })
   const [formattedTotalSubtotal, setFormattedTotalSubtotal] =
     useState<string>('')
 
   useEffect(() => {
     const calculateTotalSubtotal = () => {
       const total = dataSource.reduce((total, item) => total + item.subtotal, 0)
-      setTotalSubtotal(total)
+      setTotalSubtotal(Math.ceil(total))
+
       setFormattedTotalSubtotal(total.toLocaleString('id-ID'))
     }
 
@@ -775,7 +772,7 @@ const StockSelectorTable = () => {
         const matchingStock = productQuantities[item.finance_account_id]
         const latest_stock = matchingStock - item.qty
         return {
-          id: 12345,
+          id: 123,
           amount: Math.ceil(item.subtotal),
           discount_amount:
             Math.ceil(item.gapPrice) || item.input_diskon_manual || 0,
@@ -1158,7 +1155,7 @@ const StockSelectorTable = () => {
       key: 'subtotal',
       align: 'right',
       render: (text: any) => (
-        <div>{text ? text.toLocaleString('id-ID') : '-'}</div>
+        <div>{text ? Math.floor(text).toLocaleString('id-ID') : '-'}</div>
       ),
     },
 
