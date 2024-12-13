@@ -468,7 +468,9 @@ const StockSelectorTable = () => {
             finance_account_name: item.name,
             basePrice: item.price,
 
-            price: Number(discountedPrices[item.id]) || retailPrice,
+            // price: Number(discountedPrices[item.id]) || retailPrice,
+            price: Math.ceil(Number(discountedPrices[item.id]) || retailPrice),
+
 
             qty: 1,
 
