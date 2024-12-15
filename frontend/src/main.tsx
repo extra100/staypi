@@ -122,6 +122,9 @@ import SaveReturDetailSourceKledo from './pages/api/saveReturDetailSourceKledo'
 import BayarHutangRetur from './pages/api/BayarHutangRetur'
 import GetIdNextPaymnet from './pages/api/GetIdNextPaymnet'
 
+import BarangSearchPage from './pages/api/BarangSearchPage'
+import BarangTable from './pages/api/BarangTable'
+
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
 const router = createBrowserRouter(
@@ -276,6 +279,8 @@ const router = createBrowserRouter(
         path="/ambildetailbarangdariGoret"
         element={<AmbilDetailBarangDariGoret />}
       />
+      <Route path="/tabelbarangs" element={<BarangTable />} />
+      <Route path="/tambahbarang" element={<BarangSearchPage />} />
     </Route>
   )
 )

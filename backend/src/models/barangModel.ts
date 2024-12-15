@@ -8,6 +8,8 @@ export class Barang {
   @prop({ required: true, unique: true })
   public name!: string
   @prop({ required: true, unique: true })
+  public code!: string
+  @prop({ required: true, unique: true })
   public price!: number
   @prop()
   public unit_id!: number

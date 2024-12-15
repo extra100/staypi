@@ -228,12 +228,12 @@ function App() {
                   <Link className="nav-link header-link p-1 px-3" to={`/ibo`}>
                     Nota Baru
                   </Link>
-                  {/* <Link
+                  <Link
                     className="nav-link header-link p-1 px-3"
                     to={`/pemesananpenjualan`}
                   >
                     Pemesanan Penjualan
-                  </Link> */}
+                  </Link>
                   <Link
                     className="nav-link header-link p-1 px-3"
                     to={`/listkledo`}
@@ -521,8 +521,8 @@ function App() {
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineHtml5 size={20} style={iconStyle} />
-              <LinkContainer to="/sekean" onClick={handleDataSatuanClick}>
-                <NavDropdown.Item>Data Satuan</NavDropdown.Item>
+              <LinkContainer to="/tabelbarangs" onClick={handleDataSatuanClick}>
+                <NavDropdown.Item>Data Barang</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>

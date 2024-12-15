@@ -32,3 +32,27 @@ barangRouter.post(
     }
   })
 )
+barangRouter.put(
+  '/:edi',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { _id, id, name, code, price, pos_product_category_id } = req.body
+
+    const cumaDisiniUsaha = await BarangModel.findById(req.params.edi)
+
+    if (cumaDisiniUsaha) {
+      cumaDisiniUsaha._id = _id || cumaDisiniUsaha._id
+
+      cumaDisiniUsaha.id = id || cumaDisiniUsaha.id
+      cumaDisiniUsaha.name = name || cumaDisiniUsaha.name
+      cumaDisiniUsaha.code = code || cumaDisiniUsaha.code
+      cumaDisiniUsaha.price = price || cumaDisiniUsaha.price
+      cumaDisiniUsaha.pos_product_category_id =
+        pos_product_category_id || cumaDisiniUsaha.pos_product_category_id
+
+      const updateBarang = await cumaDisiniUsaha.save()
+      res.json(updateBarang)
+    } else {
+      res.status(404).json({ message: 'Usaha not found' })
+    }
+  })
+)

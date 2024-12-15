@@ -1,66 +1,22 @@
 import React, { useEffect, useState } from 'react'
-import { Table, Button, Spin } from 'antd'
-
-import { Barang } from '../../types/Barang'
-import {
-  useAddBarang,
-  useGetThenAddBarangsQuery,
-} from '../../hooks/barangTetukHooks'
+import { Table, Button } from 'antd'
+import { useAddBarang } from '../../hooks/barangTetukHooks'
+import { useIdNamaddBarang } from './namaBarangTetukApi'
 
 const BarangTetuk = () => {
-  const [offset, setOffset] = useState(0)
-  const batchSize = 10
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [allBarangs, setAllBarangs] = useState<Barang[]>([])
-  const [Barangset, setBarangset] = useState(new Set())
+  const { idDataddBarang } = useIdNamaddBarang()
+  console.log({ idDataddBarang })
+  const { mutate: addBarang } = useAddBarang()
 
-  const {
-    data: Barangs,
-    refetch,
-    isLoading,
-  } = useGetThenAddBarangsQuery(batchSize, offset)
-  const addBarangMutation = useAddBarang()
-  console.log({ Barangs })
-  useEffect(() => {
-    if (!Barangs || Barangs.length === 0) return
+  const handleSave = () => {
+    console.log('Save clicked')
 
-    const newBarangs = Barangs.filter((barang) => !Barangset.has(barang.id))
-    setBarangset((prevSet) => {
-      const updatedSet = new Set(prevSet)
-      newBarangs.forEach((barang) => updatedSet.add(barang.id))
-      return updatedSet
-    })
+    const dataToSave = idDataddBarang.map((barang: any) => ({
+      ...barang,
+      price: barang.price || 0,
+    }))
 
-    setAllBarangs((prevBarangs) => [...prevBarangs, ...(newBarangs as any)])
-
-    if (Barangs.length === batchSize) {
-      setTimeout(() => setOffset((prevOffset) => prevOffset + batchSize), 500)
-    }
-  }, [Barangs])
-
-  useEffect(() => {
-    if (offset > 0) {
-      refetch()
-    }
-  }, [offset])
-
-  const handleSave = async () => {
-    setIsProcessing(true)
-
-    for (let i = 0; i < allBarangs.length; i += batchSize) {
-      const batch = allBarangs.slice(i, i + batchSize)
-
-      for (const barang of batch) {
-        try {
-          await addBarangMutation.mutateAsync(barang)
-          console.log(`Successfully added barang: ${barang.name}`)
-        } catch (error) {
-          console.error(`Failed to add barang: ${barang.name}`, error)
-        }
-      }
-    }
-
-    setIsProcessing(false)
+    addBarang(dataToSave as any)
   }
 
   const columns = [
@@ -76,7 +32,7 @@ const BarangTetuk = () => {
       key: 'id',
     },
     {
-      title: 'Name',
+      title: 'Nama Product',
       dataIndex: 'name',
       key: 'name',
     },
@@ -86,17 +42,22 @@ const BarangTetuk = () => {
       key: 'price',
     },
     {
-      title: 'Unit ID',
-      dataIndex: ['unit', 'id'], // menggunakan array untuk nested field
+      title: 'Kode SKU',
+      dataIndex: 'code',
+      key: 'code',
+    },
+    {
+      title: 'Id Satuan',
+      dataIndex: ['unit', 'id'],
       key: 'unit.id',
     },
     {
-      title: 'Nama Unit',
-      dataIndex: ['unit', 'name'], // menggunakan array untuk nested field
+      title: 'Nama Satuan',
+      dataIndex: ['unit', 'name'],
       key: 'unit.name',
     },
     {
-      title: 'Kategory Barang',
+      title: 'Kategori Barang',
       dataIndex: 'pos_product_category_id',
       key: 'pos_product_category_id',
     },
@@ -104,26 +65,13 @@ const BarangTetuk = () => {
 
   return (
     <div>
-      <h1>Barang List</h1>
-      {isLoading ? (
-        <Spin tip="Loading Barangs..." />
-      ) : (
-        <Table
-          dataSource={Barangs}
-          columns={columns}
-          rowKey="id"
-          // pagination={true}
-        />
-      )}
-
-      <Button
-        type="primary"
-        onClick={handleSave}
-        disabled={isProcessing || isLoading}
-        loading={isProcessing}
-        style={{ marginTop: 16 }}
-      >
-        {isProcessing ? 'Saving...' : 'Save All Barangs'}
+      <Table
+        dataSource={idDataddBarang} // ensure this is an array of data
+        columns={columns}
+        rowKey="id"
+      />
+      <Button type="primary" onClick={handleSave}>
+        Save
       </Button>
     </div>
   )

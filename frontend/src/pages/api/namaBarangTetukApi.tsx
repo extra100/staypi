@@ -12,6 +12,8 @@ export interface Barang {
   name: string
   price: number
   unit?: Unit
+  code: string
+  pos_product_category_id: string
 }
 
 export function useIdNamaddBarang() {
@@ -21,13 +23,7 @@ export function useIdNamaddBarang() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const storedData = sessionStorage.getItem('ddBarangTransactions')
-        if (storedData) {
-          setIdDataddBarang(JSON.parse(storedData))
-          setLoading(false)
-          return
-        }
-
+        // Always fetch fresh data from the API, no session storage
         const response = await fetch(`${HOST}/oauth/token`, {
           method: 'POST',
           headers: {
@@ -48,7 +44,7 @@ export function useIdNamaddBarang() {
         const accessToken = data.access_token
 
         const bankTransResponse = await fetch(
-          `${HOST}/finance/products?page=1&per_page=2000`,
+          `${HOST}/finance/products?page=1&per_page=200000`,
           {
             headers: {
               Authorization: `Bearer ${TOKEN}`,
@@ -66,6 +62,8 @@ export function useIdNamaddBarang() {
             id: item.id,
             name: item.name,
             price: item.price,
+            code: item.code,
+            pos_product_category_id: item.pos_product_category_id,
             unit: item.unit
               ? {
                   id: item.unit.id,
@@ -76,10 +74,6 @@ export function useIdNamaddBarang() {
         )
 
         setIdDataddBarang(formattedData)
-        sessionStorage.setItem(
-          'ddBarangTransactions',
-          JSON.stringify(formattedData)
-        )
         setLoading(false)
       } catch (error) {
         console.error('Error fetching data:', error)
