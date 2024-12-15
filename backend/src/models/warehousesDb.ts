@@ -9,5 +9,9 @@ export class Warehouses {
   public name!: string
   @prop({ required: true, unique: true })
   public code!: string
+  @prop({ required: true, unique: true })
+  public contact!: string
+  @prop({ required: true, unique: true })
+  public platform!: string
 }
 export const WarehousesGetDb = getModelForClass(Warehouses)

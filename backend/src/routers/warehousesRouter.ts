@@ -127,4 +127,29 @@ warehouseRouter.post(
   })
 )
 
+
+
+warehouseRouter.put(
+  '/:edi',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { _id, id, name, contact, code, platform } = req.body
+
+    const cumaDisiniUsaha = await WarehousesGetDb.findById(req.params.edi)
+
+    if (cumaDisiniUsaha) {
+      cumaDisiniUsaha._id = _id || cumaDisiniUsaha._id
+      cumaDisiniUsaha.id = id || cumaDisiniUsaha.id
+      cumaDisiniUsaha.name = name || cumaDisiniUsaha.name
+      cumaDisiniUsaha.contact = contact || cumaDisiniUsaha.contact
+      cumaDisiniUsaha.code = code || cumaDisiniUsaha.code
+      cumaDisiniUsaha.platform = platform || cumaDisiniUsaha.platform
+
+      const updateBarang = await cumaDisiniUsaha.save()
+      res.json(updateBarang)
+    } else {
+      res.status(404).json({ message: 'Outlet not found' })
+    }
+  })
+)
+
 export default warehouseRouter

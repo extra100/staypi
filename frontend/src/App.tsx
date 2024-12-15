@@ -510,9 +510,16 @@ function App() {
                 <NavDropdown.Item>Harga</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
-            <ListGroup.Item style={listItemStyle}>
+
+            {/* <ListGroup.Item style={listItemStyle}>
               <AiOutlineSave size={20} style={iconStyle} />
               <LinkContainer to="/outlet" onClick={handleDataOutletClick}>
+                <NavDropdown.Item>Data Telolet</NavDropdown.Item>
+              </LinkContainer>
+            </ListGroup.Item> */}
+            <ListGroup.Item style={listItemStyle}>
+              <AiOutlineSave size={20} style={iconStyle} />
+              <LinkContainer to="/tabeloutlets" onClick={handleDataOutletClick}>
                 <NavDropdown.Item>Data Telolet</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>

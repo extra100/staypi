@@ -5,4 +5,6 @@ export type Warehouse = {
   photo: string
   contact: string
   telpon: string
+  _id: string
+  platform: string
 }

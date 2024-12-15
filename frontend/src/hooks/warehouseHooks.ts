@@ -73,3 +73,16 @@ export const useAddWarehouse = () => {
     }
   )
 }
+export const useUpdateWarehouseMutations = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    (murah: Warehouse) =>
+      apiClient.put<Warehouse>(`/api/warehouses/${murah._id}`, murah), // gunakan _id
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['warehouses'])
+      },
+    }
+  )
+}

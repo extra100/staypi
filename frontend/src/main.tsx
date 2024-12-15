@@ -124,7 +124,9 @@ import GetIdNextPaymnet from './pages/api/GetIdNextPaymnet'
 import BarangTable from './pages/api/BarangTable'
 import BarangSearchPage from './pages/api/BarangSearchPage'
 import PelangganTable from './pages/api/PelangganTabel'
+
 import PelangganSearchPage from './pages/api/PelangganSearchPage'
+import TableWarehouse from './pages/api/WarehouseTable'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -284,6 +286,7 @@ const router = createBrowserRouter(
       <Route path="/tambahbarang" element={<BarangSearchPage />} />
       <Route path="/tabelpelanggans" element={<PelangganTable />} />
       <Route path="/tambahpelanggan" element={<PelangganSearchPage />} />
+      <Route path="/tabeloutlets" element={<TableWarehouse />} />
     </Route>
   )
 )
