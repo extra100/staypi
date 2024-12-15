@@ -1,4 +1,5 @@
 export type Pelanggan = {
+  _id: string
   id: number
   name: string
   group_id: number

@@ -497,8 +497,11 @@ function App() {
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineReddit size={20} style={iconStyle} />
-              <LinkContainer to="/pelanggan" onClick={handleDataKategoriClick}>
-                <NavDropdown.Item>Pelanggan</NavDropdown.Item>
+              <LinkContainer
+                to="/tabelpelanggans"
+                onClick={handleDataKategoriClick}
+              >
+                <NavDropdown.Item>Data Pelanggan</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>

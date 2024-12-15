@@ -32,6 +32,35 @@ pelangganRouter.get(
     }
   })
 )
+// pelangganRouter.get(
+//   '/',
+//   asyncHandler(async (req, res) => {
+//     try {
+//       // Ambil namaGroup dari query string
+//       const { namaGroup } = req.query
+
+//       console.log('Received namaGroup:', namaGroup)
+
+//       // Jika namaGroup tersedia, lakukan pencarian berdasarkan group.name
+//       const query = namaGroup
+//         ? { 'group.name': { $regex: namaGroup, $options: 'i' } } // Case-insensitive search
+//         : {} // Jika tidak ada namaGroup, ambil semua pelanggan
+
+//       console.log('MongoDB Query:', query)
+
+//       // Ambil data dari database berdasarkan query
+//       const pelanggans = await PelangganModel.find(query)
+
+//       console.log('Query Result:', pelanggans)
+
+//       // Kirim hasil ke frontend
+//       res.json(pelanggans)
+//     } catch (error) {
+//       console.error('Server Error:', error)
+//       res.status(500).json({ message: 'Internal Server Error' })
+//     }
+//   })
+// )
 
 const cache = new NodeCache({ stdTTL: 10000000000000000 })
 
@@ -54,8 +83,8 @@ const fetchPelanggans = async (page: number, perPage: number) => {
     const filteredData: any[] = rawData.map((item: any) => ({
       id: item.id,
       name: item.name,
-      phone: item.phone || 'Mohon Lengkapi No Tlpn', // Set a default if missing
-      address: item.address || 'Mohon Lengkpai Alamat', // Set a default if missing
+      phone: item.phone || '-', // Set a default if missing
+      address: item.address || '-', // Set a default if missing
       group_id: item.group_id ?? 0,
       group: item.group
         ? { id: item.group.id, name: item.group.name }
@@ -112,8 +141,8 @@ pelangganRouter.post(
     const posData = {
       id: req.body.id,
       name: req.body.name,
-      phone: req.body.phone || 'Mohon Lengkapi No Tlpn', // Default if missing
-      address: req.body.address || 'Mohon Lengkapi Alamat', // Default if missing
+      phone: req.body.phone || '-', // Default if missing
+      address: req.body.address || '-', // Default if missing
       group_id: req.body.group_id ?? 0,
       group: req.body.group
         ? { id: req.body.group.id, name: req.body.group.name }
@@ -150,6 +179,34 @@ pelangganRouter.get(
       res.status(500).json({ error: 'Internal Server Error' })
     }
   }
+)
+pelangganRouter.put(
+  '/:edi',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { _id, id, name, group_id, group, address, phone } = req.body
+
+    const cumaDisiniUsaha = await PelangganModel.findById(req.params.edi)
+
+    if (cumaDisiniUsaha) {
+      cumaDisiniUsaha._id = _id || cumaDisiniUsaha._id
+      cumaDisiniUsaha.id = id || cumaDisiniUsaha.id
+      cumaDisiniUsaha.name = name || cumaDisiniUsaha.name
+      cumaDisiniUsaha.group_id = group_id || cumaDisiniUsaha.group_id
+      cumaDisiniUsaha.address = address || cumaDisiniUsaha.address
+      cumaDisiniUsaha.phone = phone || cumaDisiniUsaha.phone
+
+      // Handle nested group updates
+      cumaDisiniUsaha.group = {
+        id: group?.id || cumaDisiniUsaha.group?.id,
+        name: group?.name || cumaDisiniUsaha.group?.name,
+      }
+
+      const updateBarang = await cumaDisiniUsaha.save()
+      res.json(updateBarang)
+    } else {
+      res.status(404).json({ message: 'Pelanggan not found' })
+    }
+  })
 )
 
 export default pelangganRouter

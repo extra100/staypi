@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 import apiClient from '../apiClient'
 import { Pelanggan } from '../types/Pelanggan'
 
@@ -8,6 +9,33 @@ export const useGetPelanggansQueryDb = () =>
     queryFn: async () =>
       (await apiClient.get<Pelanggan[]>(`/api/pelanggans`)).data,
   })
+// export const useGetPelanggansQueryGroupName = (
+//   namaGroup: string = 'BAJA NTB'
+// ) =>
+//   useQuery({
+//     queryKey: ['pelanggans', namaGroup],
+//     queryFn: async () => {
+//       console.log('Fetching data for namaGroup:', namaGroup) // Menambahkan log di sini
+//       const response = await apiClient.get<Pelanggan[]>(`/api/pelanggans`, {
+//         params: { namaGroup },
+//       })
+//       console.log('Response data:', response.data)
+//       return response.data
+//     },
+//   })
+
+export const useGetPelanggansQueryGroupName = (name?: string) =>
+  useQuery({
+    queryKey: ['pelanggans', name],
+    queryFn: async () =>
+      (
+        await apiClient.get<Pelanggan[]>(`/api/pelanggans`, {
+          params: { name },
+        })
+      ).data,
+    keepPreviousData: true, // Agar data sebelumnya tetap ditampilkan saat memuat data baru
+  })
+
 export const useGetPelanggansQuery = () =>
   useQuery({
     queryKey: ['pelanggans'],
@@ -67,6 +95,19 @@ export const useAddPelanggan = () => {
     (warehouse: Pelanggan) => {
       return apiClient.post<Pelanggan>(`/api/pelanggans`, warehouse)
     },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['pelanggans'])
+      },
+    }
+  )
+}
+export const useUpdatePelangganMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    (murah: Pelanggan) =>
+      apiClient.put<Pelanggan>(`/api/pelanggans/${murah._id}`, murah), // gunakan _id
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['pelanggans'])
