@@ -121,9 +121,8 @@ import SuitMutasiExDanKledo from './pages/api/SuitMutasiExDanKledo'
 import SaveReturDetailSourceKledo from './pages/api/saveReturDetailSourceKledo'
 import BayarHutangRetur from './pages/api/BayarHutangRetur'
 import GetIdNextPaymnet from './pages/api/GetIdNextPaymnet'
-
-import BarangSearchPage from './pages/api/BarangSearchPage'
 import BarangTable from './pages/api/BarangTable'
+import BarangSearchPage from './pages/api/BarangSearchPage'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
