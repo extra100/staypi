@@ -4,29 +4,30 @@ import asyncHandler from 'express-async-handler'
 import { TransactionModel } from '../models/transactionModel'
 
 export const transactionRouter = express.Router()
+import dayjs from 'dayjs'
 
-transactionRouter.get(
-  '/',
-  asyncHandler(async (req: Request, res: Response) => {
-    const { date_from, date_to, warehouse_id } = req.query
+// transactionRouter.get(
+//   '/',
+//   asyncHandler(async (req: Request, res: Response) => {
+//     const { date_from, date_to, warehouse_id } = req.query
 
-    const conditions: any = {}
+//     const conditions: any = {}
 
-    if (date_from && date_to) {
-      conditions.trans_date = date_from
-      console.log('Date condition:', conditions.trans_date)
-    }
+//     if (date_from && date_to) {
+//       conditions.trans_date = date_from
+//       console.log('Date condition:', conditions.trans_date)
+//     }
 
-    if (warehouse_id) {
-      conditions.warehouse_id = Number(warehouse_id)
-      console.log('Warehouse condition:', conditions.warehouse_id)
-    }
+//     if (warehouse_id) {
+//       conditions.warehouse_id = Number(warehouse_id)
+//       console.log('Warehouse condition:', conditions.warehouse_id)
+//     }
 
-    const transactions = await TransactionModel.find(conditions)
+//     const transactions = await TransactionModel.find(conditions)
 
-    res.json(transactions)
-  })
-)
+//     res.json(transactions)
+//   })
+// )
 
 transactionRouter.post(
   '/',
@@ -38,11 +39,101 @@ transactionRouter.post(
   })
 )
 
+// transactionRouter.get(
+//   '/',
+//   asyncHandler(async (req: Request, res: Response) => {
+//     const bebas = await TransactionModel.find({})
+//     res.json(bebas)
+//   })
+// )
+// transactionRouter.get(
+//   '/',
+//   asyncHandler(async (req: any, res: any) => {
+//     const { warehouseId } = req.query
+
+//     if (!warehouseId || isNaN(Number(warehouseId))) {
+//       return res.status(400).json({ message: 'Invalid warehouseId' })
+//     }
+
+//     try {
+//       const numericWarehouseId = Number(warehouseId)
+//       const transactions = await TransactionModel.find({
+//         warehouse_id: numericWarehouseId,
+//       })
+
+//       res.json(transactions)
+//     } catch (error) {
+//       res.status(500).json({ message: 'Server error occurred.' })
+//     }
+//   })
+// )
+// transactionRouter.get(
+//   '/',
+//   asyncHandler(async (req: any, res: any) => {
+//     const { warehouseId } = req.query
+
+//     if (!warehouseId || isNaN(Number(warehouseId))) {
+//       return res.status(400).json({ message: 'Invalid warehouseId' })
+//     }
+
+//     try {
+//       const numericWarehouseId = Number(warehouseId)
+
+//       // Tanggal hari ini
+//       const todayDate = dayjs().format('YYYY-MM-DD') // Format tanggal seperti di database
+//       // const todayDate = dayjs('2024-12-16').format('YYYY-MM-DD')
+
+//       console.log('Today Date:', todayDate) // Debug tanggal hari ini
+
+//       // Filter transaksi
+//       const transactions = await TransactionModel.find({
+//         warehouse_id: numericWarehouseId,
+//         trans_date: todayDate, // Filter berdasarkan string
+//       })
+
+//       console.log('Filtered Transactions:', transactions) // Debug hasil query
+//       res.json(transactions)
+//     } catch (error) {
+//       console.error('Error querying transactions:', error) // Debug error
+//       res.status(500).json({ message: 'Server error occurred.' })
+//     }
+//   })
+// )
+
 transactionRouter.get(
   '/',
-  asyncHandler(async (req: Request, res: Response) => {
-    const bebas = await TransactionModel.find({})
-    res.json(bebas)
+  asyncHandler(async (req: any, res: any) => {
+    const { warehouseId, date } = req.query
+
+    if (!warehouseId || isNaN(Number(warehouseId))) {
+      return res.status(400).json({ message: 'Invalid warehouseId' })
+    }
+
+    try {
+      const numericWarehouseId = Number(warehouseId)
+
+      const todayDate = date
+        ? dayjs(date).format('YYYY-MM-DD')
+        : dayjs().format('YYYY-MM-DD')
+
+      let transactions
+
+      if (numericWarehouseId === 2) {
+        transactions = await TransactionModel.find({
+          trans_date: todayDate,
+        })
+      } else {
+        transactions = await TransactionModel.find({
+          warehouse_id: numericWarehouseId,
+          trans_date: todayDate,
+        })
+      }
+
+      res.json(transactions)
+    } catch (error) {
+      console.error('Error querying transactions:', error)
+      res.status(500).json({ message: 'Server error occurred.' })
+    }
   })
 )
 

@@ -32,7 +32,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
 
   // const contactName = getPosDetail?.contacts?.[0]?.name
   const gudangName = getPosDetail?.warehouses?.[0]?.name
-  const qtyUpdated = getPosDetail?.items?.[0]?.qty_update
+  const namaKontak = getPosDetail?.contacts?.[0]?.name
 
   const tglTransaksi = getPosDetail?.trans_date ?? 0
   const tglJatuhTempo = getPosDetail?.due_date ?? 0
@@ -206,7 +206,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
               fontSize: '18px',
             }}
           >
-            Pelanggan: {contactName}
+            Pelanggan: {namaKontak || contactName}
           </span>
         </Col>
         <Col span={12} style={{ textAlign: 'right', fontSize: '18px' }}>

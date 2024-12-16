@@ -79,6 +79,53 @@ export const useGetTransaksisQuery = () =>
     queryFn: async () =>
       (await apiClient.get<Transaction[]>(`/api/transactions`)).data,
   })
+
+// export const useGetTransaksisQuerymu = (warehouseId: any | null) =>
+//   useQuery({
+//     queryKey: ['transactions', warehouseId],
+//     queryFn: async () => {
+//       if (!warehouseId) {
+//         console.log('No warehouseId provided')
+//         return []
+//       }
+
+//       console.log('Fetching transactions for warehouseId:', warehouseId) // Debug
+//       const response = await apiClient.get<Transaction[]>(
+//         `/api/transactions?warehouseId=${Number(warehouseId)}`
+//       )
+//       console.log('Data from API:', response.data) // Debug data dari API
+//       return response.data
+//     },
+//     enabled: !!warehouseId,
+//   })
+
+export const useGetTransaksisQuerymu = (
+  warehouseId: any | null,
+  date: string | null
+) =>
+  useQuery({
+    queryKey: ['transactions', warehouseId, date], // Tambahkan `date` dalam query key
+    queryFn: async () => {
+      if (!warehouseId || !date) {
+        console.log('No warehouseId or date provided')
+        return []
+      }
+
+      console.log(
+        'Fetching transactions for warehouseId:',
+        warehouseId,
+        'on date:',
+        date
+      ) // Debug
+      const response = await apiClient.get<Transaction[]>(
+        `/api/transactions?warehouseId=${Number(warehouseId)}&date=${date}`
+      )
+      console.log('Data from API:', response.data) // Debug data dari API
+      return response.data
+    },
+    enabled: !!warehouseId && !!date, // Pastikan kedua nilai ada sebelum query dijalankan
+  })
+
 export const useGetTransactionByIdQuery = (ref_number: string) =>
   useQuery<Transaction[]>(
     ['transactions', ref_number],

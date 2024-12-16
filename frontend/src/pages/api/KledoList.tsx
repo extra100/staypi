@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import { Button, Col, DatePicker, Input, Row, Select, Table, Tag } from 'antd'
 
 import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
+import { useGetTransaksisQuerymu } from '../../hooks/transactionHooks'
 import { useIdInvoice } from './takeSingleInvoice'
 import UserContext from '../../contexts/UserContext'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
@@ -14,15 +15,24 @@ const ListTransaksi: React.FC = () => {
 
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
+  const [startDate, setStartDate] = useState<string | null>(null)
+  const [endDate, setEndDate] = useState<string | null>(null)
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
   )
+
+  const {
+    data: transaksi,
+    isLoading,
+    error,
+  } = useGetTransaksisQuerymu(selectedWarehouseId, startDate) // Pass startDate ke hook
+  console.log({ transaksi })
   const { data: contacts } = useGetContactsQuery()
   const { data: gudangs } = useGetoutletsQuery()
 
   useEffect(() => {
     if (user) {
-      setSelectedWarehouseId(user.id_outlet)
+      setSelectedWarehouseId(Number(user.id_outlet))
     }
   }, [user])
   const [selectedRefNumber, setSelectedRefNumber] = useState<string | null>(
@@ -38,20 +48,22 @@ const ListTransaksi: React.FC = () => {
   //aneh
   const getContactName = (contact_id: string | number) => {
     const contact = contacts?.find((c) => c.id === contact_id)
-    return contact ? contact.name : 'Nama tidak ditemukan'
+    return contact ? contact.name : 'waiting...'
   }
   const getWarehouseName = (warehouse_id: string | number) => {
     const warehouse = gudangs?.find(
       (gudang) => String(gudang.id_outlet) === String(warehouse_id)
     )
-    return warehouse ? warehouse.nama_outlet : 'Nama tidak ditemukan'
+    return warehouse ? warehouse.nama_outlet : 'waiting...'
   }
 
-  const [startDate, setStartDate] = useState<string | null>(null)
-  const [endDate, setEndDate] = useState<string | null>(null)
   const formatDateForBackend = (dateString: string) => {
     const [day, month, year] = dateString.split('-')
     return `${year}-${month}-${day}`
+  }
+  const handleDateChange = (date: any, dateString: string) => {
+    const formattedDate = formatDateForBackend(dateString) // Format tanggal
+    setStartDate(formattedDate) // Set tanggal yang sudah diformat
   }
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
 
@@ -75,9 +87,9 @@ const ListTransaksi: React.FC = () => {
   const [searchContact, setSearchContact] = useState<number | undefined>()
   const [searchWarehouse, setSearchWarehouse] = useState<number | undefined>()
   const [searchStatus, setSearchStatus] = useState<string | undefined>()
-  const filteredData = data
+  const filteredData = transaksi
     ?.filter((transaction) => {
-
+      // Filter berdasarkan Ref Number
       if (searchRef) {
         return transaction.ref_number
           .toLowerCase()
@@ -86,14 +98,14 @@ const ListTransaksi: React.FC = () => {
       return true
     })
     ?.filter((transaction) => {
-
+      // Filter berdasarkan Nama Kontak
       if (searchContact) {
         return transaction.contact_id === searchContact
       }
       return true
     })
     ?.filter((transaction) => {
-
+      // Filter berdasarkan Nama Gudang
       if (searchWarehouse) {
         return transaction.warehouse_id === searchWarehouse
       }
@@ -172,12 +184,12 @@ const ListTransaksi: React.FC = () => {
     },
     {
       title: 'Pelanggan',
-      dataIndex: ['contacts', 0, 'id'],
+      dataIndex: ['contacts', 0, 'id' || 'name'],
       key: 'contact_name',
       render: (contactId: string) => getContactName(contactId),
     },
     {
-      title: 'Outlet',
+      title: 'Warehouse',
       dataIndex: 'warehouse_id',
       key: 'warehouse_name',
       render: (warehouseId: number) => getWarehouseName(warehouseId),
@@ -192,12 +204,6 @@ const ListTransaksi: React.FC = () => {
       title: 'Tgl. Trans',
       dataIndex: 'trans_date',
       key: 'trans_date',
-      render: (text: any) => formatDate(text),
-    },
-    {
-      title: 'Tgl. Jatuh Tempo',
-      dataIndex: 'due_date',
-      key: 'due_date',
       render: (text: any) => formatDate(text),
     },
     {
@@ -228,30 +234,30 @@ const ListTransaksi: React.FC = () => {
         return <Tag color={color}>{text}</Tag>
       },
     },
-   
     {
       title: 'Total',
       dataIndex: 'amount',
       key: 'amount',
-      align: 'right',
+      align: 'center',
       render: (amount: number) => (
         <div style={{ textAlign: 'right' }}>
           {amount !== undefined ? roundUpIndonesianNumber(amount) : 'Rp 0'}
         </div>
       ),
     },
+
     {
       title: 'Terbayar',
       dataIndex: 'witholdings',
       key: 'witholdings',
-      align: 'left',
+      align: 'center',
       render: (witholdings: any[]) => {
         const totalDownPayment = witholdings
           .filter((witholding) => witholding.status === 0)
           .reduce((sum, witholding) => sum + (witholding.down_payment || 0), 0)
 
         return (
-          <div style={{ textAlign: 'left' }}>
+          <div style={{ textAlign: 'right' }}>
             {totalDownPayment !== undefined
               ? roundUpIndonesianNumber(totalDownPayment)
               : 'Rp 0'}
@@ -262,7 +268,7 @@ const ListTransaksi: React.FC = () => {
     {
       title: 'Sisa Tagihan',
       key: 'due',
-      align: 'left',
+      align: 'center',
       render: (record: any) => {
         const totalDownPayment = record.witholdings
           .filter((witholding: any) => witholding.status === 0)
@@ -275,14 +281,17 @@ const ListTransaksi: React.FC = () => {
         const due = record.amount - totalDownPayment
 
         return (
-          <div style={{ textAlign: 'left' }}>
+          <div style={{ textAlign: 'right' }}>
             {roundUpIndonesianNumber(due < 0 ? 0 : due)}
           </div>
         )
       },
     },
-   
-  
+    // {
+    //   title: 'Ket',
+    //   dataIndex: 'id',
+    //   key: 'id',
+    // },
   ]
 
   return (
@@ -327,25 +336,16 @@ const ListTransaksi: React.FC = () => {
           <DatePicker
             placeholder="Dari Tanggal"
             format="DD-MM-YYYY"
-            onChange={(date, dateString) => {
-              if (typeof dateString === 'string') {
-                setStartDate(dateString)
-              }
-            }}
+            onChange={(date, dateString) => handleDateChange(date, dateString as any)} // Panggil fungsi handleDateChange
           />
         </Col>
         <Col>
           <DatePicker
             placeholder="Sampai Tanggal"
             format="DD-MM-YYYY"
-            onChange={(date, dateString) => {
-              if (typeof dateString === 'string') {
-                setEndDate(dateString)
-              }
-            }}
+            onChange={(date, dateString) => handleDateChange(date, dateString as any)} // Panggil fungsi handleDateChange
           />
         </Col>
-
         <Row gutter={16} style={{ marginBottom: 16 }}>
           <Col>
             <Input
@@ -425,8 +425,8 @@ const ListTransaksi: React.FC = () => {
         rowKey="_id"
         pagination={{ pageSize: 100 }}
       /> */}
-     <Table
-        dataSource={filteredData}
+      <Table
+        dataSource={transaksi}
         columns={columns as any}
         rowKey="id"
         pagination={{ pageSize: 100 }}
@@ -450,7 +450,7 @@ const ListTransaksi: React.FC = () => {
 
           return (
             <Table.Summary.Row>
-              <Table.Summary.Cell index={8} colSpan={8}>
+              <Table.Summary.Cell index={7} colSpan={7}>
                 <strong>Total</strong>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={6} align="right">

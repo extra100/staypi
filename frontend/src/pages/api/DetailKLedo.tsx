@@ -24,6 +24,7 @@ import {
   useGetTransactionByIdQuery,
   useUpdateTransactionMutation,
 } from '../../hooks/transactionHooks'
+import { useGetReturnByIdQuery } from '../../hooks/returnHooks'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { AiOutlinePrinter } from 'react-icons/ai'
 import PosPrintKomponent from './PosPrintCok'
@@ -89,30 +90,35 @@ const DetailKledo: React.FC = () => {
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
   )
-
+  const { data: allreturns } = useGetReturnByIdQuery(ref_number as string)
+  console.log({ allreturns })
   const { data: contacts } = useGetContactsQuery()
   const { data: akunBanks } = useGetAkunBanksQueryDb()
-
-  const { getIdAtInvoice } = useIdInvoice(ref_number || '')
-
-  const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
-
-  const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
 
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
+  const getReturDetail = allreturns?.find(
+    (balikin: any) => balikin.ref_transaksi === ref_number
+  )
+  console.log({ getReturDetail })
 
   //delete
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(
     null
   )
   const IdYangAkanDiDelete = getPosDetail?.id
-  const memorandum = getPosDetail?.memo
+  const memorandum = getPosDetail?.memo || ref_number
+  console.log({ memorandum })
   const idMonggo = getPosDetail?._id
   const pesan = getPosDetail?.message
   const { hapusLoading, isDeleted } = useDeleteInvoice(selectedInvoiceId ?? 0)
+  const { getIdAtInvoice } = useIdInvoice(ref_number || '')
+  console.log({ getIdAtInvoice })
+  console.log({ ref_number })
+  const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
 
+  const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
   const handleDelete = () => {
     if (IdYangAkanDiDelete) {
       setSelectedInvoiceId(IdYangAkanDiDelete)
@@ -129,6 +135,7 @@ const DetailKledo: React.FC = () => {
   const items = getPosDetail?.items || []
 
   const gudangName = getPosDetail?.warehouses?.[0]?.name
+  const namaKontak = getPosDetail?.contacts?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
   const idididid = getPosDetail?.items?.[0]?.id
   const amountsPerBaris = items.map((item: any) => {
@@ -677,7 +684,7 @@ const DetailKledo: React.FC = () => {
       align: 'left',
       render: (record: any) => {
         const amount = record.amount || 0
-        const qty = record.qty || 1
+        const qty = record.qty || 1 // Pastikan qty tidak nol
         const amountPerBaris = qty > 0 ? amount / qty : 0
         return (
           <div style={{ textAlign: 'left' }}>
@@ -813,7 +820,7 @@ const DetailKledo: React.FC = () => {
               <Text strong>Pelanggan:</Text>
             </div>
             <Title level={5} style={{ marginBottom: 0 }}>
-              {contactName}
+              {namaKontak || contactName}
             </Title>
           </Col>
           <Col span={12}>
@@ -864,7 +871,10 @@ const DetailKledo: React.FC = () => {
 
       {/* Transaction Table */}
       <Table
-        dataSource={getPosDetail?.items || []}
+        dataSource={[
+          ...(getPosDetail?.items || []),
+          ...(getReturDetail?.items || []),
+        ]}
         columns={columns as any}
         pagination={false}
         rowKey="_id"
@@ -958,109 +968,108 @@ const DetailKledo: React.FC = () => {
         </Row>
       </div>
       {due !== 0 && (
-  <Card title="Pembayaran" style={{ marginTop: '20px' }}>
-    <Form layout="vertical" onFinish={handleFormSubmit}>
-      <Row gutter={16}>
-        <Col span={12}>
-          <span
-            style={{
-              fontSize: '16px',
-              cursor: 'pointer',
-            }}
-            onClick={handleSetAmountPaid}
-          >
-            Jumlah Bayar
-          </span>
-          <span
-            style={{
-              fontSize: '16px',
-            }}
-          >
-            :
-          </span>
+        <Card title="Pembayaran" style={{ marginTop: '20px' }}>
+          <Form layout="vertical" onFinish={handleFormSubmit}>
+            <Row gutter={16}>
+              <Col span={12}>
+                <span
+                  style={{
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={handleSetAmountPaid}
+                >
+                  Jumlah Bayar
+                </span>
+                <span
+                  style={{
+                    fontSize: '16px',
+                  }}
+                >
+                  :
+                </span>
 
-          <NumericFormat
-            placeholder="Nilai Pembayaran"
-            value={amountPaid}
-            displayType="input"
-            thousandSeparator="."
-            decimalSeparator=","
-            allowNegative={false}
-            decimalScale={0}
-            onValueChange={(values) => {
-              const { floatValue } = values
-              setAmountPaid(floatValue || 0)
-            }}
-            customInput={Input}
-            max={due}
-            style={{
-              width: '100%',
-              textAlign: 'right',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              color: '#007BFF',
-            }}
-          />
-        </Col>
+                <NumericFormat
+                  placeholder="Nilai Pembayaran"
+                  value={amountPaid}
+                  displayType="input"
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  allowNegative={false}
+                  decimalScale={0}
+                  onValueChange={(values) => {
+                    const { floatValue } = values
+                    setAmountPaid(floatValue || 0)
+                  }}
+                  customInput={Input}
+                  max={due}
+                  style={{
+                    width: '100%',
+                    textAlign: 'right',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: '#007BFF',
+                  }}
+                />
+              </Col>
 
-        <Col span={12}>
-          <Form.Item>
-            <SingleDate
-              onChange={(dates) => {
-                setSelectedDates(dates)
+              <Col span={12}>
+                <Form.Item>
+                  <SingleDate
+                    onChange={(dates) => {
+                      setSelectedDates(dates)
+                    }}
+                    onSave={handleDateRangeSave}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Select
+                  showSearch
+                  placeholder="Pilih bank"
+                  value={selectedBank}
+                  onChange={(value) => setSelectedBank(value)}
+                  style={{ width: '100%' }}
+                  optionFilterProp="children"
+                  filterOption={(input: any, option: any) =>
+                    option?.children
+                      ?.toString()
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {akunBanks?.map((e) => (
+                    <Select.Option key={e.id} value={e.name}>
+                      {e.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Col>
+              <Col span={12}>
+                <Form.Item name="catatan">
+                  <Input placeholder="Catatan" />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              onClick={() => {
+                setLoading(true)
+                setTimeout(() => {
+                  setLoading(false)
+                  message.success('Pembayaran berhasil ditambahkan!')
+                }, 1000)
               }}
-              onSave={handleDateRangeSave}
-            />
-          </Form.Item>
-        </Col>
-      </Row>
-      <Row gutter={16}>
-        <Col span={12}>
-          <Select
-            showSearch
-            placeholder="Pilih bank"
-            value={selectedBank}
-            onChange={(value) => setSelectedBank(value)}
-            style={{ width: '100%' }}
-            optionFilterProp="children"
-            filterOption={(input: any, option: any) =>
-              option?.children
-                ?.toString()
-                .toLowerCase()
-                .includes(input.toLowerCase())
-            }
-          >
-            {akunBanks?.map((e) => (
-              <Select.Option key={e.id} value={e.name}>
-                {e.name}
-              </Select.Option>
-            ))}
-          </Select>
-        </Col>
-        <Col span={12}>
-          <Form.Item name="catatan">
-            <Input placeholder="Catatan" />
-          </Form.Item>
-        </Col>
-      </Row>
-      <Button
-        type="primary"
-        htmlType="submit"
-        loading={loading}
-        onClick={() => {
-          setLoading(true)
-          setTimeout(() => {
-            setLoading(false)
-            message.success('Pembayaran berhasil ditambahkan!')
-          }, 1000)
-        }}
-      >
-        Tambah Pembayaran
-      </Button>
-    </Form>
-  </Card>
-)}
-
+            >
+              Tambah Pembayaran
+            </Button>
+          </Form>
+        </Card>
+      )}
     </div>
   )
 }

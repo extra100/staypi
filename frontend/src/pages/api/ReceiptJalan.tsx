@@ -23,6 +23,7 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
     (transaction: any) => transaction.ref_number === ref_number
   )
   const barangName = getPosDetail?.items?.[0]?.name
+  const namaKontak = getPosDetail?.contacts?.[0]?.name
 
   // const contactName = getPosDetail?.contacts?.[0]?.name
   const gudangName = getPosDetail?.warehouses?.[0]?.name
@@ -142,7 +143,9 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
       <br />
       <Row>
         <Col span={12}>
-          <span style={{ fontSize: '18px' }}>Pelanggan: {contactName}</span>
+          <span style={{ fontSize: '18px' }}>
+            Pelanggan: {namaKontak || contactName}
+          </span>
         </Col>
         <Col span={12} style={{ textAlign: 'right', fontSize: '18px' }}>
           <span>{refNumber}</span>
