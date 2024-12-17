@@ -454,7 +454,7 @@ const DetailKledo: React.FC = () => {
       bank_account_id: accountId || bankAccountId,
       business_tran_id: langka,
       witholding_amount: 0,
-      memo: refNumber,
+      memo: memorandum,
       trans_date: selectedDates,
       witholdings: [],
     }
