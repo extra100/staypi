@@ -28,6 +28,25 @@ import { QueryCache } from '@tanstack/react-query'
 //     },
 //   })
 
+export const useGetContactsQuerysa = (contactId: any | null) =>
+  useQuery({
+    queryKey: ['pelanggans', contactId], // Tambahkan `date` dalam query key
+    queryFn: async () => {
+      if (!contactId) {
+        console.log('No contactId or date provided')
+        return []
+      }
+
+      console.log('Fetching pelanggans for contactId:', contactId) // Debug
+      const response = await apiClient.get<Contact[]>(
+        `/api/pelanggans?contactId=${Number(contactId)}`
+      )
+      console.log('Data from API:', response.data) // Debug data dari API
+      return response.data
+    },
+    enabled: !!contactId, // Pastikan kedua nilai ada sebelum query dijalankan
+  })
+
 export const useGetContactsQuery = () =>
   useQuery({
     queryKey: ['contacts'],

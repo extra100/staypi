@@ -20,18 +20,48 @@ import { PelangganModel } from '../models/PelangganModel'
 // }
 const pelangganRouter = express.Router()
 
+// pelangganRouter.get(
+//   '/',
+//   asyncHandler(async (req, res) => {
+//     try {
+//       const pelanggans = await PelangganModel.find()
+//       res.json(pelanggans)
+//     } catch (error) {
+//       console.error('Server Error:', error)
+//       res.status(500).json({ message: 'Internal Server Error' })
+//     }
+//   })
+// )
 pelangganRouter.get(
   '/',
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req: any, res: any) => {
+    const { contactId } = req.query
+
+    // Validasi `contactId`
+    if (!contactId || isNaN(Number(contactId))) {
+      return res.status(400).json({ message: 'Invalid contactId' })
+    }
+
     try {
-      const pelanggans = await PelangganModel.find()
+      const numericcontactId = Number(contactId)
+
+      // Query transaksi berdasarkan `contactId` saja
+      const pelanggans = await PelangganModel.find({
+        id: numericcontactId,
+      })
+
+      // Cetak hasil ke console
+      console.log('Hasil query Pelanggan:', { pelanggans })
+
+      // Mengembalikan hasil
       res.json(pelanggans)
     } catch (error) {
-      console.error('Server Error:', error)
-      res.status(500).json({ message: 'Internal Server Error' })
+      console.error('Error querying pelanggans:', error)
+      res.status(500).json({ message: 'Server error occurred.' })
     }
   })
 )
+
 // pelangganRouter.get(
 //   '/',
 //   asyncHandler(async (req, res) => {
@@ -159,27 +189,27 @@ pelangganRouter.post(
   })
 )
 
-pelangganRouter.get(
-  '/pelanggans',
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const perPage = parseInt(req.query.per_page as string) || 15
+// pelangganRouter.get(
+//   '/pelanggans',
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//       const perPage = parseInt(req.query.per_page as string) || 15
 
-      const allPelangganes = await fetchAllPelanggans(perPage)
+//       const allPelangganes = await fetchAllPelanggans(perPage)
 
-      res.json({
-        success: true,
-        data: allPelangganes,
-        meta: {
-          total: allPelangganes.length,
-        },
-      })
-    } catch (error) {
-      console.error('Error fetching all pelanggans:', error)
-      res.status(500).json({ error: 'Internal Server Error' })
-    }
-  }
-)
+//       res.json({
+//         success: true,
+//         data: allPelangganes,
+//         meta: {
+//           total: allPelangganes.length,
+//         },
+//       })
+//     } catch (error) {
+//       console.error('Error fetching all pelanggans:', error)
+//       res.status(500).json({ error: 'Internal Server Error' })
+//     }
+//   }
+// )
 pelangganRouter.put(
   '/:edi',
   asyncHandler(async (req: Request, res: Response) => {

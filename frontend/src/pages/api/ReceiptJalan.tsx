@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom'
 import { useGetGudangByIdQuery } from '../../hooks/warehouseHooks'
 import {
   useGetContactsQuery,
+  useGetContactsQuerysa,
   useGetPelangganByIdQuery,
 } from '../../hooks/contactHooks'
 import { useGetBarangByIdQuery } from '../../hooks/barangHooks'
@@ -24,6 +25,7 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
   )
   const barangName = getPosDetail?.items?.[0]?.name
   const namaKontak = getPosDetail?.contacts?.[0]?.name
+  const idKontakku = getPosDetail?.contacts?.[0]?.id
 
   // const contactName = getPosDetail?.contacts?.[0]?.name
   const gudangName = getPosDetail?.warehouses?.[0]?.name
@@ -47,9 +49,14 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
   const getPelangganDetil = pelanggans?.find(
     (gedung: any) => gedung.name === contactName
   )
-  const alamatPelanggan = getPelangganDetil?.address ?? 0
-  const telponPelanggan = getPelangganDetil?.phone ?? 0
+  // const alamatPelanggan = getPelangganDetil?.address ?? 0
+  // const telponPelanggan = getPelangganDetil?.phone ?? 0
   const ketPelanggan = getPosDetail?.message ?? 0
+  //
+  const { data: contactjir } = useGetContactsQuerysa(idKontakku as any)
+  const kontakringan = contactjir?.[0]?.name ?? 0
+  const alamatPelanggan = contactjir?.[0]?.address
+  const telponPelanggan = contactjir?.[0]?.phone ?? 0
 
   //
   const { data: barangs } = useGetBarangByIdQuery(name as unknown)
@@ -104,10 +111,11 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
     <div
       ref={ref} // Attach the ref here for printing
       style={{
-        padding: 20,
-        maxWidth: 650,
+        padding: 15,
+        maxWidth: 750,
         background: '#fff',
         marginLeft: '20px',
+        marginRight: '6px',
         marginTop: '20px',
       }}
     >
@@ -143,9 +151,7 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
       <br />
       <Row>
         <Col span={12}>
-          <span style={{ fontSize: '18px' }}>
-            Pelanggan: {namaKontak || contactName}
-          </span>
+          <span style={{ fontSize: '18px' }}>Pelanggan: {kontakringan}</span>
         </Col>
         <Col span={12} style={{ textAlign: 'right', fontSize: '18px' }}>
           <span>{refNumber}</span>
@@ -216,7 +222,7 @@ const ReceiptJalan = forwardRef<HTMLDivElement>((props, ref) => {
           <br />
           <Text></Text>
           <br />
-          <Text style={{ fontSize: '18px' }}>{contactName}</Text>
+          <Text style={{ fontSize: '18px' }}>{kontakringan}</Text>
         </Col>
       </Row>
 

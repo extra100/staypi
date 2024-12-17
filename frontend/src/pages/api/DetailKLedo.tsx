@@ -37,7 +37,11 @@ import Receipt from './printNota'
 import ReceiptJalan from './ReceiptJalan'
 import { useIdInvoice } from './takeSingleInvoice'
 import { useIdWarehouse } from './namaWarehouse'
-import { useGetContactsQuery } from '../../hooks/contactHooks'
+import {
+  useGetContactsQuery,
+  useGetContactsQuerysa,
+  // useGetContactsQueryIdKontak,
+} from '../../hooks/contactHooks'
 import { useGetAkunBanksQueryDb } from '../../hooks/akunBankHooks'
 import { useGetWarehousesQuery } from '../../hooks/warehouseHooks'
 import { NumericFormat } from 'react-number-format'
@@ -91,7 +95,7 @@ const DetailKledo: React.FC = () => {
     ref_number as string
   )
   const { data: allreturns } = useGetReturnByIdQuery(ref_number as string)
-  console.log({ allreturns })
+  // console.log({ allreturns })
   const { data: contacts } = useGetContactsQuery()
   const { data: akunBanks } = useGetAkunBanksQueryDb()
 
@@ -101,7 +105,7 @@ const DetailKledo: React.FC = () => {
   const getReturDetail = allreturns?.find(
     (balikin: any) => balikin.ref_transaksi === ref_number
   )
-  console.log({ getReturDetail })
+  // console.log({ getReturDetail })
 
   //delete
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(
@@ -109,13 +113,13 @@ const DetailKledo: React.FC = () => {
   )
   const IdYangAkanDiDelete = getPosDetail?.id
   const memorandum = getPosDetail?.memo || ref_number
-  console.log({ memorandum })
+  // console.log({ memorandum })
   const idMonggo = getPosDetail?._id
   const pesan = getPosDetail?.message
   const { hapusLoading, isDeleted } = useDeleteInvoice(selectedInvoiceId ?? 0)
   const { getIdAtInvoice } = useIdInvoice(ref_number || '')
-  console.log({ getIdAtInvoice })
-  console.log({ ref_number })
+  // console.log({ getIdAtInvoice })
+  // console.log({ ref_number })
   const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
 
   const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
@@ -135,6 +139,7 @@ const DetailKledo: React.FC = () => {
   const items = getPosDetail?.items || []
 
   const gudangName = getPosDetail?.warehouses?.[0]?.name
+  const kontakId = getPosDetail?.contacts?.[0]?.id
   const namaKontak = getPosDetail?.contacts?.[0]?.name
   const gudangId = getPosDetail?.warehouses?.[0]?.warehouse_id
   const idididid = getPosDetail?.items?.[0]?.id
@@ -144,7 +149,11 @@ const DetailKledo: React.FC = () => {
     return qty > 0 ? amount / qty : 0
   })
 
-  // console.log({ amountsPerBaris })
+  const { data: contactjir } = useGetContactsQuerysa(kontakId as any)
+  const kontakringan = contactjir?.[0]?.name
+
+  // console.log('aneh kembe bismillah 212', kontakringan)
+  // console.log('dvSBSRFb kontak', contactjir)
 
   const totalAmountPerBaris = items.reduce((total: number, item: any) => {
     const amount = item.price || 0
@@ -152,13 +161,13 @@ const DetailKledo: React.FC = () => {
     const amountPerBaris = qty > 0 ? amount * qty : 0
     return total + amountPerBaris
   }, 0)
-  console.log({ totalAmountPerBaris })
+  // console.log({ totalAmountPerBaris })
   const totalDiskonSemua = items.reduce((total: number, item: any) => {
     const amount = item.discount_amount || 0
 
     return total + amount
   }, 0)
-  console.log({ totalDiskonSemua })
+  // console.log({ totalDiskonSemua })
   const langka = getPosDetail?.id
 
   const tagName = getPosDetail?.tages?.map((tag: any) => tag.name) || []
@@ -820,7 +829,7 @@ const DetailKledo: React.FC = () => {
               <Text strong>Pelanggan:</Text>
             </div>
             <Title level={5} style={{ marginBottom: 0 }}>
-              {namaKontak || contactName}
+              {kontakringan}
             </Title>
           </Col>
           <Col span={12}>

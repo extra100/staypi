@@ -8,6 +8,7 @@ import {
 } from '../../hooks/warehouseHooks'
 import {
   useGetContactsQuery,
+  useGetContactsQuerysa,
   useGetPelangganByIdQuery,
 } from '../../hooks/contactHooks'
 import { useGetBarangByIdQuery } from '../../hooks/barangHooks'
@@ -33,6 +34,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   // const contactName = getPosDetail?.contacts?.[0]?.name
   const gudangName = getPosDetail?.warehouses?.[0]?.name
   const namaKontak = getPosDetail?.contacts?.[0]?.name
+  const idKontakku = getPosDetail?.contacts?.[0]?.id
 
   const tglTransaksi = getPosDetail?.trans_date ?? 0
   const tglJatuhTempo = getPosDetail?.due_date ?? 0
@@ -65,8 +67,6 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
   const getPelangganDetil = pelanggans?.find(
     (gedung: any) => gedung.name === contactName
   )
-  const alamatPelanggan = getPelangganDetil?.address ?? 0
-  const telponPelanggan = getPelangganDetil?.phone ?? 0
 
   //
   const { data: barangs } = useGetBarangByIdQuery(name as unknown)
@@ -98,6 +98,11 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
 
     return rounded.toLocaleString('id-ID')
   }
+
+  const { data: contactjir } = useGetContactsQuerysa(idKontakku as any)
+  const kontakringan = contactjir?.[0]?.name
+  const alamatPelanggan = contactjir?.[0]?.address
+  const telponPelanggan = contactjir?.[0]?.phone ?? 0
   const columns = [
     {
       title: 'No',
@@ -162,10 +167,12 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
       ref={ref} // Attach the ref here for printing
       style={{
         padding: 20,
-        maxWidth: 650,
+        maxWidth: 750,
         background: '#fff',
         marginLeft: '20px',
-        marginTop: '20px',
+        marginRight: '20px',
+        marginTop: '10px',
+        marginBottom: '10px',
       }}
     >
       <Row justify="center" align="middle">
@@ -206,7 +213,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
               fontSize: '18px',
             }}
           >
-            Pelanggan: {namaKontak || contactName}
+            Pelanggan: {kontakringan}
           </span>
         </Col>
         <Col span={12} style={{ textAlign: 'right', fontSize: '18px' }}>
@@ -340,7 +347,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
               fontSize: '18px',
             }}
           >
-            {contactName}
+            {kontakringan}
           </Text>
         </Col>
         <Col span={12} style={{ textAlign: 'right' }}>
@@ -354,7 +361,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <Text
               strong
               style={{
-                minWidth: '120px',
+                minWidth: '150px',
                 textAlign: 'left',
 
                 fontSize: '18px',
@@ -365,7 +372,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <Text
               strong
               style={{
-                minWidth: '120px',
+                minWidth: '150px',
                 textAlign: 'right',
                 fontSize: '18px',
               }}
@@ -384,7 +391,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             <Text
               strong
               style={{
-                minWidth: '120px',
+                minWidth: '150px',
                 textAlign: 'left',
 
                 fontSize: '18px',
@@ -392,7 +399,7 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
             >
               Jml Bayar:
             </Text>
-            <Text strong style={{ minWidth: '120px', textAlign: 'right' }}>
+            <Text strong style={{ minWidth: '150px', textAlign: 'right' }}>
               {witholdings
                 .filter(
                   (witholding: any) =>
@@ -425,14 +432,14 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
           >
             <Text
               strong
-              style={{ minWidth: '120px', textAlign: 'left', fontSize: '18px' }}
+              style={{ minWidth: '150px', textAlign: 'left', fontSize: '18px' }}
             >
               Total Bayar:
             </Text>
             <Text
               strong
               style={{
-                minWidth: '120px',
+                minWidth: '150px',
                 textAlign: 'right',
                 fontSize: '18px',
               }}
@@ -450,14 +457,14 @@ const Receipt = forwardRef<HTMLDivElement>((props, ref) => {
           >
             <Text
               strong
-              style={{ minWidth: '120px', textAlign: 'left', fontSize: '18px' }}
+              style={{ minWidth: '150px', textAlign: 'left', fontSize: '18px' }}
             >
               Sisa Tagihan:
             </Text>
             <Text
               strong
               style={{
-                minWidth: '120px',
+                minWidth: '150px',
                 textAlign: 'right',
 
                 fontSize: '18px',
