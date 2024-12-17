@@ -20,12 +20,12 @@ const ListTransaksi: React.FC = () => {
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
   )
-console.log({selectedWarehouseId})
+
   const {
     data: transaksi,
     isLoading,
     error,
-  } = useGetTransaksisQuerymu(selectedWarehouseId, startDate) // Pass startDate ke hook
+  } = useGetTransaksisQuerymu(selectedWarehouseId, startDate)
   console.log({ transaksi })
   const { data: contacts } = useGetContactsQuery()
   const { data: gudangs } = useGetoutletsQuery()
@@ -88,29 +88,7 @@ console.log({selectedWarehouseId})
   const [searchWarehouse, setSearchWarehouse] = useState<number | undefined>()
   const [searchStatus, setSearchStatus] = useState<string | undefined>()
   const filteredData = transaksi
-    ?.filter((transaction) => {
-      // Filter berdasarkan Ref Number
-      if (searchRef) {
-        return transaction.ref_number
-          .toLowerCase()
-          .includes(searchRef.toLowerCase())
-      }
-      return true
-    })
-    ?.filter((transaction) => {
-      // Filter berdasarkan Nama Kontak
-      if (searchContact) {
-        return transaction.contact_id === searchContact
-      }
-      return true
-    })
-    ?.filter((transaction) => {
-      // Filter berdasarkan Nama Gudang
-      if (searchWarehouse) {
-        return transaction.warehouse_id === searchWarehouse
-      }
-      return true
-    })
+
     ?.filter((transaction) => {
       if (searchStatus) {
         const statusText = getStatus(transaction)
@@ -123,19 +101,17 @@ console.log({selectedWarehouseId})
       const start = startDate ? new Date(formatDateForBackend(startDate)) : null
       const end = endDate ? new Date(formatDateForBackend(endDate)) : null
       return (
-        (!start || transDate >= start) &&
-        (!end || transDate <= end) &&
-        (transaction.warehouse_id === Number(user?.id_outlet) ||
-          user?.isAdmin) &&
-        transaction.jalur === 'penjualan' &&
-        transaction.reason_id !== 'void'
+        transaction.jalur === 'penjualan' && transaction.reason_id !== 'void'
       )
     })
     ?.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
-
+  const filteredTransaksi = transaksi?.filter(
+    (item: any) => item.reason_id === 'void'
+  )
+  console.log({ filteredTransaksi })
   const [activeButton, setActiveButton] = useState('')
   const navigate = useNavigate()
   const handleButtonClick = (value: any) => {
@@ -426,7 +402,7 @@ console.log({selectedWarehouseId})
         pagination={{ pageSize: 100 }}
       /> */}
       <Table
-        dataSource={transaksi}
+        dataSource={filteredData}
         columns={columns as any}
         rowKey="id"
         pagination={{ pageSize: 100 }}
