@@ -462,7 +462,8 @@ const DetailKledo: React.FC = () => {
     saveNextPayment(payload)
       .then((response: any) => {
         console.log('Payment saved successfully:', response)
-        navigate(`/getnextpaymnet/${refNumber}`) // Navigasi setelah berhasil
+        navigate(`/getnextpaymnet/${memorandum}`) // Navigasi setelah berhasil
+
       })
       .catch((error: any) => {
         console.error('Error saving payment:', error)

@@ -48,7 +48,7 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
     dayjs().format('YYYY-MM-DD')
   )
   const [search, setSearch] = useState<any | null>(refNumber)
-  console.log({ search })
+  // console.log({ search })
   const handleDateFromChange = (date: dayjs.Dayjs | null) => {
     setTransDateFrom(date ? date.format('YYYY-MM-DD') : null)
   }
@@ -61,6 +61,7 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
   const [selectedWarehouse, setSelectedWarehouse] = useState<any | null>(
     idOutletLoggedIn
   )
+  // console.log({ selectedWarehouse })
   const handleWarehouseChange = (value: string) => {
     setSelectedWarehouse(value)
   }
@@ -88,6 +89,18 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
       selectedWarehouse,
       search as any
     )
+  console.log({ getInvFromKledoBasedDate })
+  const discountAmounts = getInvFromKledoBasedDate.flatMap(
+    (invoice: any) =>
+      invoice.items?.map((item: any) => item.discount_amount) || []
+  )
+
+  const qtyAmount = getInvFromKledoBasedDate.flatMap(
+    (invoice: any) => invoice.items?.map((item: any) => item.qty) || []
+  )
+
+  // console.log({ discountAmounts })
+  // console.log({ qtyAmount })
 
   const { data: filteredTransaksis, isLoading: loadingOwnDb } =
     useGetFilteredTransaksisQuery({
@@ -95,7 +108,7 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
       transDateTo,
       selectedWarehouse,
     })
-  console.log({ getInvFromKledoBasedDate })
+  console.log({ filteredTransaksis })
   const handleStatusChange = (value: number) => {
     setSelectedStatus(value)
   }
@@ -118,13 +131,13 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.memo === search
   )
+  console.log({ getPosDetail })
 
   const idBank = getPosDetail?.witholdings?.[0]?.witholding_account_id
   const name = getPosDetail?.witholdings?.[0]?.name
   const whPersen = getPosDetail?.witholdings?.[0]?.witholding_percent
   const whAmount = getPosDetail?.witholdings?.[0]?.witholding_amount
   const idMonggo = getPosDetail?.witholdings?.[0]?._id
-  console.log({ idBank })
   const nilai = getPosDetail?.memo
 
   const { getBankTrans } = TakePembayaranBankTrans(
@@ -133,8 +146,8 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
   ) || {
     getBankTrans: [],
   }
-  console.log({ idBank })
-  console.log({ getBankTrans })
+  // console.log({ idBank })
+  // console.log({ getBankTrans })
   const firstPayment =
     getBankTrans && getBankTrans.length > 0 ? getBankTrans[0] : null
   const amount = firstPayment?.amount || 0
@@ -142,7 +155,7 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
   const tanggalBayar = firstPayment?.trans_date || 0
   const idUnique = firstPayment?.id || 0
 
-  console.log({ firstPayment })
+  // console.log({ firstPayment })
 
   const updateHanyaId = updateDenganMemoDariKledo()
 
@@ -151,6 +164,7 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
     allTransactions?.find(
       (transaction: any) => transaction.id === selectedData?.id
     )?.memo
+
   //
   const updateInvoiceId = async () => {
     if (!selectedData) {
@@ -160,9 +174,9 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
 
     const invoiceId = selectedData.id
     const totalAmount = selectedData.amount
-    console.log({ totalAmount })
+    // console.log({ totalAmount })
     const due = selectedData.due
-    console.log({ totalAmount })
+    // console.log({ totalAmount })
 
     const idPadaItems =
       selectedData.items?.map((item: any) => ({
@@ -356,7 +370,7 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
         dataSource={getInvFromKledoBasedDate}
         columns={columns}
         rowKey="id"
-        loading={loading || loadingOwnDb}
+        // loading={loadingOwnDb}
         pagination={{ pageSize: 100 }}
         style={{ marginTop: '20px' }}
         // rowClassName={(record) => (record.isRed ? 'red-row' : '')}
