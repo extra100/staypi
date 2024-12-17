@@ -20,7 +20,7 @@ const ListTransaksi: React.FC = () => {
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
   )
-
+console.log({selectedWarehouseId})
   const {
     data: transaksi,
     isLoading,
