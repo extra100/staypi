@@ -98,32 +98,36 @@ export const useGetTransaksisQuery = () =>
 //     },
 //     enabled: !!warehouseId,
 //   })
-
 export const useGetTransaksisQuerymu = (
   warehouseId: any | null,
-  date: string | null
+  startDate: string | null,
+  endDate: string | null
 ) =>
   useQuery({
-    queryKey: ['transactions', warehouseId, date], // Tambahkan `date` dalam query key
+    queryKey: ['transactions', warehouseId, startDate, endDate], // Tambahkan `startDate` dan `endDate` dalam query key
     queryFn: async () => {
-      if (!warehouseId || !date) {
-        console.log('No warehouseId or date provided')
+      if (!warehouseId || !startDate || !endDate) {
+        console.log('No warehouseId, startDate, or endDate provided')
         return []
       }
 
       console.log(
         'Fetching transactions for warehouseId:',
         warehouseId,
-        'on date:',
-        date
+        'from startDate:',
+        startDate,
+        'to endDate:',
+        endDate
       ) // Debug
       const response = await apiClient.get<Transaction[]>(
-        `/api/transactions?warehouseId=${Number(warehouseId)}&date=${date}`
+        `/api/transactions?warehouseId=${Number(
+          warehouseId
+        )}&startDate=${startDate}&endDate=${endDate}`
       )
       console.log('Data from API:', response.data) // Debug data dari API
       return response.data
     },
-    enabled: !!warehouseId && !!date, // Pastikan kedua nilai ada sebelum query dijalankan
+    enabled: !!warehouseId && !!startDate && !!endDate, // Pastikan ketiga nilai ada sebelum query dijalankan
   })
 
 export const useGetTransactionByIdQuery = (ref_number: string) =>

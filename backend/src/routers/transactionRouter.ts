@@ -100,10 +100,46 @@ transactionRouter.post(
 //   })
 // )
 
+// transactionRouter.get(
+//   '/',
+//   asyncHandler(async (req: any, res: any) => {
+//     const { warehouseId, date } = req.query
+
+//     if (!warehouseId || isNaN(Number(warehouseId))) {
+//       return res.status(400).json({ message: 'Invalid warehouseId' })
+//     }
+
+//     try {
+//       const numericWarehouseId = Number(warehouseId)
+
+//       const todayDate = date
+//         ? dayjs(date).format('YYYY-MM-DD')
+//         : dayjs().format('YYYY-MM-DD')
+
+//       let transactions
+
+//       if (numericWarehouseId === 2) {
+//         transactions = await TransactionModel.find({
+//           trans_date: todayDate,
+//         })
+//       } else {
+//         transactions = await TransactionModel.find({
+//           warehouse_id: numericWarehouseId,
+//           trans_date: todayDate,
+//         })
+//       }
+
+//       res.json(transactions)
+//     } catch (error) {
+//       console.error('Error querying transactions:', error)
+//       res.status(500).json({ message: 'Server error occurred.' })
+//     }
+//   })
+// )
 transactionRouter.get(
   '/',
   asyncHandler(async (req: any, res: any) => {
-    const { warehouseId, date } = req.query
+    const { warehouseId, startDate, endDate } = req.query
 
     if (!warehouseId || isNaN(Number(warehouseId))) {
       return res.status(400).json({ message: 'Invalid warehouseId' })
@@ -112,20 +148,35 @@ transactionRouter.get(
     try {
       const numericWarehouseId = Number(warehouseId)
 
-      const todayDate = date
-        ? dayjs(date).format('YYYY-MM-DD')
-        : dayjs().format('YYYY-MM-DD')
+      // Format tanggal
+      const todayDate = dayjs().format('YYYY-MM-DD')
+      const formattedStartDate = startDate
+        ? dayjs(startDate).format('YYYY-MM-DD')
+        : todayDate
+      const formattedEndDate = endDate
+        ? dayjs(endDate).format('YYYY-MM-DD')
+        : todayDate
 
+      // Validasi range tanggal
+      if (formattedStartDate > formattedEndDate) {
+        return res.status(400).json({ message: 'Invalid date range' })
+      }
+
+      // Query berdasarkan rentang tanggal
       let transactions
+      const dateFilter = {
+        trans_date: {
+          $gte: formattedStartDate,
+          $lte: formattedEndDate,
+        },
+      }
 
       if (numericWarehouseId === 2) {
-        transactions = await TransactionModel.find({
-          trans_date: todayDate,
-        })
+        transactions = await TransactionModel.find(dateFilter)
       } else {
         transactions = await TransactionModel.find({
           warehouse_id: numericWarehouseId,
-          trans_date: todayDate,
+          ...dateFilter,
         })
       }
 

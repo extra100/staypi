@@ -15,17 +15,18 @@ const ListTransaksi: React.FC = () => {
 
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
-  const [startDate, setStartDate] = useState<string | null>(null)
-  const [endDate, setEndDate] = useState<string | null>(null)
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
   )
+  const [startDate, setStartDate] = useState<string | null>(null)
+  const [endDate, setEndDate] = useState<string | null>(null)
 
   const {
     data: transaksi,
     isLoading,
     error,
-  } = useGetTransaksisQuerymu(selectedWarehouseId, startDate)
+  } = useGetTransaksisQuerymu(selectedWarehouseId, startDate, endDate)
+
   console.log({ transaksi })
   const { data: contacts } = useGetContactsQuery()
   const { data: gudangs } = useGetoutletsQuery()
@@ -64,6 +65,12 @@ const ListTransaksi: React.FC = () => {
   const handleDateChange = (date: any, dateString: string) => {
     const formattedDate = formatDateForBackend(dateString) // Format tanggal
     setStartDate(formattedDate) // Set tanggal yang sudah diformat
+    setEndDate(formattedDate) // Set tanggal yang sudah diformat
+  }
+  const handleDateChangeSampai = (date: any, dateString: string) => {
+    const formattedDate = formatDateForBackend(dateString) // Format tanggal
+
+    setEndDate(formattedDate) // Set tanggal yang sudah diformat
   }
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
 
@@ -319,7 +326,9 @@ const ListTransaksi: React.FC = () => {
           <DatePicker
             placeholder="Sampai Tanggal"
             format="DD-MM-YYYY"
-            onChange={(date, dateString) => handleDateChange(date, dateString as any)} // Panggil fungsi handleDateChange
+            onChange={(date, dateString) =>
+              handleDateChangeSampai(date, dateString as any)
+            } // Panggil fungsi handleDateChange
           />
         </Col>
         <Row gutter={16} style={{ marginBottom: 16 }}>

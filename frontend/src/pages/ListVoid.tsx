@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Button, Table, Tag } from 'antd'
+import { Button, Col, DatePicker, Table, Tag } from 'antd'
 
-import { useGetTransaksisQuery } from '../hooks/transactionHooks'
+import {
+  useGetTransaksisQuery,
+  useGetTransaksisQuerymu,
+} from '../hooks/transactionHooks'
 import { useIdInvoice } from './api/takeSingleInvoice'
 import UserContext from '../contexts/UserContext'
 import { useGetContactsQuery } from '../hooks/contactHooks'
@@ -36,7 +39,16 @@ const ListVoid: React.FC = () => {
     return contact ? contact.name : 'Unknown Contact'
   }
 
-  const filteredData = data
+  const [startDate, setStartDate] = useState<string | null>(null)
+  const [endDate, setEndDate] = useState<string | null>(null)
+
+  const {
+    data: transaksi,
+    isLoading,
+    error,
+  } = useGetTransaksisQuerymu(selectedWarehouseId, startDate, endDate)
+  console.log({ transaksi })
+  const filteredData = transaksi
     ?.filter(
       (transaction) =>
         transaction.warehouse_id === Number(user?.id_outlet) &&
@@ -46,6 +58,23 @@ const ListVoid: React.FC = () => {
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
+  console.log({ filteredData })
+
+  const formatDateForBackend = (dateString: string) => {
+    const [day, month, year] = dateString.split('-')
+    return `${year}-${month}-${day}`
+  }
+  const handleDateChange = (date: any, dateString: string) => {
+    const formattedDate = formatDateForBackend(dateString) // Format tanggal
+    setStartDate(formattedDate) // Set tanggal yang sudah diformat
+    setEndDate(formattedDate) // Set tanggal yang sudah diformat
+  }
+  const handleDateChangeSampai = (date: any, dateString: string) => {
+    const formattedDate = formatDateForBackend(dateString) // Format tanggal
+
+    setEndDate(formattedDate) // Set tanggal yang sudah diformat
+  }
+  console.log({ data })
   const [activeButton, setActiveButton] = useState('')
   const navigate = useNavigate()
 
@@ -73,6 +102,11 @@ const ListVoid: React.FC = () => {
           {text}
         </a>
       ),
+    },
+    {
+      title: 'Tanggal',
+      dataIndex: 'trans_date',
+      key: 'trans_date',
     },
 
     {
@@ -129,9 +163,25 @@ const ListVoid: React.FC = () => {
 
   return (
     <>
-      <h1>Daftar Transaksi</h1>
+      <h1>DAFTAR VOID</h1>
 
       <div id="btn-filter-status-container" style={{ display: 'inline-flex' }}>
+        <Col>
+          <DatePicker
+            placeholder="Dari Tanggal"
+            format="DD-MM-YYYY"
+            onChange={(date, dateString) => handleDateChange(date, dateString as any)} // Panggil fungsi handleDateChange
+          />
+        </Col>
+        <Col>
+          <DatePicker
+            placeholder="Sampai Tanggal"
+            format="DD-MM-YYYY"
+            onChange={(date, dateString) =>
+              handleDateChangeSampai(date, dateString as any)
+            } // Panggil fungsi handleDateChange
+          />
+        </Col>
         <Button
           id="btn-filter-1"
           value="1"
