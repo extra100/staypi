@@ -55,6 +55,17 @@
   }
 }
 
+.row-different-total {
+  background-color: red !important;
+}
+
+.row-different-paid {
+  background-color: blue !important;
+}
+
+.row-different-remaining {
+  background-color: yellow !important;
+}
 .page-container {
   position: relative;
 }
