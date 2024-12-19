@@ -60,9 +60,7 @@ const WarehouseTransferDetail: React.FC = () => {
   const toWarehouseId =
     warehouseMap[transfer.to_warehouse_id] || transfer.to_warehouse_name
 
-  const fromWarehouseCode = idWarehouseMonggo?.find(
-    (warehouse) => warehouse.name === fromWarehouseId
-  )?.code
+
   //
   if (idWarehouseMonggo && Array.isArray(idWarehouseMonggo)) {
     idWarehouseMonggo.forEach((warehouse) => {

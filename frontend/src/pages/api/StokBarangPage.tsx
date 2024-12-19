@@ -1796,6 +1796,177 @@ const StockSelectorTable = () => {
             </Form>
           </div>
         </div>
+        <div>
+        <div>
+          <Select
+            mode="multiple"
+            placeholder="Pilih Barang"
+            style={{ width: '100%', marginTop: '10px', alignItems: 'center' }}
+            optionFilterProp="items"
+            filterOption={false}
+            onChange={handleProductChange}
+            // value={selectedFinanceAccountIds}
+            showSearch
+            onSearch={handleSearch}
+            // open={dropdownVisible}
+            // onDropdownVisibleChange={(open) => setDropdownVisible(open)}
+            dropdownRender={(menu) => (
+              <div
+                style={{
+                  minWidth: '800px',
+                  padding: '8px',
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    padding: '8px',
+                    borderBottom: '1px solid #e8e8e8',
+                    backgroundColor: '#f5f5f5',
+                  }}
+                >
+                  <span style={{ flex: 2, textAlign: 'center' }}>
+                    Nama Barang
+                  </span>
+                  {/* <span style={{ flex: 1, textAlign: 'center' }}>Qty</span> */}
+
+                  {discountRates.map((rate) => (
+                    <span
+                      key={rate.label}
+                      style={{ flex: 1, textAlign: 'center' }}
+                    >
+                      {rate.label}
+                    </span>
+                  ))}
+                </div>
+                <div
+                  style={{
+                    maxHeight: '2000px',
+                    overflowY: 'auto',
+                  }}
+                >
+                  {menu}
+                </div>
+              </div>
+            )}
+            tagRender={customDisplayRender as any}
+          >
+            {Array.isArray(barangs) &&
+              barangs
+                .filter((item) =>
+                  item.name.toLowerCase().includes(searchValue.toLowerCase())
+                )
+                .map((product) => {
+                  // const stockQuantity =
+                  //   warehouseStock.find((stock: any) => stock.id === product.id)
+                  //     ?.stock || 0
+                  // if (stockQuantity === 0) return null
+                  const filteredDiscountRates = discountRates.map((rate) => {
+                    if (rate.label === 'Istimewa SP 23%') {
+                      if (product.pos_product_category_id === 19) {
+                        return { ...rate, percentage: 23 }
+                      }
+                      // if (product.pos_product_category_id === 10) {
+                      //   if (product.name.includes('PIPA KOTAK GALVANIS 4X4X')) {
+                      //     return { ...rate, percentage: 25.5 }
+                      //   }
+                      //   return { ...rate, percentage: 22.5 }
+                      // }
+
+                      return { ...rate, percentage: null }
+                    }
+                    return rate
+                  })
+
+                  return (
+                    <Select.Option
+                      key={product.id}
+                      value={product.id}
+                      label={product.id}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '4px 8px',
+                          lineHeight: '1.2',
+                          fontSize: '12px',
+                          borderBottom: '1px solid #e8e8e8',
+                        }}
+                      >
+                        <span
+                          style={{
+                            flex: 2,
+                            textAlign: 'left',
+                            borderRight: '1px solid #e8e8e8',
+                            paddingRight: '8px',
+                            wordWrap: 'break-word',
+                            whiteSpace: 'normal',
+                          }}
+                        >
+                          {product.name}
+                        </span>
+
+                        {/* <span
+                          style={{
+                            flex: 1,
+                            textAlign: 'center',
+                            borderRight: '1px solid #e8e8e8',
+                            paddingRight: '8px',
+                            paddingLeft: '8px',
+                            wordWrap: 'break-word',
+                            whiteSpace: 'normal',
+                          }}
+                        >
+                          {Number(stockQuantity).toLocaleString('id-ID')}
+                        </span> */}
+
+                        {filteredDiscountRates.map((rate) => {
+                          const discountedPrice =
+                            rate.percentage !== null
+                              ? (
+                                  product.price -
+                                  (product.price * rate.percentage) / 100
+                                ).toFixed(2)
+                              : 0
+
+                          return (
+                            <span
+                              key={rate.label}
+                              onClick={() =>
+                                handlePriceClick(rate.label, product)
+                              }
+                              style={{
+                                flex: 1,
+                                textAlign: 'center',
+                                backgroundColor:
+                                  selectedPrices[product.id] === rate.label
+                                    ? '#52C41A'
+                                    : 'transparent',
+                                cursor: 'pointer',
+                                paddingLeft: '8px',
+                                paddingRight: '8px',
+                                borderRight: '1px solid #e8e8e8',
+                                wordWrap: 'break-word',
+                                whiteSpace: 'normal',
+                              }}
+                            >
+                              {Number(discountedPrice).toLocaleString('id-ID')}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    </Select.Option>
+                  )
+                })}
+          </Select>
+        </div>
+        </div>
         {isLoading && <div className="loading-overlay"></div>}
       </div>
     </>
