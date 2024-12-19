@@ -228,12 +228,12 @@ function App() {
                   <Link className="nav-link header-link p-1 px-3" to={`/ibo`}>
                     Nota Baru
                   </Link>
-                  <Link
+                  {/* <Link
                     className="nav-link header-link p-1 px-3"
                     to={`/pemesananpenjualan`}
                   >
                     Pemesanan Penjualan
-                  </Link>
+                  </Link> */}
                   <Link
                     className="nav-link header-link p-1 px-3"
                     to={`/listkledo`}
@@ -477,9 +477,12 @@ function App() {
               </LinkContainer>
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
-              <AiOutlineBgColors size={20} style={iconStyle} />
-              <LinkContainer to="/listpindah" onClick={handleDataSupplierClick}>
-                <NavDropdown.Item>Mutasi Awal</NavDropdown.Item>
+              <AiFillApi size={20} style={iconStyle} />
+              <LinkContainer
+                to="/caribedainvoice"
+                onClick={handleDataKategoriClick}
+              >
+                <NavDropdown.Item>Cari Beda</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
             {/* Data Supplier */}
