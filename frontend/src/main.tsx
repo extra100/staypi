@@ -287,6 +287,8 @@ const router = createBrowserRouter(
       <Route path="/tabelpelanggans" element={<PelangganTable />} />
       <Route path="/tambahpelanggan" element={<PelangganSearchPage />} />
       <Route path="/tabeloutlets" element={<TableWarehouse />} />
+      <Route path="/caribedainvoice" element={<CariBeda />} />
+
     </Route>
   )
 )
