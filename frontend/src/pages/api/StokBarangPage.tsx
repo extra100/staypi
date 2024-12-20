@@ -471,7 +471,7 @@ const StockSelectorTable = () => {
             // price: Number(discountedPrices[item.id]) || retailPrice,
             price: Math.ceil(Number(discountedPrices[item.id]) || retailPrice),
 
-            qty: 1,
+            qty: null,
 
             selectedDiscount: selectedPrices[item.id] || 'Umum 2',
 
@@ -1663,7 +1663,8 @@ const StockSelectorTable = () => {
                       fontSize: '16px',
                       fontWeight: 'bold',
                     }}
-                    value={totalSubtotal}
+                    value={formatRupiah(totalSubtotal)}
+
                     readOnly
                   />
                 </Col>
