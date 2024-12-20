@@ -1663,7 +1663,7 @@ const StockSelectorTable = () => {
                       fontSize: '16px',
                       fontWeight: 'bold',
                     }}
-                    value={formatRupiah(totalSubtotal)}
+                    value={totalSubtotal}
                     readOnly
                   />
                 </Col>
