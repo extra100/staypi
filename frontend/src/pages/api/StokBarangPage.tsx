@@ -28,7 +28,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { useAddTransactionMutation } from '../../hooks/transactionHooks'
 import { Navigate } from 'react-router-dom'
 import { useGetBarangsQuery } from '../../hooks/barangHooks'
-import { useGetContactsQuery } from '../../hooks/contactHooks'
+import { useGetContactsQuery, useGetFilteredContactsByOutletQuery } from '../../hooks/contactHooks'
 import { saveToApiNextPayment } from './NextPayment'
 import { useNavigate } from 'react-router-dom'
 import { useWarehouseStock } from './fetchSemuaStok'
@@ -47,6 +47,7 @@ import {
   useGetControlQuery,
   useUpdateControlMutation,
 } from '../../hooks/controlHooks'
+import { useGetPelanggansQueryDb } from '../../hooks/pelangganHooks'
 
 const { Option } = Select
 const { Title, Text } = Typography
@@ -69,7 +70,7 @@ const StockSelectorTable = () => {
     selectedDate || '',
     selectedWarehouseId
   )
-
+console.log({warehouseStock})
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
 
@@ -83,14 +84,14 @@ const StockSelectorTable = () => {
   const { idWarehouse } = useIdWarehouse()
 
   const { idContact } = useIdContact('')
+  const [warehouseName, setWarehouseName] = useState<string | null>(null)
 
-  const { data: contacts } = useGetContactsQuery()
+  const { data: contacts } = useGetFilteredContactsByOutletQuery(warehouseName as any)
   const { data: controllings } = useGetControlQuery()
 
   const { saveInvoiceData } = SaveApi()
   //
 
-  const [warehouseName, setWarehouseName] = useState<string | null>(null)
   const getWarehouseName = () => {
     if (!gudangdb || !selectedWarehouseId) return null
 
@@ -100,7 +101,9 @@ const StockSelectorTable = () => {
     )
     return selectedWarehouse ? selectedWarehouse.name : null
   }
-
+  // const { data: contactssss } = useGetFilteredContactsByOutletQuery(warehouseName as any);
+// console.log({contactssss})
+console.log({warehouseName})
   useEffect(() => {
     const name = getWarehouseName()
     setWarehouseName(name)
@@ -179,7 +182,7 @@ const StockSelectorTable = () => {
     }
   }, [user])
   const [dataSource, setDataSource] = useState<any[]>([])
-  console.log({ dataSource })
+
   useEffect(() => {
     if (selectedFinanceAccountIds.length > 0 && selectedWarehouseId !== null) {
       selectedFinanceAccountIds.forEach((productId: any) => {
@@ -244,7 +247,7 @@ const StockSelectorTable = () => {
         const applicableCategories = barangs?.map(
           (barang) => barang.pos_product_category_id
         )
-        console.log({ applicableCategories })
+        // console.log({ applicableCategories })
         const category19 = applicableCategories?.find(
           (category) => category === 19
         )
@@ -263,7 +266,7 @@ const StockSelectorTable = () => {
     },
   ]
 
-  console.log(discountRates)
+  // console.log(discountRates)
 
   const [discountedPrices, setDiscountedPrices] = useState<{
     [key: string]: number
@@ -324,7 +327,7 @@ const StockSelectorTable = () => {
   }
 
   const calculateSubtotal = (price: number, qty: number) => {
-    console.log({ price })
+    // console.log({ price })
 
     return price * qty
   }
@@ -444,7 +447,7 @@ const StockSelectorTable = () => {
   //Umum 2
 
   const [hargaDasar, setHargaDasar] = useState<{ [key: string]: number }>({})
-  console.log({ hargaDasar })
+  // console.log({ hargaDasar })
   const handleOkClick = () => {
     setDropdownVisible(false)
 
@@ -587,7 +590,7 @@ const StockSelectorTable = () => {
     }, 0)
   const limitizeTrans = totalReceivable > 3800
   const [totalSubtotal, setTotalSubtotal] = useState<number>(0)
-  console.log({ totalSubtotal })
+  // console.log({ totalSubtotal })
   const [formattedTotalSubtotal, setFormattedTotalSubtotal] =
     useState<string>('')
 
@@ -851,7 +854,7 @@ const StockSelectorTable = () => {
     })
     setStockQuantities(newStockQuantities)
   }, [barangs, warehouseStock])
-  console.log({ stockQuantities })
+  // console.log({ stockQuantities })
 
   const columns = [
     {
@@ -995,7 +998,7 @@ const StockSelectorTable = () => {
           categoryId === 19
             ? discountRates
             : discountRates.filter((rate) => rate.label !== 'Istimewa SP 23%')
-        console.log({ text })
+        // console.log({ text })
 
         return (
           <div
@@ -1257,7 +1260,7 @@ const StockSelectorTable = () => {
                 <span style={labelColonStyle}>:</span>
                 <Select
                   showSearch
-                  placeholder="Select a Contact"
+                  placeholder="Pilih Pelanggan"
                   style={{ width: '70%' }}
                   optionFilterProp="label"
                   filterOption={(input: any, option: any) =>

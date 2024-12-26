@@ -171,9 +171,10 @@ pelangganRouter.post(
     const posData = {
       id: req.body.id,
       name: req.body.name,
-      phone: req.body.phone || '-', // Default if missing
-      address: req.body.address || '-', // Default if missing
+      phone: req.body.phone || '-', 
+      address: req.body.address || '-', 
       group_id: req.body.group_id ?? 0,
+      outlet_name: req.body.group?.name || '-', 
       group: req.body.group
         ? { id: req.body.group.id, name: req.body.group.name }
         : undefined,
@@ -188,6 +189,7 @@ pelangganRouter.post(
     }
   })
 )
+
 
 // pelangganRouter.get(
 //   '/pelanggans',

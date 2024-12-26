@@ -39,7 +39,7 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
   useEffect(() => {
     if (contactId && takedueanContactStatusIdandMemoMny?.length) {
       const filtered = takedueanContactStatusIdandMemoMny.filter(
-        (nota: any) => nota.contact_id === contactId // Pastikan key sesuai
+        (nota: any) => nota.contact_id === contactId 
       )
       setAaa(filtered)
     }
@@ -78,11 +78,36 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
     (contact: any) => contact.id === contactId
   )?.address
 
+
   const firstWarehouseId =
     takeInvoicesFromKledoBasedOnPelanggan.length > 0
       ? takeInvoicesFromKledoBasedOnPelanggan[0].warehouse_id
       : null
   const { data: gudangs } = useGetWarehousesQuery()
+
+  const outletPelanggan = contacts?.find(
+    (contact: any) => contact.id === contactId
+  )?.outlet_name
+  console.log({outletPelanggan})
+  const filteredGudangs = gudangs?.filter((gudang) => {
+    return gudang.name === outletPelanggan;
+  });
+  const filteredCodes = gudangs
+  ?.filter((gudang) => gudang.name === outletPelanggan)
+  .map((gudang) => gudang.code);
+  const filteredNames = gudangs
+  ?.filter((gudang) => gudang.name === outletPelanggan)
+  .map((gudang) => gudang.name);
+  const filteredTelpn = gudangs
+  ?.filter((gudang) => gudang.name === outletPelanggan)
+  .map((gudang) => gudang.contact);
+  const filteredPhoto = gudangs
+  ?.filter((gudang) => gudang.name === outletPelanggan)
+  .map((gudang) => gudang.photo);
+console.log(filteredNames);
+
+
+console.log({filteredGudangs})
   const namaGudang = gudangs?.find(
     (contact: any) => contact.id === firstWarehouseId
   )?.name
@@ -100,11 +125,11 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
   const normalizedData = [
     ...takeInvoicesFromKledoBasedOnPelanggan.map((item) => ({
       ...item,
-      amount: item.amount, // Tetap pakai amount
+      amount: item.amount, 
     })),
-    ...takedueanContactStatusIdandMemoMny.map((item) => ({
+    ...aaa.map((item) => ({
       ...item,
-      amount: item.amount_after_tax, // Ubah amount_after_tax jadi amount
+      amount: item.amount_after_tax, 
     })),
   ]
   const columns = [
@@ -248,9 +273,9 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
             alignItems: 'center',
           }}
         >
-          {photoGudang ? (
+          {filteredPhoto ? (
             <img
-              src={photoGudang}
+              src={filteredPhoto as any}
               alt="Gudang"
               style={{
                 maxWidth: 'auto',
@@ -292,7 +317,7 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
                 marginBottom: '0px',
               }}
             >
-              {namaGudang || 'Nama Gudang'}
+              {namaGudang || filteredNames || 'Nama Gudang'}
             </span>
           </div>
           <div
@@ -315,7 +340,7 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
                 wordBreak: 'break-word',
               }}
             >
-              <div>{alamatGudang || 'Alamat Gudang'}</div>
+              <div>{alamatGudang || filteredCodes || 'Alamat Outlet'}</div>
             </span>
           </div>
           <div
@@ -336,7 +361,7 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
                 fontStyle: 'italic',
               }}
             >
-              <div>{telpolGudang || 'Telpon Gudang'}</div>
+              <div>{telpolGudang || filteredTelpn||'Telpon Gudang'}</div>
             </span>
           </div>
         </div>

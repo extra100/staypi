@@ -37,10 +37,10 @@ export function useIdNamaPelanggan() {
         const accessToken = data.access_token
 
         const bankTransResponse = await fetch(
-          `${HOST}/finance/contacts?page=1&per_page=200000`,
+          `${HOST}/finance/contacts?page=1&per_page=20000000`,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${TOKEN}`,
             },
           }
         )
@@ -64,8 +64,8 @@ export function useIdNamaPelanggan() {
           .map((item: Pelanggan) => ({
             id: item.id,
             name: item.name,
-            phone: item.phone || 'Mohon Lengkapi Cp',
-            address: item.address || 'Mohon Lengkapi alamat',
+            phone: item.phone || '-',
+            address: item.address || '-',
             group_id: item.group_id ?? 0,
             group: item.group
               ? { id: item.group.id, name: item.group.name }
@@ -90,5 +90,5 @@ export function useIdNamaPelanggan() {
 
   const memoizedData = useMemo(() => idDataPelanggan, [idDataPelanggan])
 
-  return { loading, idDataPelanggan: memoizedData }
+  return { loading, idDataPelanggan }
 }

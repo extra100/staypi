@@ -14,7 +14,9 @@ export class Pelanggan {
 
   @prop({ required: true })
   public group_id!: number
+  @prop({ required: true })
 
+  public outlet_name?: string
   @prop()
   public group?: {
     id: number

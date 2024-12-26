@@ -7,6 +7,8 @@ export class Contact {
 
   @prop({ required: true })
   public name!: string
+  @prop({ required: true })
+  public outlet_name!: string
 
   @prop({ required: true })
   public group_id!: number // Tipe number sesuai dengan API

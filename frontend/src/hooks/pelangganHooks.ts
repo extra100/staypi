@@ -9,20 +9,7 @@ export const useGetPelanggansQueryDb = () =>
     queryFn: async () =>
       (await apiClient.get<Pelanggan[]>(`/api/pelanggans`)).data,
   })
-// export const useGetPelanggansQueryGroupName = (
-//   namaGroup: string = 'BAJA NTB'
-// ) =>
-//   useQuery({
-//     queryKey: ['pelanggans', namaGroup],
-//     queryFn: async () => {
-//       console.log('Fetching data for namaGroup:', namaGroup) // Menambahkan log di sini
-//       const response = await apiClient.get<Pelanggan[]>(`/api/pelanggans`, {
-//         params: { namaGroup },
-//       })
-//       console.log('Response data:', response.data)
-//       return response.data
-//     },
-//   })
+
 
 export const useGetPelanggansQueryGroupName = (name?: string) =>
   useQuery({
@@ -33,7 +20,7 @@ export const useGetPelanggansQueryGroupName = (name?: string) =>
           params: { name },
         })
       ).data,
-    keepPreviousData: true, // Agar data sebelumnya tetap ditampilkan saat memuat data baru
+    keepPreviousData: true, 
   })
 
 export const useGetPelanggansQuery = () =>
@@ -47,6 +34,9 @@ export const useGetPelanggansQuery = () =>
           group_id: number
           phone: string
           address: string
+          outlet_name: string
+
+
           group?: {
             id: number
             name: string
@@ -73,6 +63,7 @@ export const useGetThenAddPelanggansQuery = (
             group_id: number
             phone: string
             address: string
+            outlet_name: string
             group?: {
               id: number
               name: string

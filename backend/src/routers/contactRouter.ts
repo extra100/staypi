@@ -16,6 +16,26 @@ contactRouter.get(
     }
   })
 )
+contactRouter.get(
+  '/filter-by-outlet',
+  asyncHandler(async (req: any, res: any) => {
+    try {
+      const { outlet_name } = req.query;
+      if (!outlet_name) {
+        return res.status(400).json({ message: 'Parameter outlet_name wajib diberikan.' });
+      }
+
+    
+      const filteredContacts = await ContactModel.find({ outlet_name });
+
+      res.json(filteredContacts);
+    } catch (error) {
+      console.error('Server Error:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  })
+);
+
 
 contactRouter.post(
   '/',

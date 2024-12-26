@@ -21,7 +21,9 @@ const BatchProcessPelangggans = () => {
     isLoading,
   } = useGetThenAddPelanggansQuery(batchSize, offset)
   const addPelanggganMutation = useAddPelanggan()
-  console.log({ idDataPelanggan })
+  const groupNames = idDataPelanggan?.map((item: any) => item.group?.name || null);
+
+  console.log({ groupNames })
   useEffect(() => {
     if (!pelanggans || pelanggans.length === 0) return
 
@@ -51,23 +53,29 @@ const BatchProcessPelangggans = () => {
   }, [offset])
 
   const handleSave = async () => {
-    setIsProcessing(true)
-
+    setIsProcessing(true);
+  
+    console.log("Starting save process...");
     for (let i = 0; i < idDataPelanggan.length; i += batchSize) {
-      const batch = idDataPelanggan.slice(i, i + batchSize)
-
+      const batch = idDataPelanggan.slice(i, i + batchSize);
+      
+      console.log("Processing batch:", batch);
+  
       for (const pelanggan of batch) {
         try {
-          await addPelanggganMutation.mutateAsync(pelanggan)
-          console.log(`Successfully added pelanggan: ${pelanggan.name}`)
+          console.log("Saving pelanggan:", pelanggan);
+          await addPelanggganMutation.mutateAsync(pelanggan);
+          console.log(`Successfully added pelanggan: ${pelanggan.name}`);
         } catch (error) {
-          console.error(`Failed to add pelanggan: ${pelanggan.name}`, error)
+          console.error(`Failed to add pelanggan: ${pelanggan.name}`, error);
         }
       }
     }
-
-    setIsProcessing(false)
-  }
+  
+    console.log("Save process completed.");
+    setIsProcessing(false);
+  };
+  
 
   const columns = [
     {

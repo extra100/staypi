@@ -30,21 +30,21 @@ import { QueryCache } from '@tanstack/react-query'
 
 export const useGetContactsQuerysa = (contactId: any | null) =>
   useQuery({
-    queryKey: ['pelanggans', contactId], // Tambahkan `date` dalam query key
+    queryKey: ['pelanggans', contactId], 
     queryFn: async () => {
       if (!contactId) {
         console.log('No contactId or date provided')
         return []
       }
 
-      console.log('Fetching pelanggans for contactId:', contactId) // Debug
+      console.log('Fetching pelanggans for contactId:', contactId) 
       const response = await apiClient.get<Contact[]>(
         `/api/pelanggans?contactId=${Number(contactId)}`
       )
-      console.log('Data from API:', response.data) // Debug data dari API
+      console.log('Data from API:', response.data) 
       return response.data
     },
-    enabled: !!contactId, // Pastikan kedua nilai ada sebelum query dijalankan
+    enabled: !!contactId, 
   })
 
 export const useGetContactsQuery = () =>
@@ -52,7 +52,16 @@ export const useGetContactsQuery = () =>
     queryKey: ['contacts'],
     queryFn: async () => (await apiClient.get<Contact[]>(`/api/contacts`)).data,
   })
-export const useGetPelangganByIdQuery = (name: any) =>
+  export const useGetFilteredContactsByOutletQuery = (outletName?: string) =>
+    useQuery({
+      queryKey: ['contacts', outletName],
+      queryFn: async () =>
+        (await apiClient.get<Contact[]>(`/api/contacts/filter-by-outlet`, {
+          params: { outlet_name: outletName }, 
+        })).data,
+    });
+  
+export const useGetPelangganByIdQuery= (name: any) =>
   useQuery<Contact[]>(
     ['contacts', name],
     async () => (await apiClient.get<Contact[]>(`/api/contacts/${name}`)).data
