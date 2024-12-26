@@ -48,6 +48,7 @@ import {
   useUpdateControlMutation,
 } from '../../hooks/controlHooks'
 import { useGetPelanggansQueryDb } from '../../hooks/pelangganHooks'
+import dayjs from 'dayjs';
 
 const { Option } = Select
 const { Title, Text } = Typography
@@ -64,13 +65,21 @@ const StockSelectorTable = () => {
     null
   )
   const [selectedWarehouse, setSelectedWarehouse] = useState<any>(undefined)
+  const [selectedDates, setSelectedDates] = useState<[string, string]>(['', ''])
+  
 
+  const formattedDate = dayjs(selectedDates[0], 'DD-MM-YYYY').format('YYYY-MM-DD');
+
+  
+
+  
   const [selectedDate, setSelectedDate] = useState<string | undefined>()
   const { warehouseStock } = useWarehouseStock(
-    selectedDate || '',
+    formattedDate,
     selectedWarehouseId
   )
 console.log({warehouseStock})
+console.log({formattedDate})
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
 
@@ -88,7 +97,7 @@ console.log({warehouseStock})
 
   const { data: contacts } = useGetFilteredContactsByOutletQuery(warehouseName as any)
   const { data: controllings } = useGetControlQuery()
-
+console.log({contacts})
   const { saveInvoiceData } = SaveApi()
   //
 
@@ -544,7 +553,6 @@ console.log({warehouseName})
     setAmountPaid(null)
   }
 
-  const [selectedDates, setSelectedDates] = useState<[string, string]>(['', ''])
 
   const [selectedDifference, setSelectedDifference] = useState<number>(0)
   const [termIdSimpan, setTermIdSimpan] = useState<number>(0)

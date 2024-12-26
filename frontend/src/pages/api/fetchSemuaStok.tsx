@@ -18,13 +18,14 @@ export function useWarehouseStock(date: string, warehouseIds: number) {
 
   const fetchWarehousesByPage = async (page: number, perPage: number) => {
     const response = await fetch(
-      `${HOST}/reportings/warehouseStock?date=${date}&warehouse_ids=${warehouseIds}&page=${page}&per_page=${perPage}`,
+      `${HOST}/reportings/warehouseStock?date=${date}&warehouse_ids=${warehouseIds}&per_page=${perPage}&hide_zero_qty=1&page=${page}`,
       {
         headers: {
           Authorization: `Bearer ${TOKEN}`,
         },
       }
-    )
+    );
+    // response = await fetch( ${HOST}/reportings/warehouseStock?date=${date}&warehouse_ids=${warehouseIds}&page=${page}&per_page=${perPage}, { headers: { Authorization: Bearer ${TOKEN}, }, } )
 
     if (!response.ok) {
       throw new Error('Failed to fetch warehouse stock')
@@ -89,7 +90,7 @@ export function useWarehouseStock(date: string, warehouseIds: number) {
       }
 
       try {
-        const perPage = 200 // Fetch 200 records per page
+        const perPage = 2000 // Fetch 200 records per page
         const allWarehouseStock = await fetchAllWarehouseStock(perPage)
 
         // Cache the result
