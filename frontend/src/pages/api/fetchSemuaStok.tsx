@@ -90,7 +90,7 @@ export function useWarehouseStock(date: string, warehouseIds: number) {
       }
 
       try {
-        const perPage = 2000 // Fetch 200 records per page
+        const perPage = 20000 // Fetch 200 records per page
         const allWarehouseStock = await fetchAllWarehouseStock(perPage)
 
         // Cache the result
