@@ -305,8 +305,18 @@ transactionRouter.put(
 
     // Perbarui ID transaksi jika tersedia dalam body request
     if (req.body.id) {
-      console.log('Updating ID:', req.body.id)
+      // console.log('Updating ID:', req.body.id)
       transaction.id = req.body.id
+    }
+    if (req.body.amount) {
+      console.log('Updating amount:', req.body.amount);
+      transaction.amount = req.body.amount;
+    }
+
+    // Perbarui due jika ada
+    if (req.body.due) {
+      // console.log('Updating due:', req.body.due);
+      transaction.due = req.body.due;
     }
 
     // Perbarui item jika ada

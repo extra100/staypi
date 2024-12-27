@@ -200,7 +200,7 @@ export const updateDenganIdUnikDariKledo = () => {
 }
 
 export const updateDenganMemoDariKledo = () => {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation(
     ({
@@ -208,28 +208,35 @@ export const updateDenganMemoDariKledo = () => {
       id,
       items,
       witholdings,
+      amount, // Baru
+      due, // Baru
     }: {
-      memo: string
-      id: string
-      items: any[]
-      witholdings: any[]
+      memo: string;
+      id: string;
+      items: any[];
+      witholdings: any[];
+      amount: any; // Baru
+      due: any; // Baru
     }) => {
       return apiClient.put(`/api/transactions/by-memo/${memo}`, {
         id,
         items,
         witholdings,
-      })
+        amount, // Baru
+        due, // Baru
+      });
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['transactions']) // Refresh data setelah berhasil
+        queryClient.invalidateQueries(['transactions']); // Refresh data setelah berhasil
       },
       onError: (error: any) => {
-        console.error('Error updating data by memo:', error)
+        console.error('Error updating data by memo:', error);
       },
     }
-  )
-}
+  );
+};
+
 export const useUpdateTransactionMutation = () => {
   const queryClient = useQueryClient()
 

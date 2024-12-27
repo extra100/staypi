@@ -64,6 +64,7 @@ const StockSelectorTable = () => {
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
   )
+  console.log({selectedWarehouseId})
   const [selectedWarehouse, setSelectedWarehouse] = useState<any>(undefined)
   const [selectedDates, setSelectedDates] = useState<[string, string]>(['', ''])
   
@@ -97,7 +98,7 @@ console.log({formattedDate})
 
   const { data: contacts } = useGetFilteredContactsByOutletQuery(warehouseName as any)
   const { data: controllings } = useGetControlQuery()
-console.log({contacts})
+// console.log({contacts})
   const { saveInvoiceData } = SaveApi()
   //
 
@@ -112,7 +113,7 @@ console.log({contacts})
   }
   // const { data: contactssss } = useGetFilteredContactsByOutletQuery(warehouseName as any);
 // console.log({contactssss})
-console.log({warehouseName})
+// console.log({warehouseName})
   useEffect(() => {
     const name = getWarehouseName()
     setWarehouseName(name)

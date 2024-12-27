@@ -98,9 +98,12 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
   const qtyAmount = getInvFromKledoBasedDate.flatMap(
     (invoice: any) => invoice.items?.map((item: any) => item.qty) || []
   )
+  const amountKledo = getInvFromKledoBasedDate.flatMap(
+    (invoice: any) => invoice.amount || []
+  )
 
-  // console.log({ discountAmounts })
-  // console.log({ qtyAmount })
+  console.log({ amountKledo })
+  console.log({ qtyAmount })
 
   const { data: filteredTransaksis, isLoading: loadingOwnDb } =
     useGetFilteredTransaksisQuery({
@@ -204,8 +207,8 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
       const response = await updateHanyaId.mutateAsync({
         memo,
         id: invoiceId,
-        // amount: totalAmount,
-        // due: due,
+        amount: totalAmount,
+        due: due,
         items: idPadaItems,
         witholdings: idPadaWitholdings,
       })
