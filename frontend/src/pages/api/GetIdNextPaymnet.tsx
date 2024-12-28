@@ -195,7 +195,7 @@ const GetIdNextPaymnet: React.FC = () => {
 
   const columns = [
     {
-      title: 'No',
+      title: 'YES',
       key: 'no',
       render: (_: any, __: any, index: number) => index + 1,
     },
