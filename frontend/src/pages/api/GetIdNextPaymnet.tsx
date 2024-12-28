@@ -177,6 +177,8 @@ const GetIdNextPaymnet: React.FC = () => {
         id: invoiceId as any,
         items: idPadaItems,
         witholdings: idPadaWitholdings,
+        amount: totalAmount,
+        due: due,
       })
 
       console.log('Invoice ID dan items berhasil diperbarui:', response)

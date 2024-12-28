@@ -140,6 +140,8 @@ const SuitMutasiExDanKledo: React.FC = () => {
         id: invoiceId,
         items: idPadaItems,
         witholdings: idPadaItems,
+        amount: 0,
+        due: 0,
       })
 
       console.log('Invoice ID dan items berhasil diperbarui:', response)
