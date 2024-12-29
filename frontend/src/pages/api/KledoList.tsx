@@ -226,10 +226,21 @@ const filteredTransaksi = transaksi?.filter(
       render: (text: any) => formatDate(text),
     },
     {
-      title: 'Tgl. Jatuh Tempo',
-      dataIndex: 'due_date',
-      key: 'due_date',
-      render: (text: any) => formatDate(text),
+      title: 'Jatuh Tempo',
+      dataIndex: 'trans_date',
+      key: 'days_after_one_month',
+      render: (text: any) => {
+        const transDate = dayjs(text); 
+        const oneMonthLater = transDate.add(1, 'month'); 
+        const today = dayjs(); 
+  
+        if (today.isBefore(oneMonthLater)) {
+          return '0 hari';
+        }
+  
+        const daysAfterOneMonth = today.diff(oneMonthLater, 'day'); 
+        return ` -${daysAfterOneMonth} hari`;
+      },
     },
     {
       title: 'Status',

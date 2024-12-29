@@ -113,6 +113,7 @@ const DetailKledo: React.FC = () => {
   )
   const IdYangAkanDiDelete = getPosDetail?.id
   const memorandum = getPosDetail?.memo || ref_number
+  const ketVoid = getPosDetail?.reason_id
   // console.log({ memorandum })
   const idMonggo = getPosDetail?._id
   const pesan = getPosDetail?.message
@@ -323,83 +324,7 @@ console.log({simpanSisaPiutrang})
       message.error('Menyebabkan double data')
     }
   }
-  // const handleFormSubmit = (values: any) => {
-  //   const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
-  //     map[warehouse.name] = warehouse.id
-  //     return map
-  //   }, {})
 
-  //   const accountId = accountMap[selectedBank as any]
-
-  //   if (langka) {
-  //     const invoiceData = {
-  //       witholdings: [
-  //         {
-  //           witholding_account_id: accountId || bankAccountId,
-  //           name: selectedBank || bankAccountName,
-  //           amount: amountPaid || 0,
-  //           witholding_percent: 0,
-  //           // witholding_amount: amountPaid || 0,
-  //           status: 0,
-  //           trans_date: selectedDates,
-  //           id: 23646,
-  //         },
-  //       ],
-  //     }
-
-  //     const existingInvoice = allTransactions?.find(
-  //       (transaction) => transaction.id === langka
-  //     )
-
-  //     if (existingInvoice) {
-  //       const updatedWithholdings = [
-  //         ...existingInvoice.witholdings,
-  //         ...invoiceData.witholdings,
-  //       ]
-
-  //       const updatedInvoice = {
-  //         ...existingInvoice,
-  //         witholdings: updatedWithholdings,
-  //       }
-
-  //       updatePosMutation.mutate(updatedInvoice as any, {
-  //         onSuccess: () => {
-  //           console.log('Invoice updated successfully.')
-  //           navigate(`/getnextpaymnet/${refNumber}`)
-  //         },
-  //         onError: (error: any) => {
-  //           console.error('Error updating invoice:', error)
-  //         },
-  //       })
-  //     } else {
-  //       console.error('Invoice with ref_number not found:', refNumber)
-  //     }
-  //   } else {
-  //     console.error('No valid ref_number found.')
-  //   }
-
-  //   // Membuat payload untuk pembayaran baru
-  //   const payload = {
-  //     amount: amountPaid || 0,
-  //     attachment: [],
-  //     bank_account_id: accountId || bankAccountId,
-  //     business_tran_id: langka,
-
-  //     // witholding_amount: amountPaid,
-  //     memo: memorandum,
-  //     trans_date: selectedDates,
-  //     witholdings: [],
-  //   }
-
-  //   saveNextPayment(payload)
-  //     .then((response: any) => {
-  //       console.log('Payment saved successfully:', response)
-  //       navigate(`/getnextpaymnet/${refNumber}`) // Navigasi setelah berhasil
-  //     })
-  //     .catch((error: any) => {
-  //       console.error('Error saving payment:', error)
-  //     })
-  // }
   const handleFormSubmit = (values: any) => {
     const accountMap = fiAc?.children?.reduce((map: any, warehouse: any) => {
       map[warehouse.name] = warehouse.id
@@ -751,7 +676,7 @@ console.log({simpanSisaPiutrang})
                 }
               })()}
             </Col>
-
+    
             <Dropdown
               overlay={menu}
               trigger={['click']}
@@ -800,31 +725,14 @@ console.log({simpanSisaPiutrang})
                 </>
               )}
             </Col>
-            {/* <Col>
-              {showButtons && (
-                <>
-                  <div>
-                    <button onClick={printNotaHandler}>Print Nota</button>
-                    <div style={{ display: 'none' }}>
-                      <Receipt ref={printNota} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <button onClick={printSuratJalanHandler}>
-                      Print Surat Jalan
-                    </button>
-                    <div style={{ display: 'none' }}>
-                      <ReceiptJalan ref={printSuratJalan} />
-                    </div>
-                  </div>
-                </>
-              )}
-            </Col> */}
+           
           </Row>
         }
-        bordered
+        // bordered
       >
+                <span>
+  {ketVoid === 'void' && <span style={{ color: 'orange', fontWeight: 'bold', marginTop: '2px' }}>Void</span>}
+</span>
         <Row>
           <Col span={12}>
             <div style={{ marginBottom: '0px' }}>

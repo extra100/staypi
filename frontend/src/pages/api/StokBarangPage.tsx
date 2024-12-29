@@ -1509,9 +1509,27 @@ console.log({selectedContactName})
             >
               {Array.isArray(barangs) &&
                 barangs
-                  .filter((item) =>
-                    item.name.toLowerCase().includes(searchValue.toLowerCase())
-                  )
+              
+                .sort((a, b) => {
+               
+                  const nameComparison = a.name.localeCompare(b.name, 'id', {
+                    numeric: false,
+                    sensitivity: 'base',
+                  });
+                  if (nameComparison !== 0) {
+                    return nameComparison; 
+                  }
+            
+                  const extractNumber = (name: string) => {
+                    const match = name.match(/(\d+(\.\d+)?)[mM]/); 
+                    return match ? parseFloat(match[1]) : 0; 
+                  };
+            
+                  return extractNumber(a.name) - extractNumber(b.name);
+                })
+                .filter((item) =>
+                  item.name.toLowerCase().includes(searchValue.toLowerCase())
+                )
                   .map((product) => {
                     const stockQuantity =
                       warehouseStock.find(
@@ -1874,9 +1892,27 @@ console.log({selectedContactName})
           >
             {Array.isArray(barangs) &&
               barangs
-                .filter((item) =>
-                  item.name.toLowerCase().includes(searchValue.toLowerCase())
-                )
+          
+              .sort((a, b) => {
+
+                const nameComparison = a.name.localeCompare(b.name, 'id', {
+                  numeric: false,
+                  sensitivity: 'base',
+                });
+                if (nameComparison !== 0) {
+                  return nameComparison; 
+                }
+         
+                const extractNumber = (name: string) => {
+                  const match = name.match(/(\d+(\.\d+)?)[mM]/);
+                  return match ? parseFloat(match[1]) : 0; 
+                };
+          
+                return extractNumber(a.name) - extractNumber(b.name);
+              })
+              .filter((item) =>
+                item.name.toLowerCase().includes(searchValue.toLowerCase())
+              )
                 .map((product) => {
                   // const stockQuantity =
                   //   warehouseStock.find((stock: any) => stock.id === product.id)
