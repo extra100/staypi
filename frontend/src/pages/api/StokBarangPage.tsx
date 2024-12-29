@@ -577,7 +577,10 @@ console.log({formattedDate})
   }
 
   const [selectedContact, setSelectedContact] = useState<number | null>(null)
-
+  const selectedContactName = selectedContact 
+  ? contacts?.find(contact => contact.id === selectedContact)?.name 
+  : null;
+console.log({selectedContactName})
   const handleContactChange = (value: number) => {
     setSelectedContact(value)
   }
@@ -705,6 +708,7 @@ console.log({formattedDate})
     setAmountPaid(totalSubtotal)
   }
   const [memo, setMemo] = useState('')
+  
   const handleSave = () => {
     if (isSaveDisabled) return
 
@@ -804,7 +808,7 @@ console.log({formattedDate})
       contacts: [
         {
           id: selectedContact,
-          name: saveContactName,
+          name: selectedContactName,
         },
       ],
       warehouses: [

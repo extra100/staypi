@@ -8,6 +8,8 @@ import UserContext from '../../contexts/UserContext'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useGetoutletsQuery } from '../../hooks/outletHooks'
+import dayjs from 'dayjs';
+import { useGetFilteredContactsByOutletQuery } from '../../hooks/contactHooks'
 
 const ListTransaksi: React.FC = () => {
   const { data } = useGetTransaksisQuery()
@@ -18,16 +20,19 @@ const ListTransaksi: React.FC = () => {
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
   )
+  console.log({selectedWarehouseId})
   const [startDate, setStartDate] = useState<string | null>(null)
   const [endDate, setEndDate] = useState<string | null>(null)
-
+console.log({startDate})
+console.log({endDate})
   const {
     data: transaksi,
     isLoading,
     error,
   } = useGetTransaksisQuerymu(selectedWarehouseId, startDate, endDate)
+  const contactIds = transaksi?.map((item) => item.contact_id);
 
-  console.log({ transaksi })
+  console.log({ contactIds })
   const { data: contacts } = useGetContactsQuery()
   const { data: gudangs } = useGetoutletsQuery()
 
@@ -47,10 +52,20 @@ const ListTransaksi: React.FC = () => {
 
   const [searchText, setSearchText] = useState<string>('')
   //aneh
-  const getContactName = (contact_id: string | number) => {
-    const contact = contacts?.find((c) => c.id === contact_id)
-    return contact ? contact.name : 'waiting...'
-  }
+  const selectedGudangName = selectedWarehouseId 
+  ? gudangs?.find(contact => Number(contact.id_outlet) === selectedWarehouseId)?.nama_outlet 
+  : null;
+    const { data: pelanggan } = useGetFilteredContactsByOutletQuery(selectedGudangName as any)
+    const selectedPelangganName = selectedWarehouseId 
+    ? pelanggan?.find(contact => Number(contact.id) === selectedWarehouseId)?.name 
+    : null;
+  console.log({selectedPelangganName})  
+  console.log({gudangs})  
+  const getContactName = (contactId: string): string => {
+    // Assuming `contacts` is an array with `id` and `name`
+    const contact = contacts?.find((contact: any) => contact.id === contactId);
+    return contact?.name || 'Unknown';
+  };
   const getWarehouseName = (warehouse_id: string | number) => {
     const warehouse = gudangs?.find(
       (gudang) => String(gudang.id_outlet) === String(warehouse_id)
@@ -73,7 +88,13 @@ const ListTransaksi: React.FC = () => {
     setEndDate(formattedDate) // Set tanggal yang sudah diformat
   }
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
-
+  useEffect(() => {
+    setStartDate(dayjs().format('YYYY-MM-DD'));
+  }, []);
+  useEffect(() => {
+    setEndDate(dayjs().format('YYYY-MM-DD'));
+  }, []);
+  
   const getStatus = (transaction: any) => {
     const totalDownPayment = transaction.witholdings.reduce(
       (sum: number, witholding: any) => sum + (witholding.down_payment || 0),
@@ -90,34 +111,48 @@ const ListTransaksi: React.FC = () => {
       return 'Belum Dibayar'
     }
   }
-  const [searchRef, setSearchRef] = useState('')
+ 
   const [searchContact, setSearchContact] = useState<number | undefined>()
   const [searchWarehouse, setSearchWarehouse] = useState<number | undefined>()
   const [searchStatus, setSearchStatus] = useState<string | undefined>()
+  const [searchRef, setSearchRef] = useState('')
+  const [searchPesan, setSearchPesan] = useState('')
+  
   const filteredData = transaksi
-
-    ?.filter((transaction) => {
-      if (searchStatus) {
-        const statusText = getStatus(transaction)
-        return statusText.toLowerCase() === searchStatus.toLowerCase()
-      }
-      return true
-    })
-    ?.filter((transaction) => {
-      const transDate = new Date(transaction.trans_date)
-      const start = startDate ? new Date(formatDateForBackend(startDate)) : null
-      const end = endDate ? new Date(formatDateForBackend(endDate)) : null
-      return (
-        transaction.jalur === 'penjualan' && transaction.reason_id !== 'void'
-      )
-    })
-    ?.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  ?.filter((transaction) => {
+    if (searchStatus) {
+      const statusText = getStatus(transaction)
+      return statusText.toLowerCase() === searchStatus.toLowerCase()
+    }
+    return true
+  })
+  ?.filter((transaction) => {
+    return (
+      transaction.jalur === 'penjualan' && transaction.reason_id !== 'void'
     )
-  const filteredTransaksi = transaksi?.filter(
-    (item: any) => item.reason_id === 'void'
+  })
+  ?.filter((transaction) => {
+    if (searchRef) {
+      const lowerSearchRef = searchRef.toLowerCase() // Normalize the search term
+      // Check if the search term matches either ref_number or message
+      return (
+        transaction.message?.toLowerCase().includes(lowerSearchRef) || transaction.ref_number?.toLowerCase().includes(lowerSearchRef)
+        
+      )
+    }
+    return true
+  })
+
+  ?.sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )
+
+const filteredTransaksi = transaksi?.filter(
+  (item: any) => item.reason_id === 'void'
+)
+
+
   console.log({ filteredTransaksi })
   const [activeButton, setActiveButton] = useState('')
   const navigate = useNavigate()
@@ -167,10 +202,11 @@ const ListTransaksi: React.FC = () => {
     },
     {
       title: 'Pelanggan',
-      dataIndex: ['contacts', 0, 'id' || 'name'],
+      dataIndex: 'contact_id', 
       key: 'contact_name',
       render: (contactId: string) => getContactName(contactId),
     },
+   
     {
       title: 'Warehouse',
       dataIndex: 'warehouse_id',
@@ -187,6 +223,12 @@ const ListTransaksi: React.FC = () => {
       title: 'Tgl. Trans',
       dataIndex: 'trans_date',
       key: 'trans_date',
+      render: (text: any) => formatDate(text),
+    },
+    {
+      title: 'Tgl. Jatuh Tempo',
+      dataIndex: 'due_date',
+      key: 'due_date',
       render: (text: any) => formatDate(text),
     },
     {
@@ -318,6 +360,8 @@ const ListTransaksi: React.FC = () => {
         <Col>
           <DatePicker
             placeholder="Dari Tanggal"
+            defaultValue={dayjs()} // Tanggal default adalah hari ini
+
             format="DD-MM-YYYY"
             onChange={(date, dateString) => handleDateChange(date, dateString as any)} // Panggil fungsi handleDateChange
           />
@@ -332,14 +376,14 @@ const ListTransaksi: React.FC = () => {
           />
         </Col>
         <Row gutter={16} style={{ marginBottom: 16 }}>
-          <Col>
-            <Input
-              placeholder="Cari Ref Number"
-              value={searchRef}
-              onChange={(e) => setSearchRef(e.target.value)}
-              style={{ width: 200 }}
-            />
-          </Col>
+        <Col>
+  <Input
+    placeholder="Cari Ref Number"
+    value={searchRef}
+    onChange={(e) => setSearchRef(e.target.value)}
+    style={{ width: 200 }}
+  />
+</Col>
 
           {/* Filter berdasarkan Nama Kontak */}
           <Col>
