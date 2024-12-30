@@ -192,17 +192,25 @@ const DetailKledo: React.FC = () => {
   const { fiAc } = useFiac()
 
   const [amountPaid, setAmountPaid] = useState<number | null>(null)
+  console.log({amountPaid})
   useEffect(() => {}, [due, amountPaid])
   const simpanSisaPiutrang = amount - (amountPaid ?? 0);
 console.log({simpanSisaPiutrang})
+  // const roundUpIndonesianNumber = (value: number | null): string => {
+  //   if (value === null) return ''
+  //   return new Intl.NumberFormat('id-ID', {
+  //     style: 'decimal',
+  //     minimumFractionDigits: 0,
+  //     maximumFractionDigits: 0,
+  //   }).format(value)
+  // }
   const roundUpIndonesianNumber = (value: number | null): string => {
-    if (value === null) return ''
+    if (value === null) return '';
     return new Intl.NumberFormat('id-ID', {
       style: 'decimal',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
+    }).format(value);
+  };
+  
 
   const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value)
@@ -214,7 +222,7 @@ console.log({simpanSisaPiutrang})
     }
   }
   const handleSetAmountPaid = () => {
-    setAmountPaid(Math.round(due))
+    setAmountPaid(due)
   }
 
   const [contactName, setContactName] = useState<string>('Unknown Contact')
@@ -915,7 +923,7 @@ console.log({simpanSisaPiutrang})
                   thousandSeparator="."
                   decimalSeparator=","
                   allowNegative={false}
-                  decimalScale={0}
+                  // decimalScale={0}
                   onValueChange={(values) => {
                     const { floatValue } = values
                     setAmountPaid(floatValue || 0)

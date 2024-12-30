@@ -52,6 +52,7 @@ import dayjs from 'dayjs';
 
 const { Option } = Select
 const { Title, Text } = Typography
+import { TakePiutangToPerContactStatusIdAndMemoMny } from './TakePiutangToPerContactStatusIdAndMemoMny'
 
 const StockSelectorTable = () => {
   const [loadingSpinner, setLoadingSpinner] = useState(false) // State untuk spinner
@@ -64,7 +65,7 @@ const StockSelectorTable = () => {
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
   )
-  console.log({selectedWarehouseId})
+  console.log({selectedWarehouseId})  
   const [selectedWarehouse, setSelectedWarehouse] = useState<any>(undefined)
   const [selectedDates, setSelectedDates] = useState<[string, string]>(['', ''])
   
@@ -79,29 +80,40 @@ const StockSelectorTable = () => {
     formattedDate,
     selectedWarehouseId
   )
-console.log({warehouseStock})
-console.log({formattedDate})
+// console.log({warehouseStock})
+// console.log({formattedDate})
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
 
   const { idaDataBarang } = useIdNamaBarang()
   const { data: barangs } = useGetBarangsQuery()
   const { data: gudangdb } = useGetWarehousesQuery()
+  console.log({ gudangdb })
+
   const { data: akunBanks } = useGetAkunBanksQueryDb()
 
   const { data: tagDb } = useGetTagsQueryDb()
 
   const { idWarehouse } = useIdWarehouse()
 
-  const { idContact } = useIdContact('')
+  // const { idContact } = useIdContact('')
   const [warehouseName, setWarehouseName] = useState<string | null>(null)
 
   const { data: contacts } = useGetFilteredContactsByOutletQuery(warehouseName as any)
+
   const { data: controllings } = useGetControlQuery()
 // console.log({contacts})
   const { saveInvoiceData } = SaveApi()
   //
+ const { loading, takedueanContactStatusIdandMemoMny } =
+    TakePiutangToPerContactStatusIdAndMemoMny(
+      'MNY',
+      '2',
+      warehouseName as any
+    )
 
+
+    
   const getWarehouseName = () => {
     if (!gudangdb || !selectedWarehouseId) return null
 
@@ -111,8 +123,14 @@ console.log({formattedDate})
     )
     return selectedWarehouse ? selectedWarehouse.name : null
   }
-  // const { data: contactssss } = useGetFilteredContactsByOutletQuery(warehouseName as any);
-// console.log({contactssss})
+  const { data: contactssss } = useGetFilteredContactsByOutletQuery(warehouseName as any);
+  
+  const firstGroupId = contactssss?.[0]?.group_id || null;
+
+  
+  
+  
+console.log({contactssss})
 // console.log({warehouseName})
   useEffect(() => {
     const name = getWarehouseName()
@@ -557,6 +575,7 @@ console.log({formattedDate})
 
   const [selectedDifference, setSelectedDifference] = useState<number>(0)
   const [termIdSimpan, setTermIdSimpan] = useState<number>(0)
+  console.log({termIdSimpan})
   const handleDateRangeSave = (
     startDate: string,
     endDate: string,
@@ -580,14 +599,22 @@ console.log({formattedDate})
   const selectedContactName = selectedContact 
   ? contacts?.find(contact => contact.id === selectedContact)?.name 
   : null;
-console.log({selectedContactName})
+console.log({selectedContact})
   const handleContactChange = (value: number) => {
     setSelectedContact(value)
   }
+
+  const { idContact } = useIdContact(firstGroupId as any)
+  console.log({ idContact })
+  const [totalSubtotal, setTotalSubtotal] = useState<number>(0)
+
   const selectedReceivable = selectedContact
     ? idContact.find((contact: any) => contact.id === selectedContact)
         ?.receivable || 0
     : '--'
+  const nilaiPlatform = gudangdb?.find((contact: any) => contact.name === warehouseName)
+        ?.platform || 0
+ console.log({nilaiPlatform})
 
   const formatRupiah = (number: any) => {
     return new Intl.NumberFormat('id-ID', {
@@ -600,9 +627,16 @@ console.log({selectedContactName})
       const receivable = parseFloat(contact.receivable) || 0
       return total + receivable
     }, 0)
-  const limitizeTrans = totalReceivable > 3800
-  const [totalSubtotal, setTotalSubtotal] = useState<number>(0)
-  // console.log({ totalSubtotal })
+    const lastReceivable = totalReceivable +totalSubtotal
+    
+    const safeTotalReceivable = Number(lastReceivable) || 0;
+    const safeNilaiPlatform = Number(nilaiPlatform) || 0;
+    
+    const limitizeTrans = safeTotalReceivable > safeNilaiPlatform;
+  console.log({ lastReceivable })
+  console.log({ safeNilaiPlatform })
+  console.log({safeTotalReceivable})
+  console.log({limitizeTrans})
   const [formattedTotalSubtotal, setFormattedTotalSubtotal] =
     useState<string>('')
 
@@ -702,7 +736,12 @@ console.log({selectedContactName})
   const [catatan, setCatatan] = useState('')
   const [yangMana, setYangMana] = useState()
 
-  const isSaveDisabled = !selectedContact || !bankAccountId
+  // const isSaveDisabled = !selectedContact || !bankAccountId || limitizeTrans;
+  const isSaveDisabled =
+  !selectedContact ||
+  !bankAccountId ||
+  (termIdSimpan !== 2 && termIdSimpan !== 0 && limitizeTrans);
+
 
   const handleSetAmountPaid = () => {
     setAmountPaid(totalSubtotal)
@@ -1272,36 +1311,51 @@ console.log({selectedContactName})
                 <span style={labelStyle}>Nama Pelanggan</span>
                 <span style={labelColonStyle}>:</span>
                 <Select
-                  showSearch
-                  placeholder="Pilih Pelanggan"
-                  style={{ width: '70%' }}
-                  optionFilterProp="label"
-                  filterOption={(input: any, option: any) =>
-                    option?.label
-                      ?.toString()
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  value={selectedContact}
-                  onChange={handleContactChange}
-                >
-                  {Array.isArray(contacts) &&
-                    contacts
-                      .filter((contact) => contact.group?.name === warehouseId)
-                      .map((item) => (
-                        <Select.Option
-                          key={item.id}
-                          value={item.id}
-                          label={item.name}
-                        >
-                          {item.name}
-                        </Select.Option>
-                      ))}
-                </Select>
+  showSearch
+  placeholder="Pilih Pelanggan"
+  style={{ width: '70%' }}
+  optionFilterProp="label"
+  filterOption={(input: any, option: any) =>
+    option?.label?.toString().toLowerCase().includes(input.toLowerCase())
+  }
+  value={selectedContact}
+  onChange={handleContactChange}
+>
+  {Array.isArray(idContact) &&
+    idContact
+      .filter((contact) => contact.group_name === warehouseId)
+      .map((item) => (
+        <Select.Option
+          key={item.id}
+          value={item.id}
+          label={item.name}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{item.name}</span>
+            <Badge
+              count={Number(item.receivable).toLocaleString('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+              })}
+              style={{ backgroundColor: '#52c41a' }}
+            />
+          </div>
+        </Select.Option>
+      ))}
+</Select>
               </Col>
               <Col span={12}>
                 <span style={labelStyle}>Outlet</span>
                 <span style={labelColonStyle}>:</span>
+                <Badge
+        count={lastReceivable?.toLocaleString('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          minimumFractionDigits: 0,
+        })}
+        style={{ backgroundColor: '#52c41a' }}
+      />
                 <Select
                   placeholder="Warehouse"
                   showSearch
@@ -1330,48 +1384,6 @@ console.log({selectedContactName})
               </Col>
             </Row>
 
-            {/* <Row gutter={16} style={{ marginBottom: '10px' }}>
-            <Col span={12}>
-              <span style={labelStyle}>Piutang/Pelanggan</span>
-              <span style={labelColonStyle}>:</span>
-              <Input
-                style={{ width: '70%' }}
-                value={formatRupiah(selectedReceivable)}
-                readOnly
-              />
-            </Col> */}
-
-            {/* <Col span={12}>
-              <span style={labelStyle}>Piutang/Outlet</span>
-              <span style={labelColonStyle}>:</span>
-              <Input
-                style={{ width: '70%' }}
-                value={formatRupiah(totalReceivable)}
-                readOnly
-              />
-            </Col>
-          </Row> */}
-
-            {/* <Row gutter={16} style={{ marginBottom: '10px' }}>
-            <Col span={12}>
-              <span style={labelStyle}>Platform</span>
-              <span style={labelColonStyle}>:</span>
-              <Input
-                style={{ width: '70%' }}
-                value={formatRupiah(20000000)}
-                readOnly
-              />
-            </Col>
-            <Col span={12}>
-              <span style={labelStyle}>Platform</span>
-              <span style={labelColonStyle}>:</span>
-              <Input
-                style={{ width: '70%' }}
-                value={formatRupiah(400000000)}
-                readOnly
-              />
-            </Col>
-          </Row> */}
             <Row gutter={16} style={{ marginBottom: '10px' }}>
               <Col span={12}>
                 <span style={labelStyle}>No Invoice</span>
@@ -1823,7 +1835,7 @@ console.log({selectedContactName})
                   onClick={handleSave}
                   type="primary"
                   style={{ marginTop: '10px', width: '45%' }}
-                  disabled={isSaveDisabled} // Tombol dinonaktifkan jika salah satu masih kosong
+                  disabled={isSaveDisabled} 
                 >
                   Simpan
                 </Button>
