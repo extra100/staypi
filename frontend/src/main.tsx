@@ -127,6 +127,7 @@ import PelangganTable from './pages/api/PelangganTabel'
 import TableWarehouse from './pages/api/WarehouseTable'
 import PelangganSearchPage from './pages/api/PelangganSearchPage'
 import CariBeda from './pages/api/CariBeda'
+import WarehouseStockManager from './pages/api/WarehouseStokManager'
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -288,6 +289,7 @@ const router = createBrowserRouter(
       <Route path="/tambahpelanggan" element={<PelangganSearchPage />} />
       <Route path="/tabeloutlets" element={<TableWarehouse />} />
       <Route path="/caribedainvoice" element={<CariBeda />} />
+      <Route path="/semuastokoutlet" element={<WarehouseStockManager />} />
     </Route>
   )
 )
