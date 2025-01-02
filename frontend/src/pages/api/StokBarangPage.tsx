@@ -1333,13 +1333,14 @@ console.log({selectedContact})
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>{item.name}</span>
             <Badge
-              count={Number(item.receivable).toLocaleString('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0,
-              })}
-              style={{ backgroundColor: '#52c41a' }}
-            />
+  count={Number(item.receivable).toLocaleString('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  })}
+  style={{ backgroundColor: '#52c41a', cursor: 'pointer' }}
+  onClick={() => navigate(`/detailpiutangperkontak?id=${item.id}`)}
+/>
           </div>
         </Select.Option>
       ))}

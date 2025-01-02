@@ -133,13 +133,35 @@ console.log({filteredGudangs})
     })),
   ]
   const columns = [
+ 
     {
-      title: 'No. INV',
-      dataIndex: 'ref_number',
-      key: 'ref_number',
-      ellipsis: true, // Untuk teks panjang
-      align: 'left',
+      title: 'Referensi',
+      key: 'references',
+      render: (text: any, record: any) => {
+        let href = '';
+        if (record.ref_number.startsWith('IBO')) {
+          href = `/detailkledo/${record.ref_number}`;
+        } else if (record.ref_number.startsWith('MNY')) {
+          href = `https://app.kledo.com/#/debit-memo/detail/${record.id}`;
+        } else if (record.ref_number.startsWith('INV')) {
+          href = `https://app.kledo.com/#/sales/invoices/detail/${record.id}`;
+        }
+    
+        return (
+          <a
+            href={href}
+            style={{ color: 'blue', textDecoration: 'none' }}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {record.ref_number}
+          </a>
+        );
+      },
     },
+    
+    
+    
     {
       title: 'Tgl. Trans',
       dataIndex: 'trans_date',
