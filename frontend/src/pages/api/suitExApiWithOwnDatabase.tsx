@@ -180,16 +180,14 @@ const SuitExApiWithOwnDbBasedDate: React.FC = () => {
     // console.log({ totalAmount })
     const due = selectedData.due
     // console.log({ totalAmount })
-
     const idPadaItems =
-      selectedData.items?.map((item: any) => ({
-        id: item.id,
-        finance_account_id: item.finance_account_id,
-        price: item.price,
-        amount: item.amount,
-        discount_amount: item.discount_amount,
-      })) || []
-
+    selectedData.items?.map((item: any, index: number) => ({
+      id: item.id,
+      finance_account_id: item.finance_account_id,
+      price: getPosDetail?.items?.[index]?.price || 0, 
+      amount: item.amount,
+      discount_amount: item.discount_amount,
+    })) || [];
     const idPadaWitholdings =
       getPosDetail?.witholdings?.map((item: any) => ({
         down_payment: amount, // Contoh nilai down_payment
