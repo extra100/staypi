@@ -438,7 +438,7 @@ const CariBeda: React.FC = () => {
         rowClassName={rowClassName}
         rowKey={(record, index: any) => index} // Gunakan index sebagai rowKey
         pagination={{
-          pageSize: 15,
+          pageSize: 100,
           showTotal: (total) => `Total ${total} Baris`,
         }}
         summary={(pageData) => {
