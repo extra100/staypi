@@ -771,7 +771,7 @@ const Aneh: React.FC = () => {
       </div>
       <Card title="" style={{ marginTop: '20px' }}>
         <Form layout="vertical" onFinish={handleFormSubmit}>
-          {/* <Row gutter={16}>
+          <Row gutter={16}>
             <Col span={12}>
               <span
                 style={{
@@ -795,6 +795,7 @@ const Aneh: React.FC = () => {
 
               <NumericFormat
                 placeholder="Nilai Pembayaran"
+                disabled
                 value={amountPaid as any}
                 thousandSeparator="."
                 decimalSeparator=","
@@ -833,6 +834,7 @@ const Aneh: React.FC = () => {
                 showSearch
                 placeholder="Pilih bank"
                 value={selectedBank}
+                disabled
                 onChange={(value) => setSelectedBank(value)}
                 style={{ width: '100%' }}
                 optionFilterProp="children"
@@ -855,7 +857,7 @@ const Aneh: React.FC = () => {
                 <Input placeholder="Catatan" />
               </Form.Item>
             </Col>
-          </Row> */}
+          </Row>
           <Row justify="end">
             <Col>
               <Button type="primary" htmlType="submit">
