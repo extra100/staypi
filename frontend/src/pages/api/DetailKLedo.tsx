@@ -94,18 +94,31 @@ const DetailKledo: React.FC = () => {
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
   )
+
+  
   const { data: allreturns } = useGetReturnByIdQuery(ref_number as string)
-  // console.log({ allreturns })
+  console.log({ allreturns })
   const { data: contacts } = useGetContactsQuery()
   const { data: akunBanks } = useGetAkunBanksQueryDb()
 
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
-  const getReturDetail = allreturns?.find(
-    (balikin: any) => balikin.ref_transaksi === ref_number
-  )
-  // console.log({ getReturDetail })
+  // const getReturDetail = allreturns?.find(
+  //   (balikin: any) => balikin.memo === ref_number
+  // )
+  const getReturDetail = allreturns?.filter(
+    (balikin: any) =>
+      balikin.memo === ref_number && 
+      balikin.items?.some((item: any) => item.qty > 0)
+  );
+  
+  console.log({ getReturDetail })
+  const totalAmountRetur = getReturDetail
+  ?.flatMap((balikin: any) => balikin.items || []) // Menggabungkan semua items
+  .reduce((sum: number, item: any) => sum + (item.amount || 0), 0) || 0; // Menjumlahkan amount
+
+console.log('Total Amount:', totalAmountRetur);
 
   //delete
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(
@@ -182,18 +195,20 @@ const DetailKledo: React.FC = () => {
       return sum + (witholding.down_payment || 0)
     }, 0)
 
-  const due = amount - totalDownPayment
-
+  const due = amount - totalDownPayment - totalAmountRetur
+console.log({due})
   const totalDiscount = items.reduce((total: number, item: any) => {
     return total + (item.discount_amount || 0)
   }, 0)
   const subTotal = totalDiscount + amount
+  const finalTotalAgterRetur = amount - (totalAmountRetur || 0);
+  const finalDueAfterRerur = due - (totalAmountRetur || 0);
 
   const { fiAc } = useFiac()
 
   const [amountPaid, setAmountPaid] = useState<number | null>(null)
   console.log({amountPaid})
-  useEffect(() => {}, [due, amountPaid])
+  useEffect(() => {}, [finalDueAfterRerur, amountPaid])
   const simpanSisaPiutrang = amount - (amountPaid ?? 0);
 console.log({simpanSisaPiutrang})
   // const roundUpIndonesianNumber = (value: number | null): string => {
@@ -521,14 +536,14 @@ console.log({simpanSisaPiutrang})
           key="void"
           icon={<CloseCircleOutlined />}
           onClick={() => {
-            // voidInvoice()
-            handleVoid(null)
+            handleVoid(null);
           }}
-          disabled={voidLoading}
+          disabled={voidLoading || totalAmountRetur > 0} 
         >
           {voidLoading ? 'Proses Void...' : 'Void'}
         </Menu.Item>
       )}
+
 
       <Menu.Item
         key="retur"
@@ -536,6 +551,8 @@ console.log({simpanSisaPiutrang})
         onClick={() => {
           navigate(`/returninvoice/${ref_number}`)
         }}
+        disabled={totalAmountRetur > 0} 
+
       >
         Retur
       </Menu.Item>
@@ -546,6 +563,8 @@ console.log({simpanSisaPiutrang})
         onClick={() => {
           navigate(`/edittransaksi/${ref_number}`)
         }}
+        disabled={totalAmountRetur > 0} 
+
       >
         Edit
       </Menu.Item>
@@ -556,7 +575,8 @@ console.log({simpanSisaPiutrang})
           handleDelete()
           handleVoid(null)
         }}
-        disabled={hapusLoading}
+        disabled={hapusLoading || totalAmountRetur > 0} 
+
       >
         {hapusLoading ? 'Proses Penghapusan...' : 'hapus'}
       </Menu.Item>
@@ -622,21 +642,21 @@ console.log({simpanSisaPiutrang})
         </div>
       ),
     },
-    {
-      title: 'Harga Diskon',
-      key: 'amountPerBaris',
-      align: 'left',
-      render: (record: any) => {
-        const amount = record.amount || 0
-        const qty = record.qty || 1 // Pastikan qty tidak nol
-        const amountPerBaris = qty > 0 ? amount / qty : 0
-        return (
-          <div style={{ textAlign: 'left' }}>
-            {roundUpIndonesianNumber(amountPerBaris)}
-          </div>
-        )
-      },
-    },
+    // {
+    //   title: 'Harga Diskon',
+    //   key: 'amountPerBaris',
+    //   align: 'left',
+    //   render: (record: any) => {
+    //     const amount = record.amount || 0
+    //     const qty = record.qty || 1 // Pastikan qty tidak nol
+    //     const amountPerBaris = qty > 0 ? amount / qty : 0
+    //     return (
+    //       <div style={{ textAlign: 'left' }}>
+    //         {roundUpIndonesianNumber(amountPerBaris)}
+    //       </div>
+    //     )
+    //   },
+    // },
 
     {
       title: 'Total',
@@ -649,6 +669,8 @@ console.log({simpanSisaPiutrang})
         </div>
       ),
     },
+    
+
   ]
   const [loading, setLoading] = useState(true)
 
@@ -800,13 +822,16 @@ console.log({simpanSisaPiutrang})
       <Table
         dataSource={[
           ...(getPosDetail?.items || []),
-          ...(getReturDetail?.items || []),
+          // ...(getReturDetail
+          //   ?.flatMap((retur: any) => retur.items || [])
+          //   .filter((item: any) => item.qty > 0) || []),
         ]}
         columns={columns as any}
         pagination={false}
         rowKey="_id"
         style={{ marginTop: '20px' }}
       />
+
 
       <div
         style={{
@@ -845,14 +870,29 @@ console.log({simpanSisaPiutrang})
                 <Text strong>{roundUpIndonesianNumber(amount)}</Text>
               </Col>
             </Row>
+            {totalAmountRetur > 0 && (
+              <Row style={{ marginTop: '8px' }}>
+                <Col span={12} style={{ textAlign: 'right' }}>
+                  <Text strong style={{ color: 'blue' }}>Total Retur</Text>
+                </Col>
+                <Col span={12} style={{ textAlign: 'right' }}>
+                  <Text strong style={{ color: 'blue' }}>
+                    {roundUpIndonesianNumber(totalAmountRetur)}
+                  </Text>
+                </Col>
+              </Row>
+            )}
+
+
             <Row style={{ marginTop: '8px' }}>
               <Col span={12} style={{ textAlign: 'right' }}>
                 <Title level={4}>Total</Title>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
-                <Title level={4}>{roundUpIndonesianNumber(amount)}</Title>
+                <Title level={4}>{roundUpIndonesianNumber(finalTotalAgterRetur)}</Title>
               </Col>
             </Row>
+
             <Divider style={{ margin: '16px 0' }} />
 
             <>
@@ -865,36 +905,38 @@ console.log({simpanSisaPiutrang})
                   <Row key={index} style={{ marginTop: '8px' }}>
                     <Col span={12} style={{ textAlign: 'left' }}>
                       <a href={`/editpembayaran/${memorandum}`}>
-                        <Text strong>{witholding.name}</Text>
+                        <Text strong style={{ color: 'blue' }}
+                        >{witholding.name}</Text>
                       </a>
                     </Col>
                     <Col span={12} style={{ textAlign: 'right' }}>
-                      <Text strong>
+                      <Text strong 
+                      style={{ color: 'blue' }}>
                         {roundUpIndonesianNumber(witholding.down_payment)}
                       </Text>
                     </Col>
                   </Row>
                 ))}
             </>
-
+                  
             <Row style={{ marginTop: '8px' }}>
               <Col span={12} style={{ textAlign: 'right' }}>
                 <Text strong style={{ fontSize: '20px' }}>
-                  {' '}
                   Sisa Tagihan
                 </Text>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
                 <Text strong style={{ fontSize: '20px' }}>
-                  {' '}
-                  {roundUpIndonesianNumber(due)}
+                  {due <= 0 ? 0 : roundUpIndonesianNumber(due)}
                 </Text>
               </Col>
             </Row>
+
+
           </Col>
         </Row>
       </div>
-      {due !== 0 && (
+      {due != 0 && (
         <Card title="Pembayaran" style={{ marginTop: '20px' }}>
           <Form layout="vertical" onFinish={handleFormSubmit}>
             <Row gutter={16}>
