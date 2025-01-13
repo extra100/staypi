@@ -79,7 +79,6 @@ const Aneh: React.FC = () => {
   const { data: allTransactions } = useGetTransactionByIdQuery(
     ref_number as string
   )
-  console.log({allTransactions})
   const getPosDetail = allTransactions?.find(
     (transaction: any) => transaction.ref_number === ref_number
   )
@@ -87,14 +86,12 @@ const Aneh: React.FC = () => {
 
   const { data: contacts } = useGetContactsQuery()
   const { data: akunBanks } = useGetAkunBanksQueryDb()
-  //
 
-  //
 
   const { getIdAtInvoice } = useIdInvoice(ref_number || '')
 
   const invoiceId = getIdAtInvoice ? getIdAtInvoice.id : null
-  console.log({ invoiceId })
+
   const refNumber = getIdAtInvoice ? getIdAtInvoice.ref_number : null
 
   // const contactName = getPosDetail?.contacts?.[0]?.name
@@ -106,10 +103,13 @@ const Aneh: React.FC = () => {
   const tagId = getPosDetail?.tages?.map((tag: any) => tag.id) || []
   const finance_account_id =
     getPosDetail?.items?.map((item: any) => item.finance_account_id) || []
+    const namaBarang =
+    getPosDetail?.items?.map((item: any) => item.name) || []
+    console.log({namaBarang})
   const qty = getPosDetail?.items?.[0]?.qty || null
   const price = getPosDetail?.items?.[0]?.price || null
   const memorandum = getPosDetail?.memo ?? 0
-  console.log({ memorandum })
+
   const amount = getPosDetail?.amount ?? 0
   const warehouseNomor = getPosDetail?.warehouse_id ?? 0
   const status_id = getPosDetail?.status_id ?? 0
@@ -245,6 +245,7 @@ const Aneh: React.FC = () => {
       items:
         getPosDetail?.items?.map((item: any, index: any) => ({
           finance_account_id: item.finance_account_id,
+        
           tax_id: '',
           desc: '',
           qty_transaksi: item.qty,
@@ -296,10 +297,10 @@ const Aneh: React.FC = () => {
           desc: '',
           qty_transaksi: item.qty,
           qty: transferQty[index] || 0,
-
+          name: namaBarang[index] || 0,
+          amount: totalNilaiPerItme[index] || 0,
+          discount_amount: aaadiskon[index] || 0,          
           price: item.price,
-          amount: item.amount,
-          discount_amount: item.discount_amount,
           discount_percent: 0,
           price_after_tax: 0,
           amount_after_tax: 0,
@@ -317,7 +318,14 @@ const Aneh: React.FC = () => {
       ],
     }
     simpanReturn.mutate(simpanQty as any)
-    navigate(`/pembayaranretur/${memorandum}/${selectedDates}`) 
+    // navigate(`/pembayaranretur/${memorandum}/${selectedDates}`) 
+    if (hutang === 0) {
+      navigate(`/detailkledo/${memorandum}`);
+    } else {
+      navigate(`/pembayaranretur/${memorandum}/${selectedDates}`);
+    }
+    
+    
   }
   const printNota = useRef<HTMLDivElement>(null)
 
@@ -400,11 +408,12 @@ const Aneh: React.FC = () => {
 
   const [newRefNomor, setNewRefNomor] = useState('')
 
-  const [transferQty, setTransferQty] = useState<number[]>([])
 
   const [totalNilaiPerItme, setTotalNilaiPerIem] = useState<number[]>([])
-  console.log({totalNilaiPerItme})
   const [aaadiskon, setAaaDiskon] = useState<number[]>([])
+  const [transferQty, setTransferQty] = useState<number[]>([])
+
+  const beh = Number(aaadiskon) / Number(transferQty)
 
   const [subTotalReturn, setSubTotal] = useState(0)
   const [sumDiskon, setSumDiskon] = useState<number>(0)
@@ -433,6 +442,9 @@ const Aneh: React.FC = () => {
   const handleSetAmountPaid = () => {
     setAmountPaid(hutang)
   }
+
+  const [selisih, setSelisih] = useState<number[]>([]);
+
   // Function to handle changes in transfer quantity
   const handleTransferQtyChange = (
     value: number,
@@ -443,30 +455,27 @@ const Aneh: React.FC = () => {
     setTransferQty((prevTransferQty) => {
       const updatedTransferQty = [...prevTransferQty]
       updatedTransferQty[index] = value
-      console.log("Updated Transfer Qty:", updatedTransferQty) // Log perubahan transfer qty
       return updatedTransferQty
     })
   
     setTotalNilaiPerIem((prevAmounts) => {
       const updatedAmounts = [...prevAmounts]
       updatedAmounts[index] = value * discounted_price
-      console.log("Updated Total Nilai Per Item:", updatedAmounts) // Log perubahan nilai per item
       return updatedAmounts
     })
   
     setAaaDiskon((prevDiscount) => {
       const updatedTotalDiscount = [...(prevDiscount || [])]
-      updatedTotalDiscount[index] = value * discount_amount
-      console.log("Updated Total Discount:", updatedTotalDiscount) // Log perubahan diskon total
+      updatedTotalDiscount[index] = discount_amount
       return updatedTotalDiscount
     })
+      setTotalNilaiPerIem((prevAmounts) => {
+      const updatedAmounts = [...prevAmounts]
+      updatedAmounts[index] = value * discounted_price
+      return updatedAmounts
+    })
   
-    console.log("Handle Transfer Qty Change Called With:", {
-      value,
-      index,
-      discounted_price,
-      discount_amount,
-    }) // Log parameter yang diterima fungsi
+    
   }
   
   const [isDiscountVisible, setIsDiscountVisible] = useState<boolean>(true)
@@ -514,21 +523,76 @@ const Aneh: React.FC = () => {
           </div>
         ),
       },
-
-   
       isDiscountVisible && {
         title: 'Discount',
         dataIndex: 'discount_percent',
         key: 'discount_percent',
         align: 'center',
-        render: (discount_persen: number) => (
+        render: (discount_percent: number) => (
           <div style={{ textAlign: 'right' }}>
-            {discount_persen !== undefined
-              ? `${discount_persen.toLocaleString()}`
-              : 'Rp 0'}
+            {discount_percent !== undefined
+              ? `${discount_percent.toLocaleString()}%`
+              : '0%'}
           </div>
         ),
       },
+
+      {
+        title: 'Umum 2',
+        key: 'original_price',
+        align: 'center',
+        render: (_: any, record: { price: number; discount_percent: number }) => {
+          const { price, discount_percent } = record;
+          const originalPrice =
+            discount_percent !== undefined && discount_percent > 0
+              ? price / (1 - discount_percent / 100)
+              : price;
+      
+          return (
+            <div style={{ textAlign: 'right' }}>
+              {originalPrice !== undefined
+                ? `${Math.round(originalPrice).toLocaleString()}`
+                : 'Rp 0'}
+            </div>
+          );
+        },
+      },
+      
+      {
+        title: 'Harga',
+        dataIndex: 'price',
+        key: 'price',
+        align: 'center',
+        render: (price: number) => (
+          <div style={{ textAlign: 'right' }}>
+            {price !== undefined ? `${price.toLocaleString()}` : 'Rp 0'}
+          </div>
+        ),
+      },
+      {
+        title: 'Selisih',
+        key: 'difference',
+        align: 'center',
+        render: (_: any, record: { price: number; discount_percent: number }) => {
+          const { price, discount_percent } = record;
+          const originalPrice =
+            discount_percent !== undefined && discount_percent > 0
+              ? price / (1 - discount_percent / 100)
+              : price;
+      
+          const difference = originalPrice - price;
+      
+          return (
+            <div style={{ textAlign: 'right' }}>
+              {difference !== undefined
+                ? `${Math.round(difference).toLocaleString()}`
+                : 'Rp 0'}
+            </div>
+          );
+        },
+      }
+,      
+      
       {
         title: 'Qty Retur',
         dataIndex: 'transferQty',
@@ -550,18 +614,31 @@ const Aneh: React.FC = () => {
       }, 
     
      
-    
       {
-        title: 'Harga',
-        dataIndex: 'price',
-        key: 'price',
+        title: 'Total Diskon',
+        key: 'totalValue',
         align: 'center',
-        render: (price: number) => (
-          <div style={{ textAlign: 'right' }}>
-            {price !== undefined ? `${price.toLocaleString()}` : 'Rp 0'}
-          </div>
-        ),
+        render: (_: any, record: { price: number; discount_percent: number }, index: number) => {
+          const { price, discount_percent } = record;
+          const originalPrice =
+            discount_percent !== undefined && discount_percent > 0
+              ? price / (1 - discount_percent / 100)
+              : price;
+      
+          const difference = originalPrice - price;
+          const qtyRetur = transferQty[index] || 0;
+          const totalValue = difference * qtyRetur;
+      
+          return (
+            <div style={{ textAlign: 'right' }}>
+              {totalValue !== undefined
+                ? `${Math.round(totalValue).toLocaleString()}`
+                : 'Rp 0'}
+            </div>
+          );
+        },
       },
+     
       
   
       {
@@ -570,10 +647,8 @@ const Aneh: React.FC = () => {
         key: 'amount',
         align: 'center',
         render: (_: string, record: any, index: number) => {
-          const transferQuantity = Number(transferQty[index] || 0); // Qty Retur
-          const price = Number(record.price || 0); // Harga per item
-      
-          // Total hanya berdasarkan Qty Retur x Harga
+          const transferQuantity = Number(transferQty[index] || 0); 
+          const price = Number(record.price || 0); 
           const total = transferQuantity * price;
       
           return (
