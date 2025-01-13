@@ -723,7 +723,7 @@ console.log({selectedContact})
   }, [user])
   const generateUnique = () => {
     const uuid = uuidv4()
-    const last5OfUUID = uuid.substr(uuid.length - 5)
+    const last5OfUUID = uuid.substr(uuid.length - 2)
     const shortNumber = parseInt(last5OfUUID, 16) % 100000
     return shortNumber
   }
@@ -804,12 +804,12 @@ console.log({selectedContact})
       : []
 
     const invoiceData = {
-      id: uniqueNumber,
+      id: 212,
       jalur: 'penjualan',
       ref_number: refNumber,
       ref_transaksi: 0,
       status_id: status,
-      unique_id: uniqueNumber,
+      unique_id: 212,
       trans_date: formatDate(selectedDates[0]),
       due_date: dueDate,
       contact_id: selectedContact,
