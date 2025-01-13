@@ -587,7 +587,7 @@ console.log({simpanSisaPiutrang})
 
   const columns = [
     {
-      title: 'No.',
+      title: 'No..',
       key: 'no',
       align: 'center',
       render: (_: any, __: any, index: number) => (
@@ -630,7 +630,7 @@ console.log({simpanSisaPiutrang})
       ),
     },
     {
-      title: 'Diskon',
+      title: 'Diskont',
       dataIndex: 'discount_amount',
       key: 'discount_amount',
       align: 'left',
