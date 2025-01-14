@@ -587,7 +587,7 @@ console.log({simpanSisaPiutrang})
 
   const columns = [
     {
-      title: 'No..',
+      title: 'Nu',
       key: 'no',
       align: 'center',
       render: (_: any, __: any, index: number) => (

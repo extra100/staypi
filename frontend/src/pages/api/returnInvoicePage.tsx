@@ -493,7 +493,7 @@ const Aneh: React.FC = () => {
   
     const columns = [
       {
-        title: 'NO..',
+        title: 'Nu',
         key: 'no',
         align: 'center',
         render: (_: any, __: any, index: number) => (
