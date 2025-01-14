@@ -187,6 +187,23 @@ transactionRouter.get(
     }
   })
 )
+transactionRouter.get(
+  '/:contact_id',
+  asyncHandler(async (req: any, res: any) => {
+    const contact_id = parseInt(req.params.contact_id, 10);
+    if (isNaN(contact_id)) {
+      return res.status(400).json({ message: 'Invalid contact_id' });
+    }
+
+    const posData = await TransactionModel.find({ contact_id: contact_id });
+
+    if (posData && posData.length > 0) {
+      res.json(posData);
+    } else {
+      res.status(404).json({ message: 'Transactions not found' });
+    }
+  })
+);
 
 transactionRouter.get(
   '/:ref_number',
