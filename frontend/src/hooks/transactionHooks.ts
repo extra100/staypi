@@ -36,20 +36,20 @@ export const useGetFilteredTransaksisQuery = ({
     },
     enabled: Boolean(transDateFrom && transDateTo),
   })
-  export const useGetTransactionsByContactQuery = (contact_id?: number) =>
-    useQuery({
-      queryKey: ['transactions', contact_id],
-      queryFn: async () => {
-        if (contact_id === undefined) {
-          return [];
-        }
-        // Tambahkan `/` sebelum `${contact_id}`
-        return (
-          await apiClient.get<Transaction[]>(`/api/transactions/${contact_id}`)
-        ).data;
-      },
-      enabled: contact_id !== undefined, // Fetch data only if contact_id is provided
-    });
+  // export const useGetTransactionsByContactQuery = (contact_id?: number) =>
+  //   useQuery({
+  //     queryKey: ['transactions', contact_id],
+  //     queryFn: async () => {
+  //       if (contact_id === undefined) {
+  //         return [];
+  //       }
+  //       // Tambahkan `/` sebelum `${contact_id}`
+  //       return (
+  //         await apiClient.get<Transaction[]>(`/api/transactions/${contact_id}`)
+  //       ).data;
+  //     },
+  //     enabled: contact_id !== undefined, // Fetch data only if contact_id is provided
+  //   });
   
   
 export const useUpdateWitholdingMutation = () => {

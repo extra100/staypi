@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useGetoutletsQuery } from '../../hooks/outletHooks'
 import dayjs from 'dayjs';
 import { useGetFilteredContactsByOutletQuery } from '../../hooks/contactHooks'
-import { useGetTransactionsByContactQuery, useGetTransaksisQuery } from '../../hooks/transactionHooks'
+import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
 
 const ListTransaksi: React.FC = () => {
   const { data } = useGetTransaksisQuery()
@@ -118,7 +118,7 @@ console.log({endDate})
   const [searchStatus, setSearchStatus] = useState<string | undefined>()
   const [searchRef, setSearchRef] = useState('')
   const [searchPesan, setSearchPesan] = useState('')
-  const { data: transactionsIdContact} = useGetTransactionsByContactQuery(searchContact);
+  // const { data: transactionsIdContact} = useGetTransactionsByContactQuery(searchContact);
   
   const filteredData = transaksi
   ?.filter((transaction) => {
@@ -141,13 +141,13 @@ console.log({endDate})
     }
     return true;
   })
-  ?.filter((transaction) => {
-    if (transactionsIdContact) {
-      const contactIds = transactionsIdContact.map((contact) => contact._id);
-      return contactIds.includes(transaction._id);
-    }
-    return true;
-  })
+  // ?.filter((transaction) => {
+  //   if (transactionsIdContact) {
+  //     const contactIds = transactionsIdContact.map((contact) => contact._id);
+  //     return contactIds.includes(transaction._id);
+  //   }
+  //   return true;
+  // })
   ?.sort((a, b) => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
