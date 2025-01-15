@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import { Button, Col, DatePicker, Input, Row, Select, Table, Tag } from 'antd'
 
 // import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
-import { useGetTransaksisQuerymu } from '../../hooks/transactionHooks'
+import { useGetTransactionsByContactQuery, useGetTransaksisQuerymu } from '../../hooks/transactionHooks'
 import { useIdInvoice } from './takeSingleInvoice'
 import UserContext from '../../contexts/UserContext'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
@@ -118,7 +118,7 @@ console.log({endDate})
   const [searchStatus, setSearchStatus] = useState<string | undefined>()
   const [searchRef, setSearchRef] = useState('')
   const [searchPesan, setSearchPesan] = useState('')
-  // const { data: transactionsIdContact} = useGetTransactionsByContactQuery(searchContact);
+  const { data: transactionsIdContact} = useGetTransactionsByContactQuery(searchContact);
   
   const filteredData = transaksi
   ?.filter((transaction) => {
@@ -141,13 +141,13 @@ console.log({endDate})
     }
     return true;
   })
-  // ?.filter((transaction) => {
-  //   if (transactionsIdContact) {
-  //     const contactIds = transactionsIdContact.map((contact) => contact._id);
-  //     return contactIds.includes(transaction._id);
-  //   }
-  //   return true;
-  // })
+  ?.filter((transaction) => {
+    if (transactionsIdContact) {
+      const contactIds = transactionsIdContact.map((contact) => contact._id);
+      return contactIds.includes(transaction._id);
+    }
+    return true;
+  })
   ?.sort((a, b) => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
