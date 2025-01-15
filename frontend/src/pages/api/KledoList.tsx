@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Button, Col, DatePicker, Input, Row, Select, Table, Tag } from 'antd'
 
-// import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
-import { useGetTransactionsByContactQuery, useGetTransaksisQuerymu } from '../../hooks/transactionHooks'
+import { useGetTransaksisQuery, useGetTransactionsByContactQuery } from '../../hooks/transactionHooks'
+import { useGetTransaksisQuerymu } from '../../hooks/transactionHooks'
 import { useIdInvoice } from './takeSingleInvoice'
 import UserContext from '../../contexts/UserContext'
 import { useGetContactsQuery } from '../../hooks/contactHooks'
@@ -10,7 +10,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useGetoutletsQuery } from '../../hooks/outletHooks'
 import dayjs from 'dayjs';
 import { useGetFilteredContactsByOutletQuery } from '../../hooks/contactHooks'
-import { useGetTransaksisQuery } from '../../hooks/transactionHooks'
 
 const ListTransaksi: React.FC = () => {
   const { data } = useGetTransaksisQuery()
@@ -58,12 +57,10 @@ console.log({endDate})
   : null;
     const { data: pelanggan } = useGetFilteredContactsByOutletQuery(selectedGudangName as any)
     const selectedPelangganName = selectedWarehouseId 
-    ? pelanggan?.find(contact => Number(contact.id) === selectedWarehouseId)?.name 
+    ? contacts?.find(contact => Number(contact.id) === selectedWarehouseId)?.name 
     : null;
-  console.log({selectedPelangganName})  
-  console.log({gudangs})  
+
   const getContactName = (contactId: string): string => {
-    // Assuming `contacts` is an array with `id` and `name`
     const contact = contacts?.find((contact: any) => contact.id === contactId);
     return contact?.name || 'Unknown';
   };
@@ -114,13 +111,50 @@ console.log({endDate})
   }
  
   const [searchContact, setSearchContact] = useState<number | undefined>()
+  console.log({searchContact})
   const [searchWarehouse, setSearchWarehouse] = useState<number | undefined>()
   const [searchStatus, setSearchStatus] = useState<string | undefined>()
   const [searchRef, setSearchRef] = useState('')
   const [searchPesan, setSearchPesan] = useState('')
   const { data: transactionsIdContact} = useGetTransactionsByContactQuery(searchContact);
-  
-  const filteredData = transaksi
+  console.log({transactionsIdContact})
+
+//   const filteredData = transaksi
+//   ?.filter((transaction) => {
+//     if (searchStatus) {
+//       const statusText = getStatus(transaction)
+//       return statusText.toLowerCase() === searchStatus.toLowerCase()
+//     }
+//     return true
+//   })
+//   ?.filter((transaction) => {
+//     return (
+//       transaction.jalur === 'penjualan' && transaction.reason_id !== 'void'
+//     )
+//   })
+//   ?.filter((transaction) => {
+//     if (searchRef) {
+//       const lowerSearchRef = searchRef.toLowerCase() // Normalize the search term
+//       // Check if the search term matches either ref_number or message
+//       return (
+//         transaction.message?.toLowerCase().includes(lowerSearchRef) || transaction.ref_number?.toLowerCase().includes(lowerSearchRef)
+        
+//       )
+//     }
+//     return true
+//   })
+
+//   ?.sort(
+//     (a, b) =>
+//       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+//   )
+
+// const filteredTransaksi = transaksi?.filter(
+//   (item: any) => item.reason_id === 'void'
+// )
+
+
+const filteredData = transaksi
   ?.filter((transaction) => {
     if (searchStatus) {
       const statusText = getStatus(transaction);
@@ -155,6 +189,9 @@ console.log({endDate})
 const filteredTransaksi = transaksi?.filter(
   (item) => item.reason_id === 'void'
 );
+
+
+  console.log({ filteredTransaksi })
   const [activeButton, setActiveButton] = useState('')
   const navigate = useNavigate()
   const handleButtonClick = (value: any) => {
@@ -209,7 +246,7 @@ const filteredTransaksi = transaksi?.filter(
     },
    
     {
-      title: 'Warehouse',
+      title: 'Outlet',
       dataIndex: 'warehouse_id',
       key: 'warehouse_name',
       render: (warehouseId: number) => getWarehouseName(warehouseId),
@@ -389,13 +426,13 @@ const filteredTransaksi = transaksi?.filter(
         </Col>
         <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col>
-  <Input
-    placeholder="Cari Ref Number"
-    value={searchRef}
-    onChange={(e) => setSearchRef(e.target.value)}
-    style={{ width: 200 }}
-  />
-</Col>
+          <Input
+            placeholder="Cari Detail"
+            value={searchRef}
+            onChange={(e) => setSearchRef(e.target.value)}
+            style={{ width: 200 }}
+          />
+        </Col>
 
           {/* Filter berdasarkan Nama Kontak */}
           <Col>
@@ -414,7 +451,7 @@ const filteredTransaksi = transaksi?.filter(
                     .includes(input.toLowerCase()) // Custom filter logic
               }
             >
-              {contacts?.map((contact) => (
+              {pelanggan?.map((contact) => (
                 <Select.Option key={contact.id} value={contact.id}>
                   {contact.name}
                 </Select.Option>
@@ -423,7 +460,7 @@ const filteredTransaksi = transaksi?.filter(
           </Col>
 
           {/* Filter berdasarkan Nama Gudang */}
-          <Col>
+          {/* <Col>
             <Select
               placeholder="Pilih Nama Gudang"
               value={searchWarehouse}
@@ -440,7 +477,7 @@ const filteredTransaksi = transaksi?.filter(
                 </Select.Option>
               ))}
             </Select>
-          </Col>
+          </Col> */}
 
           {/* Filter berdasarkan Status */}
           <Col>
