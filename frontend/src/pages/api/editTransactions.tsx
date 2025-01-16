@@ -727,7 +727,7 @@ const EditTransaksi = () => {
     const uuid = uuidv4()
     const last4OfUUID = uuid.substr(uuid.length - 4)
     const shortNumber = parseInt(last4OfUUID, 16) % 10000
-    return `IBO-${idOutlet}-${String(shortNumber).padStart(5, '0')}`
+    return `UBI-${idOutlet}-${String(shortNumber).padStart(5, '0')}`
   }
 
   const [refNumber, setRefNumber] = useState<string>('')

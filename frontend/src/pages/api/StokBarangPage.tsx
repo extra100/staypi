@@ -705,7 +705,7 @@ console.log({selectedContact})
     const last4OfUUID = uuid.substr(uuid.length - 4)
     const shortNumber = parseInt(last4OfUUID, 16) % 10000
 
-    return `IBO-${idOutlet}-${timestamp}-${String(shortNumber).padStart(
+    return `UBI-${idOutlet}-${timestamp}-${String(shortNumber).padStart(
       5,
       '0'
     )}`

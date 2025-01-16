@@ -41,7 +41,7 @@ export function KirimEditKeKledo() {
         },
       ],
       message: null,
-      ref_number: 'IBO-3-05519',
+      ref_number: 'UBI-3-05519',
       shipping_comp_id: null,
       shipping_cost: 0,
       shipping_date: null,

@@ -153,8 +153,8 @@ const ProductStocksPage: React.FC = () => {
             </div>
             <div className="col-md-6">
               <Form.Item
-                name="TUJUAN IBO"
-                label="TUJUAN IBO"
+                name="TUJUAN UBI"
+                label="TUJUAN UBI"
                 rules={[{ required: true }]}
               >
                 <Select

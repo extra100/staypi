@@ -139,7 +139,7 @@ console.log({filteredGudangs})
       key: 'references',
       render: (text: any, record: any) => {
         let href = '';
-        if (record.ref_number.startsWith('IBO')) {
+        if (record.ref_number.startsWith('UBI')) {
           href = `/detailkledo/${record.ref_number}`;
         } else if (record.ref_number.startsWith('MNY')) {
           href = `https://app.kledo.com/#/debit-memo/detail/${record.id}`;
