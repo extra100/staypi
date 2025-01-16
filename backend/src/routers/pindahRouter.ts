@@ -252,5 +252,24 @@ warehouseTransferRouter.put(
     }
   })
 );
+warehouseTransferRouter.get(
+  '/by-idGudang/:idGudang',
+  asyncHandler(async (req: any, res: any) => {
+    const idGudang = parseInt(req.params.idGudang); // Match parameter name
+    if (isNaN(idGudang)) {
+      return res.status(400).json({ message: 'Invalid idGudang' });
+    }
+
+    const posData = await WarehouseTransferModel.find({ to_warehouse_id: idGudang });
+    console.log({ idGudang });
+    console.log({ posData });
+
+    if (posData && posData.length > 0) {
+      res.json(posData);
+    } else {
+      res.status(404).json({ message: 'Gudang not found' });
+    }
+  })
+);
 
 export default warehouseTransferRouter

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { Button, Input, Table } from 'antd'
-import { useGetWarehouseTransfersQuery } from '../../hooks/pindahHooks'
+import { useGetWarehouseTransferByWarehouseId, useGetWarehouseTransfersQuery } from '../../hooks/pindahHooks'
 import { useIdWarehouse } from './namaWarehouse'
 import { useNavigate } from 'react-router-dom'
 import UserContext from '../../contexts/UserContext'
@@ -14,7 +14,10 @@ const ListSiapDiValidasi: React.FC = () => {
     idOutletLoggedIn = Number(user.id_outlet)
   }
 
-  const { data: transfers } = useGetWarehouseTransfersQuery()
+  const { data: withoutAnyFilter } = useGetWarehouseTransfersQuery()
+  const {
+    data: withFilter
+  } = useGetWarehouseTransferByWarehouseId(idOutletLoggedIn)
 
   const { idWarehouse } = useIdWarehouse()
   const navigate = useNavigate()
@@ -31,8 +34,8 @@ const ListSiapDiValidasi: React.FC = () => {
 
   const today = dayjs().format('YYYY-MM-DD')
 
-  const dataSource = Array.isArray(transfers)
-  ? transfers
+  const dataSource = Array.isArray(withFilter)
+  ? withFilter
       .filter((transfer: any) => {
         const transDate = dayjs(transfer.trans_date).format('YYYY-MM-DD')
         const isToday = transDate === today
@@ -42,11 +45,8 @@ const ListSiapDiValidasi: React.FC = () => {
           transfer.to_warehouse_id !== user?.isAdmin &&
           (String(transfer.ref_number || '').includes(searchTerm) ||
             String(transfer.from_warehouse_id || '').includes(searchTerm))
-
+  
         const isEksekusiMet = transfer.eksekusi === '1' || transfer.eksekusi === undefined;
-
-        console.log({isEksekusiMet})
-        console.log({isCommonCriteriaMet})
 
         if (user?.isAdmin) {
           return isToday && isCommonCriteriaMet && isEksekusiMet
@@ -54,7 +54,7 @@ const ListSiapDiValidasi: React.FC = () => {
 
         const isNonAdminCriteriaMet =
           transfer.code === 1 && transfer.to_warehouse_id === idOutletLoggedIn
-          console.log({isNonAdminCriteriaMet})
+    
 
         return isToday && isNonAdminCriteriaMet && isEksekusiMet
       })
@@ -63,7 +63,6 @@ const ListSiapDiValidasi: React.FC = () => {
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
   : []
-
 
 
   const handleRowClick = (record: any) => {

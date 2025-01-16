@@ -167,3 +167,16 @@ export const useUpdateEkesekusiUntukToggle = () => {
     }
   );
 };
+export const useGetWarehouseTransferByWarehouseId = (idGudang?: number) =>
+  useQuery({
+    queryKey: ['pindah', idGudang],
+    queryFn: async () => {
+      if (idGudang === undefined) {
+        return [];
+      }
+      return (
+        await apiClient.get<WarehouseTransfer[]>(`/api/pindah/by-idGudang/${idGudang}`)
+      ).data;
+    },
+    enabled: idGudang !== undefined, // Fetch data only if contact_id is provided
+  });
