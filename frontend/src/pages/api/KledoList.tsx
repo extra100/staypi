@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react'
-import { Button, Col, DatePicker, Input, Row, Select, Table, Tag } from 'antd'
+import React, { useState, useEffect, useContext, useMemo } from 'react'
+import { Button, Col, DatePicker, Input, Row, Select, Table, Tag, Tooltip } from 'antd'
 
 import { useGetTransaksisQuery, useGetTransactionsByContactQuery } from '../../hooks/transactionHooks'
 import { useGetTransaksisQuerymu } from '../../hooks/transactionHooks'
@@ -20,19 +20,39 @@ const ListTransaksi: React.FC = () => {
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<any | null>(
     null
   )
-  console.log({selectedWarehouseId})
+  // console.log({selectedWarehouseId})
   const [startDate, setStartDate] = useState<string | null>(null)
   const [endDate, setEndDate] = useState<string | null>(null)
-console.log({startDate})
-console.log({endDate})
+// console.log({startDate})
+// console.log({endDate})
   const {
     data: transaksi,
     isLoading,
     error,
   } = useGetTransaksisQuerymu(selectedWarehouseId, startDate, endDate)
   const contactIds = transaksi?.map((item) => item.contact_id);
-
-  console.log({ contactIds })
+  const itemNames = useMemo(() => {
+    if (!transaksi || transaksi.length === 0) {
+      return [];
+    }
+  
+    // Flatten all `items` arrays from each transaction and extract `name`
+    const allNames = transaksi.flatMap((transaction) =>
+      transaction.items.map((item) => item.name)
+    );
+  
+    // Return unique names
+    return [...new Set(allNames)];
+  }, [transaksi]);
+  const pelengganId = useMemo(() => {
+    if (!transaksi || transaksi.length === 0) {
+      return [];
+    }
+    const allNames = transaksi.flatMap((transaction) =>
+      transaction.contacts.map((item) => item.id)
+    );
+    return [...new Set(allNames)];
+  }, [transaksi]);
   const { data: contacts } = useGetContactsQuery()
   const { data: gudangs } = useGetoutletsQuery()
 
@@ -51,7 +71,6 @@ console.log({endDate})
   }
 
   const [searchText, setSearchText] = useState<string>('')
-  //aneh
   const selectedGudangName = selectedWarehouseId 
   ? gudangs?.find(contact => Number(contact.id_outlet) === selectedWarehouseId)?.nama_outlet 
   : null;
@@ -110,48 +129,19 @@ console.log({endDate})
     }
   }
  
-  const [searchContact, setSearchContact] = useState<number | undefined>()
+  const [searchContact, setSearchContact] = useState<string | undefined>()
+  const [searchNamaBarang, setSearchNamaBarang] = useState<any | undefined>()
   console.log({searchContact})
   const [searchWarehouse, setSearchWarehouse] = useState<number | undefined>()
   const [searchStatus, setSearchStatus] = useState<string | undefined>()
   const [searchRef, setSearchRef] = useState('')
   const [searchPesan, setSearchPesan] = useState('')
-  const { data: transactionsIdContact} = useGetTransactionsByContactQuery(searchContact);
-  console.log({transactionsIdContact})
+  const { data: transactionsIdContact} = useGetTransactionsByContactQuery(searchContact as any);
+  const handleSelectChange = (value: string) => {
+    setSearchNamaBarang(value);
+  };
 
-//   const filteredData = transaksi
-//   ?.filter((transaction) => {
-//     if (searchStatus) {
-//       const statusText = getStatus(transaction)
-//       return statusText.toLowerCase() === searchStatus.toLowerCase()
-//     }
-//     return true
-//   })
-//   ?.filter((transaction) => {
-//     return (
-//       transaction.jalur === 'penjualan' && transaction.reason_id !== 'void'
-//     )
-//   })
-//   ?.filter((transaction) => {
-//     if (searchRef) {
-//       const lowerSearchRef = searchRef.toLowerCase() // Normalize the search term
-//       // Check if the search term matches either ref_number or message
-//       return (
-//         transaction.message?.toLowerCase().includes(lowerSearchRef) || transaction.ref_number?.toLowerCase().includes(lowerSearchRef)
-        
-//       )
-//     }
-//     return true
-//   })
 
-//   ?.sort(
-//     (a, b) =>
-//       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-//   )
-
-// const filteredTransaksi = transaksi?.filter(
-//   (item: any) => item.reason_id === 'void'
-// )
 
 
 const filteredData = transaksi
@@ -175,23 +165,25 @@ const filteredData = transaksi
     }
     return true;
   })
-  ?.filter((transaction) => {
-    if (transactionsIdContact) {
-      const contactIds = transactionsIdContact.map((contact) => contact._id);
-      return contactIds.includes(transaction._id);
+  ?.filter((contact) => {
+    if (searchContact) {
+      return contact.contact_id === Number(searchContact);
     }
     return true;
   })
+  ?.filter((transaction) => {
+    if (searchNamaBarang) {
+      const lowerSearchRef = searchNamaBarang.toLowerCase();
+      return transaction.items.some(item =>
+        item.name?.toLowerCase().includes(lowerSearchRef)
+      );
+    }
+    return true;
+  })
+  
   ?.sort((a, b) => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
-
-const filteredTransaksi = transaksi?.filter(
-  (item) => item.reason_id === 'void'
-);
-
-
-  console.log({ filteredTransaksi })
   const [activeButton, setActiveButton] = useState('')
   const navigate = useNavigate()
   const handleButtonClick = (value: any) => {
@@ -205,7 +197,7 @@ const filteredTransaksi = transaksi?.filter(
       navigate('/listreturn')
     }
   }
-
+console.log({filteredData})
   const roundUpIndonesianNumber = (value: number | null): string => {
     if (value === null) return ''
     return new Intl.NumberFormat('id-ID', {
@@ -222,9 +214,38 @@ const filteredTransaksi = transaksi?.filter(
     {
       title: 'No',
       key: 'no',
-      render: (_: any, __: any, index: number) => index + 1,
+      render: (_: any, record: any, index: number) => (
+        <Tooltip
+          title={
+            <table style={{ width: '350px', borderCollapse: 'collapse', backgroundColor: '#f8f9fa'}}>
+              <thead>
+                <tr style={{ backgroundColor: '#f1f1f1', borderBottom: '1px solid #e0e0e0' }}>
+                  <th style={{ textAlign: 'left', padding: '8px', fontWeight: 'bold', color: '#595959' }}>Items</th>
+                  <th style={{ textAlign: 'left', padding: '8px', fontWeight: 'bold', color: '#595959' }}>Qty</th>
+                </tr>
+              </thead>
+              <tbody>
+                {record.items.map((item: any) => (
+                  <tr key={item._id}>
+                    <td style={{ padding: '8px', color: '#595959' }}>{item.name}</td>
+                    <td style={{ padding: '8px', color: '#595959' }}>{item.qty} {item.unit}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          }
+        >
+          <span>{index + 1}</span>
+        </Tooltip>
+      ),
       width: 50,
     },
+    
+    
+    
+    
+    
+    
     {
       title: 'No. Invoice',
       dataIndex: 'ref_number',
@@ -361,11 +382,7 @@ const filteredTransaksi = transaksi?.filter(
         )
       },
     },
-    // {
-    //   title: 'Ket',
-    //   dataIndex: 'id',
-    //   key: 'id',
-    // },
+ 
   ]
 
   return (
@@ -433,53 +450,50 @@ const filteredTransaksi = transaksi?.filter(
             style={{ width: 200 }}
           />
         </Col>
-
-          {/* Filter berdasarkan Nama Kontak */}
-          <Col>
-            <Select
-              placeholder="Pilih Nama Kontak"
-              value={searchContact}
-              onChange={(value) => setSearchContact(value)}
-              style={{ width: 200 }}
-              allowClear
-              showSearch
-              optionFilterProp="children" // Enable filtering by the displayed option text
-              filterOption={
-                (input, option) =>
-                  (option?.children as any)
-                    .toLowerCase()
-                    .includes(input.toLowerCase()) // Custom filter logic
-              }
-            >
-              {pelanggan?.map((contact) => (
-                <Select.Option key={contact.id} value={contact.id}>
-                  {contact.name}
+        <Col>
+          <Select
+            placeholder="Pilih Nama Kontak"
+            value={searchContact}
+            onChange={(value) => setSearchContact(value)}
+            style={{ width: 200 }}
+            allowClear
+            showSearch
+            optionFilterProp="children"
+            filterOption={(input, option) =>
+              (option?.children as any).toLowerCase().includes(input.toLowerCase())
+            }
+          >
+            {pelengganId?.map((id) => {
+              const contact = contacts?.find((contact) => contact.id === id);
+              return (
+                <Select.Option key={id} value={id}>
+                  {contact?.name || "Nama Tidak Ditemukan"}
                 </Select.Option>
-              ))}
-            </Select>
-          </Col>
+              );
+            })}
+          </Select>
+        </Col>
 
-          {/* Filter berdasarkan Nama Gudang */}
-          {/* <Col>
-            <Select
-              placeholder="Pilih Nama Gudang"
-              value={searchWarehouse}
-              onChange={(value) => setSearchWarehouse(value)}
-              style={{ width: 200 }}
-              allowClear
-            >
-              {gudangs?.map((warehouse) => (
-                <Select.Option
-                  key={warehouse.id_outlet}
-                  value={warehouse.id_outlet}
-                >
-                  {warehouse.nama_outlet}
-                </Select.Option>
-              ))}
-            </Select>
-          </Col> */}
+        <Col>
+          <Select
+            showSearch
+            placeholder="Pilih Nama Barang"
+            style={{ width: 300 }}
+            allowClear
+            onChange={handleSelectChange} // Handler untuk menangani perubahan nilai
+            filterOption={(input, option) =>
+              (option?.children as any).toLowerCase().includes(input.toLowerCase())
+            }
+          >
+            {itemNames.map((name) => (
+              <Select.Option key={name} value={name}>
+                {name}
+              </Select.Option>
+            ))}
+          </Select>
+        </Col>
 
-          {/* Filter berdasarkan Status */}
+      
           <Col>
             <Select
               placeholder="Pilih Status"
@@ -497,12 +511,7 @@ const filteredTransaksi = transaksi?.filter(
           </Col>
         </Row>
       </Row>
-      {/* <Table
-        dataSource={filteredData}
-        columns={columns as any}
-        rowKey="_id"
-        pagination={{ pageSize: 100 }}
-      /> */}
+     
       <Table
         dataSource={filteredData}
         columns={columns as any}
