@@ -880,11 +880,13 @@ console.log({selectedContact})
     addPosMutation.mutate(invoiceData as any, {
       onSuccess: () => {
         message.success('Transaksi berhasil disimpan!')
-
+    
         setTimeout(() => {
           setIsLoading(false)
+          window.open(`/detailkledo/${refNumber}`, '_blank')
+    
           navigate(`/getinvbasedondate/${refNumber}`)
-        }, 3000) // 3000ms = 3 detik
+        }, 3000) 
       },
       onError: (error: any) => {
         message.error(`Terjadi kesalahan: ${error.message}`)
