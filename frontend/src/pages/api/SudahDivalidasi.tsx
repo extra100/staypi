@@ -240,6 +240,11 @@ const SudahDivalidasi: React.FC = () => {
       dataIndex: 'product_name',
       key: 'product_name',
     },
+    {
+      title: 'Code',
+      dataIndex: 'code',
+      key: 'code',
+    },
 
     {
       title: 'Qty',
