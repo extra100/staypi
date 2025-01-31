@@ -32,13 +32,15 @@ const ListSiapDiValidasi: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('')
 
+ 
   const today = dayjs().format('YYYY-MM-DD')
+const threeDaysAgo = dayjs().subtract(3, 'day').format('YYYY-MM-DD')
 
-  const dataSource = Array.isArray(withFilter)
+const dataSource = Array.isArray(withFilter)
   ? withFilter
       .filter((transfer: any) => {
         const transDate = dayjs(transfer.trans_date).format('YYYY-MM-DD')
-        const isToday = transDate === today
+        const isLastThreeDays = transDate >= threeDaysAgo && transDate <= today
 
         const isCommonCriteriaMet =
           transfer.code === 1 &&
@@ -49,20 +51,21 @@ const ListSiapDiValidasi: React.FC = () => {
         const isEksekusiMet = transfer.eksekusi === '1' || transfer.eksekusi === undefined;
 
         if (user?.isAdmin) {
-          return isToday && isCommonCriteriaMet && isEksekusiMet
+          return isLastThreeDays && isCommonCriteriaMet && isEksekusiMet
         }
 
         const isNonAdminCriteriaMet =
           transfer.code === 1 && transfer.to_warehouse_id === idOutletLoggedIn
     
-
-        return isToday && isNonAdminCriteriaMet && isEksekusiMet
+        return isLastThreeDays && isNonAdminCriteriaMet && isEksekusiMet
       })
       .sort(
         (a: any, b: any) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
   : []
+
+
 
 
   const handleRowClick = (record: any) => {
