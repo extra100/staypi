@@ -534,8 +534,8 @@ function App() {
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineHtml5 size={20} style={iconStyle} />
-              <LinkContainer to="/tabelbarangs" onClick={handleDataSatuanClick}>
-                <NavDropdown.Item>Data Barang</NavDropdown.Item>
+              <LinkContainer to="/productkategori" onClick={handleDataSatuanClick}>
+                <NavDropdown.Item>Data Pengguna</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
