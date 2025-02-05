@@ -44,7 +44,7 @@ const WarehouseStockManager: React.FC = () => {
 
   const generateColumns = () => {
     const warehouseIds = [...new Set(stokWarehouse?.map((item) => item.warehouse_id))];
-
+  
     const columns = [
       {
         title: 'Produk',
@@ -54,19 +54,21 @@ const WarehouseStockManager: React.FC = () => {
       ...warehouseIds.map((id) => {
         const warehouse = gudangdb?.find((gudang: any) => String(gudang.id) === String(id));
         const title = warehouse?.singkatan || id;
-
+  
         return {
           title: title,
           dataIndex: id,
           key: id,
-          render: (value: number) => (value !== undefined ? value : 0),
+          render: (value: any) => {
+            const numericValue = Number(value); 
+            return isNaN(numericValue) ? 0 : numericValue; 
+          },
         };
       }),
     ];
-
+  
     return columns;
   };
-
   return (
     <div>
       {/* Select Barang */}
