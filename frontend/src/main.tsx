@@ -129,6 +129,8 @@ import PelangganSearchPage from './pages/api/PelangganSearchPage'
 import CariBeda from './pages/api/CariBeda'
 import WarehouseStockManager from './pages/api/WarehouseStokManager'
 import { SalesPerProductCategoryUI } from './pages/kategoribarang/ProductKategory'
+import WarehouseStockTable from './pages/api/WarehouseStockTable'
+
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
 
@@ -292,6 +294,8 @@ const router = createBrowserRouter(
       <Route path="/caribedainvoice" element={<CariBeda />} />
       <Route path="/semuastokoutlet" element={<WarehouseStockManager />} />
       <Route path="/productkategori" element={<SalesPerProductCategoryUI />} />
+      <Route path="/printstokauditmanual" element={<WarehouseStockTable />} />
+
 
     </Route>
   )

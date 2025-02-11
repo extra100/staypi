@@ -562,6 +562,12 @@ function App() {
                 <NavDropdown.Item>ibo</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
+            <ListGroup.Item style={listItemStyle}>
+              <AiOutlineShop size={20} style={iconStyle} />
+              <LinkContainer to="/printstokauditmanual" onClick={handleDataTransaksiClick}>
+                <NavDropdown.Item>Print Stok Audit Mandiri</NavDropdown.Item>
+              </LinkContainer>
+            </ListGroup.Item>
           </ListGroup>
         </div>
         {/* Main Content */}
