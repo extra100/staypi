@@ -103,7 +103,9 @@ const StockSelectorTable = () => {
 
   const { data: controllings } = useGetControlQuery()
 // console.log({contacts})
-  const { saveInvoiceData } = SaveApi()
+  // const { saveInvoiceData } = SaveApi()
+const { saveInvoiceData, error } = SaveApi(); // Tambahkan success di sini
+
   //
  const { loading, takedueanContactStatusIdandMemoMny } =
     TakePiutangToPerContactStatusIdAndMemoMny(
@@ -748,7 +750,7 @@ console.log({selectedContact})
   }
   const [memo, setMemo] = useState('')
   
-  const handleSave = () => {
+  const handleSave = async () => {
     if (isSaveDisabled) return
 
     const saveTag = tagDb?.reduce((map: any, tag: any) => {
@@ -873,18 +875,27 @@ console.log({selectedContact})
     }
 
     setLoadingSpinner(true)
+  
+    const isSaved = await saveInvoiceData(invoiceData)
+  
+    if (!isSaved) {
+      message.error(error || 'Gagal menyimpan invoice. Pastikan semua data sudah benar!')
+      setLoadingSpinner(false)
+      return
+    }
 
-    saveInvoiceData(invoiceData)
 
-    setIsLoading(true) // Aktifkan loading
+  
+    setIsLoading(true)
+  
     addPosMutation.mutate(invoiceData as any, {
       onSuccess: () => {
         message.success('Transaksi berhasil disimpan!')
-
+  
         setTimeout(() => {
           setIsLoading(false)
           navigate(`/getinvbasedondate/${refNumber}`)
-        }, 3000) // 3000ms = 3 detik
+        }, 3000)
       },
       onError: (error: any) => {
         message.error(`Terjadi kesalahan: ${error.message}`)
@@ -1128,7 +1139,7 @@ console.log({selectedContact})
               alignItems: 'center',
             }}
           >
-            <NumericFormat
+            {/* <NumericFormat
               value={text}
               allowNegative={false}
               thousandSeparator="."
@@ -1166,7 +1177,42 @@ console.log({selectedContact})
               }}
               customInput={Input}
               style={{ textAlign: 'center', width: '70px' }}
-            />
+            /> */}
+                        <NumericFormat
+  value={text}
+  allowNegative={false}
+  thousandSeparator="."
+  decimalSeparator=","
+  onValueChange={(values) => {
+    const { floatValue } = values
+    if (floatValue === undefined || isNaN(floatValue)) return
+
+    console.log("Input Value (sebelum validasi):", floatValue) // Debug sebelum diubah
+    console.log("Stock Quantity:", stockQuantity)
+
+    const isOverStock = floatValue > stockQuantity
+
+    setDataSource((prev) =>
+      prev.map((item) =>
+        item.finance_account_id === record.finance_account_id
+          ? {
+              ...item,
+              qty: floatValue, // Simpan nilai asli yang diketik user
+              subtotal: (record.harga_setelah_diskon || record.price) * floatValue,
+              error: isOverStock ? `Stok tersedia: ${stockQuantity}` : undefined,
+            }
+          : item
+      )
+    )
+
+    // Tambahkan validasi agar tidak bisa dipakai di sistem (tetap tampil di input)
+    if (isOverStock) {
+      console.log(`Qty terlalu besar, hanya tersedia: ${stockQuantity}`)
+    }
+  }}
+  customInput={Input}
+  style={{ textAlign: 'center', width: '70px' }}
+/>
 
             {record.error && (
               <span style={{ color: 'red', fontSize: '12px' }}>
