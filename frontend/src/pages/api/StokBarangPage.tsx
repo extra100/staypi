@@ -102,9 +102,8 @@ const StockSelectorTable = () => {
   const { data: contacts } = useGetFilteredContactsByOutletQuery(warehouseName as any)
 
   const { data: controllings } = useGetControlQuery()
-// console.log({contacts})
-  // const { saveInvoiceData } = SaveApi()
-const { saveInvoiceData, error } = SaveApi(); // Tambahkan success di sini
+  const { saveInvoiceData } = SaveApi()
+
 
   //
  const { loading, takedueanContactStatusIdandMemoMny } =
@@ -749,8 +748,7 @@ console.log({selectedContact})
     setAmountPaid(totalSubtotal)
   }
   const [memo, setMemo] = useState('')
-  
-  const handleSave = async () => {
+  const handleSave = () => {
     if (isSaveDisabled) return
 
     const saveTag = tagDb?.reduce((map: any, tag: any) => {
@@ -788,8 +786,6 @@ console.log({selectedContact})
     if (termIdSimpan === 2) {
       dueDate = formatDate(selectedDates[0])
     }
-
-    // Cek jika `amountPaid` tidak kosong
     const witholdings = amountPaid
       ? [
           {
@@ -806,12 +802,12 @@ console.log({selectedContact})
       : []
 
     const invoiceData = {
-      id: 212,
+      id: uniqueNumber,
       jalur: 'penjualan',
       ref_number: refNumber,
       ref_transaksi: 0,
       status_id: status,
-      unique_id: 212,
+      unique_id: uniqueNumber,
       trans_date: formatDate(selectedDates[0]),
       due_date: dueDate,
       contact_id: selectedContact,
@@ -875,27 +871,18 @@ console.log({selectedContact})
     }
 
     setLoadingSpinner(true)
-  
-    const isSaved = await saveInvoiceData(invoiceData)
-  
-    if (!isSaved) {
-      message.error(error || 'Gagal menyimpan invoice. Pastikan semua data sudah benar!')
-      setLoadingSpinner(false)
-      return
-    }
 
+    saveInvoiceData(invoiceData)
 
-  
-    setIsLoading(true)
-  
+    setIsLoading(true) // Aktifkan loading
     addPosMutation.mutate(invoiceData as any, {
       onSuccess: () => {
         message.success('Transaksi berhasil disimpan!')
-  
+
         setTimeout(() => {
           setIsLoading(false)
           navigate(`/getinvbasedondate/${refNumber}`)
-        }, 3000)
+        }, 3000) // 3000ms = 3 detik
       },
       onError: (error: any) => {
         message.error(`Terjadi kesalahan: ${error.message}`)
@@ -903,7 +890,6 @@ console.log({selectedContact})
       },
     })
   }
-
   const [stockQuantities, setStockQuantities] = useState<
     Record<string, number>
   >({})
