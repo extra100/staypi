@@ -50,7 +50,6 @@ const WarehouseStockTable: React.FC = () => {
     }
   }, [user]);
 
-  const { warehouseStock } = useWarehouseStock(formattedDate, selectedWarehouseId ?? 0);
 
   const handleDateChange = (dates: any, dateStrings: [string, string]) => {
     setSelectedDates(dateStrings);
@@ -60,9 +59,27 @@ const WarehouseStockTable: React.FC = () => {
     setSelectedCategory(value);
   };
 
+
+  const { warehouseStock } = useWarehouseStock(formattedDate, selectedWarehouseId ?? 0);
+  console.log({ warehouseStock });
+  
   const filteredBarangs = selectedCategory
     ? barangs?.filter((barang) => barang.pos_product_category_id === selectedCategory)
     : barangs;
+  
+  // Gabungkan data barang dengan stok dari warehouseStock dan hilangkan stok 0
+  const finalFilteredBarangs = filteredBarangs
+    ?.map((barang) => {
+      const stockData = warehouseStock?.find((stock) => stock.id === barang.id);
+      return {
+        ...barang,
+        stock: stockData?.stock ?? 0, // Set ke 0 jika tidak ditemukan
+      };
+    })
+    .filter((barang) => barang.stock > 0); // Hanya ambil barang dengan stok > 0
+  
+  console.log({ finalFilteredBarangs });
+  
 
   const handlePrint = () => {
     if (printRef.current) {
@@ -124,7 +141,7 @@ const WarehouseStockTable: React.FC = () => {
         Print
       </Button>
       <div ref={printRef}>
-        <Table dataSource={filteredBarangs} columns={columns} rowKey="id" pagination={false} />
+        <Table dataSource={finalFilteredBarangs} columns={columns} rowKey="id" pagination={false} />
       </div>
     </div>
   );
