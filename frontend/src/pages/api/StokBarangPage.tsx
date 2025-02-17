@@ -748,43 +748,45 @@ console.log({selectedContact})
     setAmountPaid(totalSubtotal)
   }
   const [memo, setMemo] = useState('')
-  const handleSave = () => {
-    if (isSaveDisabled) return
+  const [error, setError] = useState<string | null>(null);
 
+  const handleSave = async () => {
+    if (isSaveDisabled) return;
+  
     const saveTag = tagDb?.reduce((map: any, tag: any) => {
-      map[tag.name] = tag.id
-      return map
-    }, {})
-
+      map[tag.name] = tag.id;
+      return map;
+    }, {});
+  
     const saveIdTags = selectTag
       .map((id: number) => {
-        const tag = tagDb?.find((item: any) => item.id === id)
-        return tag ? { id: tag.id, name: tag.name } : null
+        const tag = tagDb?.find((item: any) => item.id === id);
+        return tag ? { id: tag.id, name: tag.name } : null;
       })
-      .filter(Boolean)
-
+      .filter(Boolean);
+  
     const accountMap = akunBanks?.reduce((map: any, warehouse: any) => {
-      map[warehouse.name] = warehouse.id
-      return map
-    }, {})
-    const accountId = accountMap[selectedBank as any]
-    setYangMana(accountId)
-
+      map[warehouse.name] = warehouse.id;
+      return map;
+    }, {});
+    const accountId = accountMap[selectedBank as any];
+    setYangMana(accountId);
+  
     const saveNameContact = idContact.reduce((map: any, warehouse: any) => {
-      map[warehouse.id] = warehouse.name
-      return map
-    }, {})
-    const saveContactName = saveNameContact[selectedContact as any]
-
+      map[warehouse.id] = warehouse.name;
+      return map;
+    }, {});
+    const saveContactName = saveNameContact[selectedContact as any];
+  
     const saveNamaGudang = idWarehouse.reduce((map: any, warehouse: any) => {
-      map[warehouse.id] = warehouse.name
-      return map
-    }, {})
-    const simpanGudang = saveNamaGudang[selectedWarehouseId as any]
-
-    let dueDate = formatDate(selectedDates[1])
+      map[warehouse.id] = warehouse.name;
+      return map;
+    }, {});
+    const simpanGudang = saveNamaGudang[selectedWarehouseId as any];
+  
+    let dueDate = formatDate(selectedDates[1]);
     if (termIdSimpan === 2) {
-      dueDate = formatDate(selectedDates[0])
+      dueDate = formatDate(selectedDates[0]);
     }
     const witholdings = amountPaid
       ? [
@@ -799,8 +801,8 @@ console.log({selectedContact})
             trans_date: formatDate(selectedDates[0]),
           },
         ]
-      : []
-
+      : [];
+  
     const invoiceData = {
       id: uniqueNumber,
       jalur: 'penjualan',
@@ -822,8 +824,8 @@ console.log({selectedContact})
       reason_id: 'unvoid',
       message: memo || '',
       items: dataSource.map((item) => {
-        const matchingStock = productQuantities[item.finance_account_id]
-        const latest_stock = matchingStock - item.qty
+        const matchingStock = productQuantities[item.finance_account_id];
+        const latest_stock = matchingStock - item.qty;
         return {
           id: 123,
           amount: item.subtotal,
@@ -839,7 +841,7 @@ console.log({selectedContact})
           price: item.price,
           unit_id: item.unit_id,
           satuan: item.name,
-        }
+        };
       }),
       witholdings,
       contacts: [
@@ -860,7 +862,6 @@ console.log({selectedContact})
       })),
       due: piutang,
       down_payment: amountPaid as any || 0,
-
       down_payment_bank_account_id: accountId || bankAccountId,
       witholding_account_id: accountId || bankAccountId,
       tags: selectTag || tagId,
@@ -868,28 +869,55 @@ console.log({selectedContact})
       witholding_percent: 0,
       column_name: '',
       externalId: 0,
+    };
+  
+    setLoadingSpinner(true);
+  
+    try {
+      const result = await saveInvoiceData(invoiceData);
+  
+      // Jika status respons adalah 401, jangan lanjutkan ke addPosMutation
+      if (!result) {
+        if (error && error.includes('401')) {
+          message.error('Unauthorized: Token expired or invalid. Please login again.');
+          setIsLoading(false);
+          return; // Jangan lanjutkan ke addPosMutation
+        }
+        message.error('Gagal menyimpan invoice. Coba lagi nanti.');
+        setIsLoading(false);
+        return; // Jangan lanjutkan jika gagal
+      }
+  
+      // Hanya lanjutkan ke addPosMutation jika saveInvoiceData berhasil
+      setIsLoading(true); // Aktifkan loading
+      addPosMutation.mutate(invoiceData as any, {
+        onSuccess: () => {
+          message.success('Transaksi berhasil disimpan!');
+  
+          setTimeout(() => {
+            setIsLoading(false);
+            navigate(`/getinvbasedondate/${refNumber}`);
+          }, 3000); // 3000ms = 3 detik
+        },
+        onError: (error: any) => {
+          message.error(`Terjadi kesalahan: ${error.message}`);
+          setIsLoading(false);
+        },
+      });
+    } catch (err) {
+      // Pengecekan tipe error
+      setIsLoading(false);
+      if (err instanceof Error) {
+        message.error(`Terjadi kesalahan: ${err.message}`);
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        const errorMessage = (err as any).message || 'Terjadi kesalahan yang tidak diketahui.';
+        message.error(errorMessage);
+      } else {
+        message.error('Terjadi kesalahan yang tidak diketahui.');
+      }
     }
-
-    setLoadingSpinner(true)
-
-    saveInvoiceData(invoiceData)
-
-    setIsLoading(true) // Aktifkan loading
-    addPosMutation.mutate(invoiceData as any, {
-      onSuccess: () => {
-        message.success('Transaksi berhasil disimpan!')
-
-        setTimeout(() => {
-          setIsLoading(false)
-          navigate(`/getinvbasedondate/${refNumber}`)
-        }, 3000) // 3000ms = 3 detik
-      },
-      onError: (error: any) => {
-        message.error(`Terjadi kesalahan: ${error.message}`)
-        setIsLoading(false)
-      },
-    })
-  }
+  };
+  
   const [stockQuantities, setStockQuantities] = useState<
     Record<string, number>
   >({})
