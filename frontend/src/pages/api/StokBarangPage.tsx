@@ -738,20 +738,30 @@ console.log({selectedContact})
   const [yangMana, setYangMana] = useState()
 
   // const isSaveDisabled = !selectedContact || !bankAccountId || limitizeTrans;
-  const isSaveDisabled =
-  !selectedContact ||
-  !bankAccountId ||
-  (termIdSimpan !== 2 && termIdSimpan !== 0 && limitizeTrans);
-
 
   const handleSetAmountPaid = () => {
     setAmountPaid(totalSubtotal)
   }
   const [memo, setMemo] = useState('')
-  const [error, setError] = useState<string | null>(null);
 
+  const [error, setError] = useState<string | null>(null);
+  const [isSaveDisabled, setIsSaveDisabled] = useState(false);  // State untuk menonaktifkan tombol
+  const [clickedTime, setClickedTime] = useState<number | null>(null);  // State untuk melacak waktu klik
+  
+  // Gabungkan kondisi validasi dan kontrol waktu
+  const isSaveDisabledFinal =
+    !selectedContact ||
+    !bankAccountId ||
+    (termIdSimpan !== 2 && termIdSimpan !== 0 && limitizeTrans) ||
+    isSaveDisabled; // Tombol akan dinonaktifkan berdasarkan kondisi
+  
   const handleSave = async () => {
-    if (isSaveDisabled) return;
+      // Jika tombol sedang dinonaktifkan, tidak lakukan apapun
+      if (isSaveDisabled) return;
+  
+      // Set tombol menjadi disabled setelah diklik
+      setIsSaveDisabled(true); // Menonaktifkan tombol
+      setClickedTime(Date.now()); // Set waktu klik
   
     const saveTag = tagDb?.reduce((map: any, tag: any) => {
       map[tag.name] = tag.id;
@@ -875,21 +885,17 @@ console.log({selectedContact})
   
     try {
       const result = await saveInvoiceData(invoiceData);
-  
-      // Jika status respons adalah 401, jangan lanjutkan ke addPosMutation
       if (!result) {
         if (error && error.includes('401')) {
           message.error('Unauthorized: Token expired or invalid. Please login again.');
           setIsLoading(false);
-          return; // Jangan lanjutkan ke addPosMutation
+          return; 
         }
         message.error('Gagal menyimpan invoice. Coba lagi nanti.');
         setIsLoading(false);
-        return; // Jangan lanjutkan jika gagal
+        return; 
       }
-  
-      // Hanya lanjutkan ke addPosMutation jika saveInvoiceData berhasil
-      setIsLoading(true); // Aktifkan loading
+      setIsLoading(true); 
       addPosMutation.mutate(invoiceData as any, {
         onSuccess: () => {
           message.success('Transaksi berhasil disimpan!');
@@ -897,15 +903,15 @@ console.log({selectedContact})
           setTimeout(() => {
             setIsLoading(false);
             navigate(`/getinvbasedondate/${refNumber}`);
-          }, 3000); // 3000ms = 3 detik
+          }, 3000);
         },
+        
         onError: (error: any) => {
           message.error(`Terjadi kesalahan: ${error.message}`);
           setIsLoading(false);
         },
       });
     } catch (err) {
-      // Pengecekan tipe error
       setIsLoading(false);
       if (err instanceof Error) {
         message.error(`Terjadi kesalahan: ${err.message}`);
@@ -916,7 +922,23 @@ console.log({selectedContact})
         message.error('Terjadi kesalahan yang tidak diketahui.');
       }
     }
+    setTimeout(() => {
+      setIsSaveDisabled(false);
+    }, 5000); 
   };
+
+  useEffect(() => {
+    if (isSaveDisabled) {
+      const timer = setTimeout(() => {
+        setIsSaveDisabled(false); 
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSaveDisabled]);
+
+  
+  
+  
   
   const [stockQuantities, setStockQuantities] = useState<
     Record<string, number>
@@ -931,11 +953,10 @@ console.log({selectedContact})
     })
     setStockQuantities(newStockQuantities)
   }, [barangs, warehouseStock])
-  // console.log({ stockQuantities })
 
   const columns = [
     {
-      title: 'Barang',
+      title: 'Barangss',
       dataIndex: 'finance_account_id',
       key: 'finance_account_id',
       align: 'left',
@@ -1075,7 +1096,6 @@ console.log({selectedContact})
           categoryId === 19
             ? discountRates
             : discountRates.filter((rate) => rate.label !== 'Istimewa SP 23%')
-        // console.log({ text })
 
         return (
           <div
@@ -1892,15 +1912,15 @@ console.log({selectedContact})
                 </Col>
               </Row>
               <Row>
-                <Button
-                  onClick={handleSave}
-                  type="primary"
-                  style={{ marginTop: '10px', width: '45%' }}
-                  disabled={isSaveDisabled} 
-                >
-                  Simpan
-                </Button>
-              </Row>
+      <Button
+        onClick={handleSave}
+        type="primary"
+        style={{ marginTop: '10px', width: '45%' }}
+        disabled={isSaveDisabledFinal} 
+      >
+        Simpan
+      </Button>
+    </Row>
             </Form>
           </div>
         </div>
