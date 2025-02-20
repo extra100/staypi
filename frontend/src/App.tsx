@@ -39,8 +39,35 @@ import axios from 'axios'
 import { Badge, Table } from 'antd'
 import { useRedData } from './badgeMessage'
 import BagdePenjualan from './badgePenjualan'
+// import TransactionFilter from './hooks/OmsertJenisHarga'
+import CompareTransfers from './pages/api/CompareTransfers'
 
 function App() {
+  useEffect(() => {
+    const lastSignOut = localStorage.getItem('lastSignOut');
+    const now = new Date();
+    
+    // Jika sudah sign out hari ini, tidak perlu sign out lagi
+    if (lastSignOut === now.toDateString()) return;
+  
+    const checkSignOut = () => {
+      const now = new Date();
+  
+      // Cek apakah sudah jam 21:45 atau lebih
+      if (now.getHours() >= 5 && now.getMinutes() >= 59) {
+        localStorage.setItem('lastSignOut', now.toDateString()); // Simpan tanggal sign-out
+        signoutHandler();
+      }
+    };
+  
+    checkSignOut(); // Cek langsung saat halaman pertama kali dibuka
+  
+    const interval = setInterval(checkSignOut, 60000); // Cek setiap menit
+  
+    return () => clearInterval(interval);
+  }, []);
+  
+  
   const { hasRedData } = useRedData()
 
   const [user, setUser] = useState<UserInfo | null>(null)
@@ -169,12 +196,12 @@ function App() {
                   >
                     List Pemesanan Pembelian
                   </Link>
-                  <Link
-                    className="nav-link header-link p-1 px-3"
-                    to={`/pesolist`}
-                  >
-                    History Peso
-                  </Link>
+                  // <Link
+                  //   className="nav-link header-link p-1 px-3"
+                  //   to={`/pesolist`}
+                  // >
+                  //   History Peso
+                  // </Link>
 
                   <Link
                     className="nav-link header-link p-1 px-3"
@@ -255,19 +282,13 @@ function App() {
                   </Link>
                   <Link
                     className="nav-link header-link p-1 px-3"
-                    to={`/getinvbasedondate`}
+                    to={`/kirimulanggagalpo`}
                   >
-                    <BagdePenjualan />
+                    <CompareTransfers />
+                    .
                   </Link>
-                  {/* <Link className="nav-link header-link p-1 px-3" to={`/ibo`}>
-                    POS
-                  </Link>
-                  <Link
-                    className="nav-link header-link p-1 px-3"
-                    to={`/listkledo`}
-                  >
-                    Transaksi
-                  </Link> */}
+             
+             
                 </div>
               </div>
               <div
@@ -441,6 +462,7 @@ function App() {
               <AiOutlineBgColors size={20} style={iconStyle} />
               <LinkContainer
                 to="/ambildetailbarangdarikledo"
+
                 onClick={handleDataSupplierClick}
               >
                 <NavDropdown.Item>
@@ -493,12 +515,6 @@ function App() {
               </LinkContainer>
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
-              <AiOutlineHtml5 size={20} style={iconStyle} />
-              <LinkContainer to="/tabelbarangs" onClick={handleDataSatuanClick}>
-                <NavDropdown.Item>Data Barang</NavDropdown.Item>
-              </LinkContainer>
-            </ListGroup.Item>
-            <ListGroup.Item style={listItemStyle}>
               <AiFillApi size={20} style={iconStyle} />
               <LinkContainer to="/kind" onClick={handleDataKategoriClick}>
                 <NavDropdown.Item>Kategori</NavDropdown.Item>
@@ -515,17 +531,17 @@ function App() {
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineDollar size={20} style={iconStyle} />
-              <LinkContainer to="/harga" onClick={handleDataHargaClick}>
+              <LinkContainer to="/listpenjualanpemesanan" onClick={handleDataHargaClick}>
                 <NavDropdown.Item>Harga</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
 
-            {/* <ListGroup.Item style={listItemStyle}>
+            <ListGroup.Item style={listItemStyle}>
               <AiOutlineSave size={20} style={iconStyle} />
-              <LinkContainer to="/outlet" onClick={handleDataOutletClick}>
-                <NavDropdown.Item>Data Telolet</NavDropdown.Item>
+              <LinkContainer to="/auditqty" onClick={handleDataOutletClick}>
+                <NavDropdown.Item>cek qty</NavDropdown.Item>
               </LinkContainer>
-            </ListGroup.Item> */}
+            </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineSave size={20} style={iconStyle} />
               <LinkContainer to="/tabeloutlets" onClick={handleDataOutletClick}>
@@ -534,14 +550,14 @@ function App() {
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
               <AiFillAndroid size={20} style={iconStyle} />
-              <LinkContainer to="/usaha" onClick={handleDataUsahaClick}>
+              <LinkContainer to="/penjualanpemesanan" onClick={handleDataUsahaClick}>
                 <NavDropdown.Item>Data Usaha</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineHtml5 size={20} style={iconStyle} />
-              <LinkContainer to="/productkategori" onClick={handleDataSatuanClick}>
-                <NavDropdown.Item>Data Pengguna</NavDropdown.Item>
+              <LinkContainer to="/tabelbarangs" onClick={handleDataSatuanClick}>
+                <NavDropdown.Item>Data Barang</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
@@ -556,6 +572,7 @@ function App() {
                 <NavDropdown.Item>List Transaksi</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
+            
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineShop size={20} style={iconStyle} />
               <LinkContainer to="/ibo" onClick={handleDataTransaksiClick}>
