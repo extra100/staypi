@@ -23,9 +23,10 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
       console.log('contactId is updated:', contactId)
     }
   }, [contactId])
-  console.log({ contactId })
   const location = useLocation()
   const [filteredData, setFilteredData] = useState<any[]>([])
+  console.log({ filteredData })
+
   const [aaa, setAaa] = useState<any[]>([])
   console.log({ aaa })
   const { takeInvoicesFromKledoBasedOnPelanggan } =
@@ -104,10 +105,7 @@ const DetailPiutangKontak = forwardRef<HTMLDivElement>((props, ref) => {
   const filteredPhoto = gudangs
   ?.filter((gudang) => gudang.name === outletPelanggan)
   .map((gudang) => gudang.photo);
-console.log(filteredNames);
 
-
-console.log({filteredGudangs})
   const namaGudang = gudangs?.find(
     (contact: any) => contact.id === firstWarehouseId
   )?.name
@@ -148,17 +146,20 @@ console.log({filteredGudangs})
         }
     
         return (
-          <a
-            href={href}
-            style={{ color: 'blue', textDecoration: 'none' }}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {record.ref_number}
-          </a>
+          <div style={{ textAlign: 'left', width: '180px' }}>
+            <a
+              href={href}
+              style={{ color: 'blue', textDecoration: 'none', fontSize: '10px' }}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {record.ref_number}
+            </a>
+          </div>
         );
       },
     },
+    
     
     
     {
