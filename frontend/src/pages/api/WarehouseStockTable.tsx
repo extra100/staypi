@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Table, DatePicker, Button, Select } from 'antd';
+import { Table, DatePicker, Button, Select, message, Spin, Modal } from 'antd';
 import dayjs from 'dayjs';
 import { useWarehouseStock } from './fetchSemuaStok';
 import UserContext from '../../contexts/UserContext';
 import { useGetBarangsQuery } from '../../hooks/barangHooks';
-
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 const { RangePicker } = DatePicker;
 const { Option } = Select;
+import autoTable from 'jspdf-autotable';
 
 const categories = [
   { id: 5, name: 'ATAP' },
@@ -39,7 +41,11 @@ const WarehouseStockTable: React.FC = () => {
   const user = userContext?.user;
   const printRef = useRef<HTMLDivElement>(null);
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<number | null>(null);
-  const [selectedDates, setSelectedDates] = useState<[string, string]>(['', '']);
+  const [selectedDates, setSelectedDates] = useState<[string, string]>([
+    dayjs().format('DD-MM-YYYY'),
+    dayjs().format('DD-MM-YYYY'),
+  ]);
+  
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
 
   const formattedDate = dayjs(selectedDates[0], 'DD-MM-YYYY').format('YYYY-MM-DD');
@@ -67,7 +73,6 @@ const WarehouseStockTable: React.FC = () => {
     ? barangs?.filter((barang) => barang.pos_product_category_id === selectedCategory)
     : barangs;
   
-  // Gabungkan data barang dengan stok dari warehouseStock dan hilangkan stok 0
   const finalFilteredBarangs = filteredBarangs
     ?.map((barang) => {
       const stockData = warehouseStock?.find((stock) => stock.id === barang.id);
@@ -107,13 +112,40 @@ const WarehouseStockTable: React.FC = () => {
     }
   };
 
+  const handleSavePDF = () => {
+    const doc = new jsPDF();
+    doc.text(`Stok Gudang (${selectedDates[0]} - ${selectedDates[1]})`, 14, 10);
+  
+    // Panggil autoTable setelah memastikan impor sudah benar
+    autoTable(doc, {
+      head: [['No', 'Kode', 'Nama Barang', 'Kategori', 'Stok']],
+      body: finalFilteredBarangs?.map((item, index) => [
+        index + 1,
+        item.code,
+        item.name,
+        categoryMap[item.pos_product_category_id] || 'Unknown',
+        item.stock,
+      ]) || [],
+    });
+  
+    doc.save('stok_gudang.pdf');
+    message.success('PDF berhasil disimpan!');
+  };
+  const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  if (warehouseStock !== undefined && warehouseStock.length > 0) {
+    setLoading(false);
+  }
+}, [warehouseStock]);
+
+
   const columns = [
     {
       title: 'No',
       key: 'no',
       render: (_: any, __: any, index: number) => index + 1,
     },
-    { title: 'Id', dataIndex: 'id', key: 'id' },
     { title: 'Kode', dataIndex: 'code', key: 'code' },
     { title: 'Nama Barang', dataIndex: 'name', key: 'name' },
     { title: 'Kategori', dataIndex: 'pos_product_category_id', key: 'category', render: (id: number) => categoryMap[id] || 'Unknown' },
@@ -121,15 +153,35 @@ const WarehouseStockTable: React.FC = () => {
     { title: 'Fisik Stok', dataIndex: '', key: '' },
     { title: 'Selisih Stok', dataIndex: '', key: '' },
   ];
+  const [isModalVisible, setIsModalVisible] = useState(true); // State untuk modal
 
   return (
     <div>
-      <RangePicker format="DD-MM-YYYY" onChange={handleDateChange} style={{ marginBottom: 16, marginRight: 16 }} />
+     <Modal
+  title="Penting!"
+  visible={isModalVisible}
+  onCancel={() => setIsModalVisible(false)} // Modal bisa ditutup manual jika diperlukan
+  footer={[
+  
+  ]}
+>
+  <p>Mohon untuk mengklik tombol <strong>Simpan PDF</strong> terlebih dahulu sebelum ada transaksi apapun. ini sangat penting guna mengarsipkan stok pehari ini <br /> <br />
+
+  <strong>WAJIB...... MUN NDQ JAK JERAWATM</strong></p>
+</Modal>
+
+<RangePicker
+  format="DD-MM-YYYY"
+  onChange={handleDateChange}
+  style={{ marginBottom: 16, marginRight: 16 }}
+  defaultValue={[dayjs(), dayjs()]}
+/>
+
       <Select
         placeholder="Pilih Kategori Produk"
         onChange={handleCategoryChange}
         allowClear
-        style={{ width: 200, marginBottom: 16 }}
+        style={{ width: 200, marginBottom: 16, marginRight: 16 }}
       >
         {categories.map((category) => (
           <Option key={category.id} value={category.id}>
@@ -137,11 +189,19 @@ const WarehouseStockTable: React.FC = () => {
           </Option>
         ))}
       </Select>
-      <Button type="primary" onClick={handlePrint} style={{ marginBottom: 16 }}>
+      <Button type="primary" onClick={handlePrint} style={{ marginBottom: 16, marginRight: 16 }}>
         Print
-      </Button>
+      </Button> 
+      <Button type="primary" onClick={handleSavePDF} style={{ marginBottom: 16, marginRight: 8 }}>Simpan PDF</Button>
+
       <div ref={printRef}>
-        <Table dataSource={finalFilteredBarangs} columns={columns} rowKey="id" pagination={false} />
+      {loading ? (
+  <div style={{ textAlign: 'center', padding: '20px' }}>
+    <Spin size="large" />
+  </div>
+) : (
+  <Table dataSource={finalFilteredBarangs} columns={columns} rowKey="id" pagination={false} />
+)}
       </div>
     </div>
   );
