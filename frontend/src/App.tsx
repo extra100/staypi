@@ -54,7 +54,7 @@ function App() {
       const now = new Date();
   
       // Cek apakah sudah jam 21:45 atau lebih
-      if (now.getHours() >= 5 && now.getMinutes() >= 59) {
+      if (now.getHours() >= 6 && now.getMinutes() >= 8) {
         localStorage.setItem('lastSignOut', now.toDateString()); // Simpan tanggal sign-out
         signoutHandler();
       }
