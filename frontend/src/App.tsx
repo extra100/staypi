@@ -572,6 +572,12 @@ function App() {
                 <NavDropdown.Item>List Transaksi</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
+            <ListGroup.Item style={listItemStyle}>
+              <AiOutlineDollar size={20} style={iconStyle} />
+              <LinkContainer to="/productkategori" onClick={handleDataHargaClick}>
+                <NavDropdown.Item>Omset Kategory</NavDropdown.Item>
+              </LinkContainer>
+            </ListGroup.Item>
             
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineShop size={20} style={iconStyle} />

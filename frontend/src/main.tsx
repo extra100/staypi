@@ -304,6 +304,7 @@ const router = createBrowserRouter(
       <Route path="/bandingkanpo" element={<CompareTransfers />} />
       <Route path="/kirimulanggagalpo" element={<ResentFailedPo />} />
       <Route path="/ulangvalidasi/:ref_number" element={<RevalidatePindah />} />
+      <Route path="/productkategori" element={<SalesPerProductCategoryUI />} />
 
 
 
