@@ -75,21 +75,21 @@ export function SalesPerProductCategoryUI() {
 //b
 
   
-const dataSourceSumberB = hasilPerhitungan.map((item) => {
-  let totalPerOutlet = 0;
-  const rowData: any = { key: (item as any)._id, outlet_name: (item as any).outlet_name };
 
-  kategoriB.forEach((category) => {
-    const value = (item as any)[category] || 0;
-    rowData[category] = value;
-    totalPerOutlet += value;
+  const dataSourceSumberB = hasilPerhitungan.map((item: any) => {
+    let totalPerOutlet = 0;
+    const rowData: any = { key: item._id, outlet_name: item.outlet_name };
+  
+    kategoriB.forEach((category) => {
+      const value = item[category] || 0;
+      rowData[category] = value;
+      totalPerOutlet += value;
+    });
+  
+    rowData.total = totalPerOutlet;
+  
+    return rowData;
   });
-
-  rowData.total = totalPerOutlet;
-
-  return rowData;
-});
-
 
   const { data: gudangs } = useGetWarehousesQuery()
 
