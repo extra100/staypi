@@ -21,7 +21,7 @@ export function SalesPerProductCategoryUI() {
 
 
   const [hasilPerhitungan, setHasilPerhitungan] = useState([]);
-  console.log({hasilPerhitungan})
+  // console.log({hasilPerhitungan})
   const dataDariSumberB = sumberB.map((kategoriId) => {
     const { data } = useGetKategoryPenjualansQuery(dates[0], dates[1], kategoriId);
     return data ?? [];
@@ -37,7 +37,7 @@ export function SalesPerProductCategoryUI() {
       const startDate = new Date(dates[0]);
       const endDate = new Date(dates[1]);
       const gapTanggal = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) || 1;
-      console.log({ gapTanggal }); 
+      // console.log({ gapTanggal }); 
     
       const hasil = dataDariSumberB.flat().map((item) => {
         const target = item.target ?? 0;
@@ -111,6 +111,9 @@ const sumberBMap = useMemo(() => {
   return map;
   
 }, [dataSourceSumberB]);
+
+console.log({dataDariSumberB})
+
 const columnsA = [
   {
     title: 'OUTLET',
