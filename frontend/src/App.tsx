@@ -54,7 +54,7 @@ function App() {
       const now = new Date();
   
       // Cek apakah sudah jam 21:45 atau lebih
-      if (now.getHours() >= 6 && now.getMinutes() >= 8) {
+      if (now.getHours() >= 6 && now.getMinutes() >= 3) {
         localStorage.setItem('lastSignOut', now.toDateString()); // Simpan tanggal sign-out
         signoutHandler();
       }
@@ -531,8 +531,21 @@ function App() {
             </ListGroup.Item>
             <ListGroup.Item style={listItemStyle}>
               <AiOutlineDollar size={20} style={iconStyle} />
-              <LinkContainer to="/listpenjualanpemesanan" onClick={handleDataHargaClick}>
-                <NavDropdown.Item>Harga</NavDropdown.Item>
+              <LinkContainer to="/productkategori" onClick={handleDataHargaClick}>
+                <NavDropdown.Item>Omset Kategoryiese</NavDropdown.Item>
+              </LinkContainer>
+            </ListGroup.Item>
+            
+            <ListGroup.Item style={listItemStyle}>
+              <AiOutlineDollar size={20} style={iconStyle} />
+              <LinkContainer to="/diskonsummary" onClick={handleDataHargaClick}>
+                <NavDropdown.Item>Omset Jenis Harga</NavDropdown.Item>
+              </LinkContainer>
+            </ListGroup.Item>
+            <ListGroup.Item style={listItemStyle}>
+              <AiOutlineDollar size={20} style={iconStyle} />
+              <LinkContainer to="/qtysummary" onClick={handleDataHargaClick}>
+                <NavDropdown.Item>Omset Stok</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
 
@@ -570,12 +583,6 @@ function App() {
               <AiOutlineShop size={20} style={iconStyle} />
               <LinkContainer to="/listkledo" onClick={handleDataTransaksiClick}>
                 <NavDropdown.Item>List Transaksi</NavDropdown.Item>
-              </LinkContainer>
-            </ListGroup.Item>
-            <ListGroup.Item style={listItemStyle}>
-              <AiOutlineDollar size={20} style={iconStyle} />
-              <LinkContainer to="/productkategori" onClick={handleDataHargaClick}>
-                <NavDropdown.Item>Omset Kategory</NavDropdown.Item>
               </LinkContainer>
             </ListGroup.Item>
             
