@@ -183,7 +183,7 @@ const columnsA = [
   },
   
   {
-    title: 'Selisih (%)',
+    title: 'Selisih (%.)',
     dataIndex: 'selisihPersentase',
     key: 'selisihPersentase',
     className: 'no-padding',
