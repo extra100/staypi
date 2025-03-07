@@ -10,6 +10,7 @@ const ListSiapDiValidasi: React.FC = () => {
   const userContext = useContext(UserContext)
   const { user } = userContext || {}
   let idOutletLoggedIn = 0
+  console.log({idOutletLoggedIn})
   if (user) {
     idOutletLoggedIn = Number(user.id_outlet)
   }
@@ -18,6 +19,7 @@ const ListSiapDiValidasi: React.FC = () => {
   const {
     data: withFilter
   } = useGetWarehouseTransferByWarehouseId(idOutletLoggedIn)
+  console.log({withFilter})
 
   const { idWarehouse } = useIdWarehouse()
   const navigate = useNavigate()
@@ -32,10 +34,9 @@ const ListSiapDiValidasi: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('')
 
- 
   const today = dayjs().format('YYYY-MM-DD')
 const threeDaysAgo = dayjs().subtract(3, 'day').format('YYYY-MM-DD')
-
+const idProduksi = '22'
 const dataSource = Array.isArray(withFilter)
   ? withFilter
       .filter((transfer: any) => {
@@ -44,7 +45,8 @@ const dataSource = Array.isArray(withFilter)
 
         const isCommonCriteriaMet =
           transfer.code === 1 &&
-          transfer.to_warehouse_id !== user?.isAdmin &&
+          transfer.to_warehouse_id !== user?.isAdmin && 
+          transfer.from_warehouse_id !== idProduksi &&
           (String(transfer.ref_number || '').includes(searchTerm) ||
             String(transfer.from_warehouse_id || '').includes(searchTerm))
   
@@ -64,9 +66,6 @@ const dataSource = Array.isArray(withFilter)
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
   : []
-
-
-
 
   const handleRowClick = (record: any) => {
     navigate(`/validasi-pindah/${record.ref_number}`)
@@ -90,7 +89,7 @@ const dataSource = Array.isArray(withFilter)
   }
   const columns = [
     {
-      title: 'Dari',
+      title: 'Dari rubah dari ',
       dataIndex: 'to_warehouse_id',
       key: 'to_warehouse_id',
       render: (id: number) => warehouseMap[id] || id,

@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler'
 import { WarehouseTransferModel } from '../models/pindahModel'
 import express, { Request, Response } from 'express'
+import dayjs from 'dayjs'
 
 export const warehouseTransferRouter = express.Router()
 warehouseTransferRouter.get(
@@ -78,6 +79,7 @@ warehouseTransferRouter.get(
     }
   })
 )
+
 
 // warehouseTransferRouter.put(
 //   '/by-id/:ref_number',
@@ -252,24 +254,44 @@ warehouseTransferRouter.put(
     }
   })
 );
+// warehouseTransferRouter.get(
+//   '/by-idGudang/:idGudang',
+//   asyncHandler(async (req: any, res: any) => {
+//     const idGudang = parseInt(req.params.idGudang); // Match parameter name
+//     if (isNaN(idGudang)) {
+//       return res.status(400).json({ message: 'Invalid idGudang' });
+//     }
+
+//     const posData = await WarehouseTransferModel.find({ to_warehouse_id: idGudang });
+//     console.log({ idGudang });
+//     console.log({ posData });
+
+//     if (posData && posData.length > 0) {
+//       res.json(posData);
+//     } else {
+//       res.status(404).json({ message: 'Gudang not found' });
+//     }
+//   })
+// );
 warehouseTransferRouter.get(
   '/by-idGudang/:idGudang',
   asyncHandler(async (req: any, res: any) => {
-    const idGudang = parseInt(req.params.idGudang); // Match parameter name
+    const idGudang = parseInt(req.params.idGudang);
     if (isNaN(idGudang)) {
       return res.status(400).json({ message: 'Invalid idGudang' });
     }
+    const threeDaysAgo = dayjs().subtract(3, 'days').format('YYYY-MM-DD');
+    const today = dayjs().format('YYYY-MM-DD');
+    const posData = await WarehouseTransferModel.find({
+      $or: [{ to_warehouse_id: idGudang }, { to_warehouse_id: 22 }],
+      trans_date: { $gte: threeDaysAgo, $lte: today } 
+    });
 
-    const posData = await WarehouseTransferModel.find({ to_warehouse_id: idGudang });
-    console.log({ idGudang });
-    console.log({ posData });
-
-    if (posData && posData.length > 0) {
+    if (posData.length > 0) {
       res.json(posData);
     } else {
-      res.status(404).json({ message: 'Gudang not found' });
+      res.status(404).json({ message: 'No recent transfers found' });
     }
   })
 );
-
 export default warehouseTransferRouter
