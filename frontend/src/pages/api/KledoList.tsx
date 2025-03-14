@@ -141,49 +141,122 @@ const ListTransaksi: React.FC = () => {
     setSearchNamaBarang(value);
   };
 
+  const [searchJatuhTempo, setSearchJatuhTempo] = useState<string | null>(null);
 
-
-
-const filteredData = transaksi
-  ?.filter((transaction) => {
-    if (searchStatus) {
-      const statusText = getStatus(transaction);
-      return statusText.toLowerCase() === searchStatus.toLowerCase();
-    }
-    return true;
-  })
-  ?.filter((transaction) => {
-    return transaction.jalur === 'penjualan' && transaction.reason_id !== 'void';
-  })
-  ?.filter((transaction) => {
-    if (searchRef) {
-      const lowerSearchRef = searchRef.toLowerCase();
-      return (
-        transaction.message?.toLowerCase().includes(lowerSearchRef) ||
-        transaction.ref_number?.toLowerCase().includes(lowerSearchRef)
-      );
-    }
-    return true;
-  })
-  ?.filter((contact) => {
-    if (searchContact) {
-      return contact.contact_id === Number(searchContact);
-    }
-    return true;
-  })
-  ?.filter((transaction) => {
-    if (searchNamaBarang) {
-      const lowerSearchRef = searchNamaBarang.toLowerCase();
-      return transaction.items.some(item =>
-        item.name?.toLowerCase().includes(lowerSearchRef)
-      );
-    }
-    return true;
-  })
+  const filteredData = transaksi
+    ?.filter((transaction) => {
+      if (searchStatus) {
+        const statusText = getStatus(transaction);
+        return statusText.toLowerCase() === searchStatus.toLowerCase();
+      }
+      return true;
+    })
+    ?.filter((transaction) => {
+      return transaction.jalur === 'penjualan' && transaction.reason_id !== 'void';
+    })
+    ?.filter((transaction) => {
+      if (searchRef) {
+        const lowerSearchRef = searchRef.toLowerCase();
+        return (
+          transaction.message?.toLowerCase().includes(lowerSearchRef) ||
+          transaction.ref_number?.toLowerCase().includes(lowerSearchRef)
+        );
+      }
+      return true;
+    })
+    ?.filter((contact) => {
+      if (searchContact) {
+        return contact.contact_id === Number(searchContact);
+      }
+      return true;
+    })
+    ?.filter((transaction) => {
+      if (searchNamaBarang) {
+        const lowerSearchRef = searchNamaBarang.toLowerCase();
+        return transaction.items.some(item =>
+          item.name?.toLowerCase().includes(lowerSearchRef)
+        );
+      }
+      return true;
+    })
+    // ?.filter((transaction) => {
+    //   if (searchJatuhTempo) {
+    //     const selisihHari = dayjs(transaction.due_date).diff(dayjs(transaction.trans_date), 'day');
+    //     return searchJatuhTempo === '15_hari' ? selisihHari === 15 : selisihHari === 30;
+    //   }
+    //   return true;
+    // })
+    
+    ?.filter((transaction) => {
+      if (searchJatuhTempo) {
+        const selisihHari = dayjs(transaction.due_date).diff(dayjs(transaction.trans_date), 'day');
+    
+        // Hitung jumlah pembayaran yang sudah dilakukan
+        const totalDownPayment = transaction.witholdings.reduce(
+          (sum: number, witholding: any) => sum + (witholding.down_payment || 0),
+          0
+        );
+    
+        const due = transaction.amount - totalDownPayment;
+        const status = due === 0 || due <= 0 ? 'Lunas' : due > 0 && totalDownPayment > 0 ? 'Dibayar Sebagian' : 'Belum Dibayar';
+    
+        // Jika transaksi lunas, maka tidak ditampilkan
+        if (status === 'Lunas') {
+          return false;
+        }
+    
+        // Filter berdasarkan jatuh tempo
+        return searchJatuhTempo === '15_hari' ? selisihHari === 15 : selisihHari === 30;
+      }
+      return true;
+    })
+    
+    ?.sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
   
-  ?.sort((a, b) => {
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+
+
+// const filteredData = transaksi
+//   ?.filter((transaction) => {
+//     if (searchStatus) {
+//       const statusText = getStatus(transaction);
+//       return statusText.toLowerCase() === searchStatus.toLowerCase();
+//     }
+//     return true;
+//   })
+//   ?.filter((transaction) => {
+//     return transaction.jalur === 'penjualan' && transaction.reason_id !== 'void';
+//   })
+//   ?.filter((transaction) => {
+//     if (searchRef) {
+//       const lowerSearchRef = searchRef.toLowerCase();
+//       return (
+//         transaction.message?.toLowerCase().includes(lowerSearchRef) ||
+//         transaction.ref_number?.toLowerCase().includes(lowerSearchRef)
+//       );
+//     }
+//     return true;
+//   })
+//   ?.filter((contact) => {
+//     if (searchContact) {
+//       return contact.contact_id === Number(searchContact);
+//     }
+//     return true;
+//   })
+//   ?.filter((transaction) => {
+//     if (searchNamaBarang) {
+//       const lowerSearchRef = searchNamaBarang.toLowerCase();
+//       return transaction.items.some(item =>
+//         item.name?.toLowerCase().includes(lowerSearchRef)
+//       );
+//     }
+//     return true;
+//   })
+  
+//   ?.sort((a, b) => {
+//     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+//   });
   const [activeButton, setActiveButton] = useState('')
   const navigate = useNavigate()
   const handleButtonClick = (value: any) => {
@@ -284,22 +357,41 @@ console.log({filteredData})
       key: 'trans_date',
       render: (text: any) => formatDate(text),
     },
+    // {
+    //   title: 'Jatuh Tempo',
+    //   dataIndex: 'trans_date',
+    //   key: 'days_after_one_month',
+    //   render: (text: any) => {
+    //     const transDate = dayjs(text); 
+    //     const oneMonthLater = transDate.add(1, 'month'); 
+    //     const today = dayjs(); 
+  
+    //     if (today.isBefore(oneMonthLater)) {
+    //       return '0 hari';
+    //     }
+  
+    //     const daysAfterOneMonth = today.diff(oneMonthLater, 'day'); 
+    //     return ` -${daysAfterOneMonth} hari`;
+    //   },
+    // },
     {
       title: 'Jatuh Tempo',
-      dataIndex: 'trans_date',
-      key: 'days_after_one_month',
-      render: (text: any) => {
-        const transDate = dayjs(text); 
-        const oneMonthLater = transDate.add(1, 'month'); 
-        const today = dayjs(); 
+      dataIndex: 'due_date',
+      key: 'due_date',
+      render: (text: any) => formatDate(text),
+
+      // render: (text: any) => {
+      //   const transDate = dayjs(text); 
+      //   const oneMonthLater = transDate.add(1, 'month'); 
+      //   const today = dayjs(); 
   
-        if (today.isBefore(oneMonthLater)) {
-          return '0 hari';
-        }
+      //   if (today.isBefore(oneMonthLater)) {
+      //     return '0 hari';
+      //   }
   
-        const daysAfterOneMonth = today.diff(oneMonthLater, 'day'); 
-        return ` -${daysAfterOneMonth} hari`;
-      },
+      //   const daysAfterOneMonth = today.diff(oneMonthLater, 'day'); 
+      //   return ` -${daysAfterOneMonth} hari`;
+      // },
     },
     {
       title: 'Status',
@@ -509,7 +601,20 @@ console.log({filteredData})
               <Select.Option value="Belum Dibayar">Belum Dibayar</Select.Option>
             </Select>
           </Col>
+          
         </Row>
+        <Col>
+  <Select
+    placeholder="Filter Jatuh Tempo"
+    value={searchJatuhTempo}
+    onChange={(value) => setSearchJatuhTempo(value)}
+    style={{ width: 200 }}
+    allowClear
+  >
+    {/* <Select.Option value="15_hari">15 Hari</Select.Option> */}
+    <Select.Option value="30_hari">30 Hari</Select.Option>
+  </Select>
+</Col>
       </Row>
      
       <Table
