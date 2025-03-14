@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { Button, Input, Table } from 'antd'
+import { Button, Input, Table, Tooltip } from 'antd'
 import { useGetWarehouseTransfersQuery } from '../../hooks/pindahHooks'
 import { useIdWarehouse } from './namaWarehouse'
 import { useNavigate } from 'react-router-dom'
@@ -71,6 +71,35 @@ const ListSudahDivalidasi: React.FC = () => {
     }
   }
   const columns = [
+    {
+      title: 'No',
+      key: 'no',
+      render: (_: any, record: any, index: number) => (
+        <Tooltip
+          title={
+            <table style={{ width: '350px', borderCollapse: 'collapse', backgroundColor: '#f8f9fa'}}>
+              <thead>
+                <tr style={{ backgroundColor: '#f1f1f1', borderBottom: '1px solid #e0e0e0' }}>
+                  <th style={{ textAlign: 'left', padding: '8px', fontWeight: 'bold', color: '#595959' }}>Items</th>
+                  <th style={{ textAlign: 'left', padding: '8px', fontWeight: 'bold', color: '#595959' }}>Qty</th>
+                </tr>
+              </thead>
+              <tbody>
+                {record.items.map((item: any) => (
+                  <tr key={item._id}>
+                    <td style={{ padding: '8px', color: '#595959' }}>{item.product_name}</td>
+                    <td style={{ padding: '8px', color: '#595959' }}>{item.qty_minta} {item.unit}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          }
+        >
+          <span>{index + 1}</span>
+        </Tooltip>
+      ),
+      width: 50,
+    },    
     {
       title: 'Dari',
       dataIndex: 'from_warehouse_id',
