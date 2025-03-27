@@ -31,25 +31,25 @@ const LaporanKeListTransaksi: React.FC = () => {
   }, [location.search, transaksiData])
 
   const filteredByContactName = useMemo(() => {
+    if (!Array.isArray(filteredData)) return []; // Jika bukan array, return array kosong
+    if (!Array.isArray(contacts)) return []; // Jika bukan array, return array kosong
+  
     if (!searchText) {
-      // Pastikan hanya memunculkan data yang bukan 'void'
       return filteredData.filter(
         (transaction) => transaction.reason_id !== 'void'
-      )
+      );
     }
-
-    const filteredContacts = contacts?.filter((contact) =>
-      contact.name.toLowerCase().includes(searchText.toLowerCase())
-    )
-    const filteredContactIds = filteredContacts?.map((contact) => contact.id)
-
+  
+    const filteredContacts = contacts.filter((contact) =>
+      contact.name?.toLowerCase().includes(searchText.toLowerCase())
+    );
+    const filteredContactIds = filteredContacts.map((contact) => contact.id) || [];
+  
     return filteredData
-      .filter((transaction) => transaction.reason_id !== 'void') // Tambahkan filter ini
-      .filter((transaction) =>
-        filteredContactIds?.includes(transaction.contact_id)
-      )
-  }, [filteredData, contacts, searchText])
-
+      .filter((transaction) => transaction.reason_id !== 'void')
+      .filter((transaction) => filteredContactIds.includes(transaction.contact_id));
+  }, [filteredData, contacts, searchText]);
+  
   const columns = [
     {
       title: 'Nomor',
