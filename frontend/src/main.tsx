@@ -98,7 +98,7 @@ import AmbilDetailBarangDariGoret from './pages/AmbilDetailBarangKledo/AmbilDeta
 import IdUnikDariKledo from './pages/api/SimpanIdUnikDariKledo'
 import SimpanIdUnikDariKledoPenjualan from './pages/api/simpanIdUnikDariKledoPenjualan'
 import LaporanKeuangan from './pages/api/LaporanKeuangan'
-import LaporanKeListTransaksi from './pages/api/LaporanKeListTransaksi'
+// import LaporanKeListTransaksi from './pages/api/LaporanKeListTransaksi'
 import FilterContactBasedIdAndGroupid from './pages/api/PageFilteredContactBasedIdAndGroupId'
 import DetailPiutangKontak from './pages/api/DetailPiutangPerKontak'
 import BarangTetuk from './pages/api/BarangTetukList'
@@ -184,10 +184,7 @@ const router = createBrowserRouter(
       />
       <Route path="/fiac" element={<FinanceAccountDisplay />} />
       <Route path="/listkledo" element={<ListTransaksi />} />
-      <Route
-        path="/laporankelisttransaksi"
-        element={<LaporanKeListTransaksi />}
-      />
+    
       <Route
         path="/filteriddangroupidcontact"
         element={<FilterContactBasedIdAndGroupid />}
