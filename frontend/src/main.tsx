@@ -130,10 +130,10 @@ import PelangganSearchPage from './pages/api/PelangganSearchPage'
 import CariBeda from './pages/api/CariBeda'
 import WarehouseStockManager from './pages/api/WarehouseStokManager'
 import { SalesPerProductCategoryUI } from './pages/kategoribarang/ProductKategory'
-// import WarehouseStockTable from './pages/api/WarehouseStockTable'
 import RevalidatePindah from './pages/api/RevalidatePindah'
 import ResentFailedPo from './pages/api/ResentFailedPo'
 import CompareTransfers from './pages/api/CompareTransfers'
+import WarehouseStockTable from './pages/api/WarehouseStockTable'
 
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
@@ -141,7 +141,7 @@ import CompareTransfers from './pages/api/CompareTransfers'
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
-    {/* <Route index element={<Navigate to="/printstokauditmanual" replace />} /> */}
+    <Route index element={<Navigate to="/printstokauditmanual" replace />} />
 
       <Route path="cart" element={<CartPage />} />
       <Route path="signin" element={<SigninPage />} />
@@ -300,7 +300,7 @@ const router = createBrowserRouter(
       <Route path="/caribedainvoice" element={<CariBeda />} />
       <Route path="/semuastokoutlet" element={<WarehouseStockManager />} />
       <Route path="/productkategori" element={<SalesPerProductCategoryUI />} />
-      {/* <Route path="/printstokauditmanual" element={<WarehouseStockTable />} /> */}
+      <Route path="/printstokauditmanual" element={<WarehouseStockTable />} />
       <Route path="/bandingkanpo" element={<CompareTransfers />} />
       <Route path="/kirimulanggagalpo" element={<ResentFailedPo />} />
       <Route path="/ulangvalidasi/:ref_number" element={<RevalidatePindah />} />
