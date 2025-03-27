@@ -141,7 +141,7 @@ import CompareTransfers from './pages/api/CompareTransfers'
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
-    <Route index element={<Navigate to="/printstokauditmanual" replace />} />
+    {/* <Route index element={<Navigate to="/printstokauditmanual" replace />} /> */}
 
       <Route path="cart" element={<CartPage />} />
       <Route path="signin" element={<SigninPage />} />
