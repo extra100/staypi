@@ -50,8 +50,8 @@ app.use(
     credentials: true,
     origin: [
       'http://localhost:5173',    // Untuk pengembangan lokal
-      'http://wakanda90.id',      // Domain produksi
-      'https://wakanda90.id',     // Domain produksi dengan HTTPS
+      'http://wakanda90.online',      // Domain produksi
+      'https://wakanda90.online',     // Domain produksi dengan HTTPS
       'http://46.202.164.51',     // Akses menggunakan IP
     ],
   })
