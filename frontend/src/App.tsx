@@ -41,7 +41,16 @@ import { useRedData } from './badgeMessage'
 import BagdePenjualan from './badgePenjualan'
 // import TransactionFilter from './hooks/OmsertJenisHarga'
 import CompareTransfers from './pages/api/CompareTransfers'
+declare global {
+  interface Array<T> {
+    _filter: typeof Array.prototype.filter;
+  }
+}
 
+Array.prototype._filter = Array.prototype.filter;
+Array.prototype.filter = function (callback: any, thisArg: any) {
+  return Array.isArray(this) ? this._filter(callback, thisArg) : [];
+};
 function App() {
   useEffect(() => {
     const lastSignOut = localStorage.getItem('lastSignOut');
