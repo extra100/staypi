@@ -133,7 +133,7 @@ import { SalesPerProductCategoryUI } from './pages/kategoribarang/ProductKategor
 import RevalidatePindah from './pages/api/RevalidatePindah'
 import ResentFailedPo from './pages/api/ResentFailedPo'
 import CompareTransfers from './pages/api/CompareTransfers'
-import WarehouseStockTable from './pages/api/WarehouseStockTable'
+// import WarehouseStockTable from './pages/api/WarehouseStockTable'
 
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
@@ -297,7 +297,7 @@ const router = createBrowserRouter(
       <Route path="/caribedainvoice" element={<CariBeda />} />
       <Route path="/semuastokoutlet" element={<WarehouseStockManager />} />
       <Route path="/productkategori" element={<SalesPerProductCategoryUI />} />
-      <Route path="/printstokauditmanual" element={<WarehouseStockTable />} />
+      {/* <Route path="/printstokauditmanual" element={<WarehouseStockTable />} /> */}
       <Route path="/bandingkanpo" element={<CompareTransfers />} />
       <Route path="/kirimulanggagalpo" element={<ResentFailedPo />} />
       <Route path="/ulangvalidasi/:ref_number" element={<RevalidatePindah />} />
