@@ -130,10 +130,10 @@ import PelangganSearchPage from './pages/api/PelangganSearchPage'
 import CariBeda from './pages/api/CariBeda'
 import WarehouseStockManager from './pages/api/WarehouseStokManager'
 import { SalesPerProductCategoryUI } from './pages/kategoribarang/ProductKategory'
+// import WarehouseStockTable from './pages/api/WarehouseStockTable'
 import RevalidatePindah from './pages/api/RevalidatePindah'
 import ResentFailedPo from './pages/api/ResentFailedPo'
 import CompareTransfers from './pages/api/CompareTransfers'
-// import WarehouseStockTable from './pages/api/WarehouseStockTable'
 
 
 // import MutasiSuratJalan from './pages/api/MutasiSuratJalan'
@@ -184,7 +184,10 @@ const router = createBrowserRouter(
       />
       <Route path="/fiac" element={<FinanceAccountDisplay />} />
       <Route path="/listkledo" element={<ListTransaksi />} />
-    
+      {/* <Route
+        path="/laporankelisttransaksi"
+        element={<LaporanKeListTransaksi />}
+      /> */}
       <Route
         path="/filteriddangroupidcontact"
         element={<FilterContactBasedIdAndGroupid />}
@@ -306,12 +309,7 @@ const router = createBrowserRouter(
 
 
     </Route>
-  ),
-  {
-    future: {
-      v7_skipActionErrorRevalidation: true,
-    },
-  }
+  )
 )
 
 const queryClient = new QueryClient()
