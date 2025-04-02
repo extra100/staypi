@@ -265,7 +265,7 @@ function App() {
                     className="nav-link header-link p-1 px-3"
                     to={`/listkledo`}
                   >
-                    List Penjualan
+                    List Penjualan LAGGOI
                   </Link>
 
                   <Link
