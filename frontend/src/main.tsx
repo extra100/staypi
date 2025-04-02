@@ -306,7 +306,12 @@ const router = createBrowserRouter(
 
 
     </Route>
-  )
+  ),
+  {
+    future: {
+      v7_skipActionErrorRevalidation: true,
+    },
+  }
 )
 
 const queryClient = new QueryClient()
